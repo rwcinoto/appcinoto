@@ -9,11 +9,14 @@ class SistemaController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      // Listar sistemas baseado no plano do usuário
-      const idPlano = req.usuario.id_plano;
+      // Admin vê todos os sistemas, usuário comum vê apenas do seu plano
+      const where = {};
+      if (req.usuario.tipo !== "admin") {
+        where.id_plano = req.usuario.id_plano;
+      }
 
       const sistemas = await Sistema.findAll({
-        where: { id_plano: idPlano },
+        where,
         include: [{ association: "plano" }],
         order: [["tipo", "ASC"]],
       });

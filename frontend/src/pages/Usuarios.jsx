@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../context/AuthContext";
+import React, { useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import api from "../services/api";
 import ListaUsuarios from "../components/usuarios/ListaUsuarios";
 import ModalUsuario from "../components/usuarios/ModalUsuario";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 import "./Usuarios.css";
 
 const Usuarios = () => {
@@ -120,7 +120,7 @@ const Usuarios = () => {
   return (
     <div className="usuarios-container">
       <div className="usuarios-header">
-        <h1>Gerenciar Usuários</h1>
+        <h1>Usuários</h1>
         <button className="btn-criar" onClick={handleCriarUsuario}>
           + Criar Usuário
         </button>
