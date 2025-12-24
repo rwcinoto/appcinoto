@@ -1,0 +1,104 @@
+.lista-usuarios {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lista-usuarios table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lista-usuarios thead {
+  background: #f5f5f5;
+}
+
+.lista-usuarios th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #ddd;
+}
+
+.lista-usuarios td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.lista-usuarios tr:hover {
+  background: #f9f9f9;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-admin {
+  background: #ff9800;
+  color: white;
+}
+
+.badge-comum {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-ativo {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-inativo {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-editar,
+.btn-desativar {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: opacity 0.3s;
+}
+
+.btn-editar:hover {
+  opacity: 0.7;
+}
+
+.btn-desativar:hover {
+  opacity: 0.7;
+}
+
+.texto-inativo {
+  color: #999;
+  font-size: 14px;
+}
+
+.sem-usuarios {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  background: white;
+  border-radius: 8px;
+}
+

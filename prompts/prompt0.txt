@@ -1,0 +1,69 @@
+Quero fazer um site para que as pessoas possam treinar a fazer contas matemáticas. A ideia é a pessoa se logar no site, escolher um tipo de operação matemática e fazer um treino com um limite de tempo e um tipo de sistema numérico, pra ver quantas contas ela consegue fazer nesse intervalo de tempo. Daí salvamos o maior número de contas que ela conseguiu e fazemos um ranking dos usuários para cada tipo de operação. Teremos também a criação de conjuntos de usuários, para que possamos fazer o ranking dentro de um conjunto. Para isso, acredito que temos alguns cadastros:
+- cadastro de planos: id, nome (não nulo), descrição, ordem, conjuntos criar (não nulo), conjuntos participar (não nulo), data de criação, criado por, data de atualização, atualizado por;
+- cadastro de usuários: id, email (login) (não nulo), senha (não nulo), nome (não nulo), tipo (admin, comum) (não nulo), id_plano (não nulo), ativo, data de criação, criado por, data de atualização, atualizado por;
+- cadastro de operações: id, nome (não nulo), descrição, tipo (soma, subtracao, multiplicacao, divisao, raiz) (não nulo), mínimo parcela 1 (não nulo), máximo parcela 1 (não nulo), mínimo parcela 2, máximo parcela 2, mínimo parcela 3, máximo parcela 3, id_plano, data de criação, criado por, data de atualização, atualizado por;
+- cadastro de limites: id, descrição (não nulo), tempo (em segundos) (não nulo), id_plano (não nulo), data de criação, criado por, data de atualização, atualizado por;
+- cadastro de sistemas: id, descrição, tipo (arabico, romano, binario) (não nulo), id_plano (não nulo), data de criação, criado por, data de atualização, atualizado por;
+- cadastro de recordes: id, id_usuario (não nulo), id_operacao (não nulo), id_ limite (não nulo), id_sistema (não nulo), total (não nulo), data de criação, criado por, data de atualização (não nulo), atualizado por;
+- cadastro de conjuntos: id, nome (não nulo), ativo, data de criação, criado por, data de atualização, atualizado por;
+- cadastro de usuários do conjunto: id, id_conjunto (não nulo), id_usuario (não nulo), tipo (dono, admin, comum) (não nulo), data de criação, criado por, data de atualização, atualizado por.
+
+Sobre os planos, operações, limites e sistemas:
+- Somente usuários do tipo admin podem criar planos, operações, limites e sistemas.
+
+Sobre os usuários:
+- Somente usuários do tipo admin podem criar outros usuários;
+- Um usuário comum poderá editar seu perfil, alterando seu email (login), senha e nome;
+- Um usuário admin poderá editar o cadastro completo de todos os usuários: email (login), senha, nome, tipo (admin, comum), plano, ativo.
+
+Sobre os conjuntos e seus usuários (elementos):
+- Um conjunto só serve para fazermos um ranking que inlcuem os usuários que pertencem a esse conjunto;
+- Qualquer usuário pode criar um conjunto, desde que não passe do limite "conjuntos criar" do seu plano e ele será o dono (campo tipo na tabela de usuários do conjunto) do conjunto;
+- Ao criar um conjunto, temos que ver também o limite de "conjuntos participar" do seu plano, porque ao criar ele irá participar desse conjunto e não pode extrapolar esse limite também;
+- O dono de um conjunto pode editar o nome do conjunto e excluir o conjunto (nesse caso vamos fazer uma exclusão lógica apenas alterando o campo ativo para falso);
+- Somente usuários do conjunto do tipo admin ou dono podem adicionar e excluir usuários do conjunto;
+- O dono de um conjunto pode alterar o tipo de um usuário do conjunto para admin;
+- Para cadastrar um usuário num conjunto, o dono ou admin irá digitar o login (email) do usuário e este usuário verá um aviso na sua tela para aceitar ou rejeitar essa inlcusão.
+
+Sobre os recordes:
+- todos os usuários criam recordes;
+- quando o usuário fizer um treino, vamos pesquisar no banco a maior pontuação do usuário;
+- se for a primeira ou se pontuação a atual é maior que a que tem no banco, vamos salvar um novo recorde para esse usuário, nessa operação, limite e sistema;
+- salvar sempre a data de atualização, mesmo que seja a criação do registro, porque essa data usaremos para saber quando foi o recorde do usuário.
+
+Pensei em ter os seguintes itens no menu lateral do sistema:
+- Novo treino (essa é a página inicial e principal depois de se logar);
+- Recordes;
+- Rankings;
+- Conjuntos;
+- Perfil;
+- Usuários (somente para admin).
+
+Agora vamos falar sobre como pensei que devem funcionar os treinos. A função principal do sistema é criar um novo treino. Então quando a pessoa clicar no menu "Novo treino", devem aparecer uma página com cartões com todas as operações disponíveis para o plano do usuário. Importante ressaltar que os planos possuem uma ordem. Se uma operação está disponível para um plano de ordem 1, ela está disponível para todos usuários dos planos de ordem 1 ou superior. Se uma operação está disponível para um plano de ordem 3, ela não está disponível para os usuários dos planos de ordem 1 e 2, apenas para usuários dos planos de ordem 3 ou superior. Temos nessa página ainda duas caixas de seleção: limite de tempo e sistema numérico. Para isso, vamos ver o plano do usuário e procurar todos os limites que tenham um plano cuja ordem é menor ou igual à ordem do plano do usuário. Escolhida a operação, limite e sistema, o usuário pode clicar em "Começar" para inicia o treino.
+
+No cadastro da operação escolhida temos algumas informações:
+- tipo: que diz qual operação vamos efetuar entre as parcelas, e pode ser soma, subtracao, multiplicacao, divisao ou raiz quadrada;
+- mínimo parcela e máximo parcela são os limites para os números inteiros que podemo mostrar nas contas que o usuário vai fazer;
+- por exemplo, se ele escolher uma operação que é do tipo = soma, mínimo parcela 1 = 0, máximo parcela 1 = 9, mínimo parcela 2 = 10, máximo parcela 2 = 99, mínimo parcela 3 = null, máximo parcela 3 = null, é porque apresentaremos para o usuário apenas contas com duas parcelas, uma de 0 a 9, outra de 10 a 99 para que ele digite o resultado da soma desses dois números. Quando os valores de mínimo parcela 3 e máximo parcela 3 forem nulos, é porque só teremos 2 parcelas. No caso da raiz quadrada, até mínimo parcela 2 e máximo parcela 2 serão nulos porque só vamos tirar a raiz de um número;
+- no caso da raiz quadrada, só mostraremos números que possuem uma raiz quadrada sendo número inteiro, então vamos sortear um número e elevar ao quadrado e apresentar esse resultado, desde que ele esteja dentro dos limites mínimo e máximo do cadastro da operação.
+
+Ao clicar em "Começar" aparece uma contagem regressiva de 3 segundos e começa a contar o tempo limite, mostrando na tela a contagem regressiva. A ideia é permitir que a pessoa faça o maior número de contas possível dentro do limite de tempo, sem que a interface do sistema atrapalhe isso. Então pensei em mostrar várias contas na tela (talvez umas 10 ou quantas couber na tela), uma embaixo da outra, porque a pessoa pode ir olhando a próxima conta enquanto digita o resultado da conta atual. As operações serão sorteadas aleatoriamente dentro dos limites de mínimo e máximo da operação. A medida que ela vai acertando as contas, as próximas contas vão subindo na tela e as anteriores vão sumindo. Acho que seria bom se essas contas fossem subindo do lado esquerdo e do lado direito ficasse a caixa onde a pessoa vai digitar os resultados, que vai ser a mesma caixa para todas as contas. Do lado direito também teria o tempo no alto e o total de pontos até agora na parte de baixo. Essa caixa de texto onde ela vai digitar o resultado, deve ficar vermelha se ela digitar um resultado errado. Se o resultado da conta tiver 2 dígitos, a caixa não fica vermelha quando ela digitou o primeiro algarismo, só quando tiver a mesma quantidade de algrismos do resultado e o número estiver errado. Se a pessoa digitar o resultado correto, já muda para a próxima conta, ela não deve precisar apertar enter, e aí limpa o conteúdo da caixa de texto para ela digitar o próximo resultado, aumentando um ponto no total de acertos. Se bater recorde avisar que é um novo recorde e salvar o resultado adequadamente na tabela de recordes. Daí pode ter um botão de "Recomeçar" para fazer o mesmo treino de novo e um botão de "Novo treino" para voltar à tela onde escolhe o tipo de operação, limite e sistema.
+
+Sobre as telas, precisamos de uma tela de login primeiramente e depois disso a pessoa cai na página de novo treino. A página de "Recordes" mostra um painel pessoal com os recordes em todos os tipos de operação que o plano da pessoa permite acessar. Mas no alto deve ter os filtros de limite e sistema que o plano da pessoa permite escolher, daí isso permite que ela veja os recordes de todas as operações, filtradas pelos limites e sistemas. A página de "Rankings" precisa de um filtro de operação, além dos filtros de limite e sistema que o plano da pessoa permite escolher, para aí mostrar a classificação da pessoa entre todos os usuários do sistema. Vamos mostrar apenas os 200 usuários com os maiores recordes do sistema, dentro do filtro escolhido. Se o usuário estiver entre os 200, o nome dele deve vir destacado na lista, assim como os 3 primeiros, que devem ter um destaque diferente. Além do ranking dos 200 primeiros, deve aparecer nessa página, no alto, a pontuação do usuário e mostrar quantos usuários já participaram do ranking filtrado. Se o usuário participar de pelo menos um conjunto, deve ter também nessa página um filtro de "Conjunto" para a pessoa escolher um conjunto que ela participa e mostrar o ranking dela nele. Na página de "Conjuntos" é onde a pessoa pode gerenciar seus conjuntos, criar novos, e inlcuir usuários (elementos) nos conjuntos, tudo respeitando as permissões do tipo de usuário do conjunto. Na página de perfil a pessoa pode editar suas informações básicas. Na página de usuários o admin do sistema pode criar e editar usuários.
+
+Como sugestão de tema, o sistema deveria trazer as cores do Cubo mágico (branco, amarelo, verde, azul, vermelho e laranja) porque muita gente que vai entrar nesse sistema vem de uma comunidade que gosta de brincar de Cubo mágico. É muito importante que esse site funcione bem no celular porque 95% do uso dele será feito através de celulares. Inlcusive na parte onde a pessoa digita o resultado, acredito que poderia ter um teclado virtual na tela do celular para a pessoa ir digitando por ali.
+
+A ideia é mais ou menos essa, se tiver alguma dúvida mais de algum detalhe, pode me perguntar, mas quero que estruture pra mim como deveria criar esse sistema em termos do banco de dados, relacionamentos entre as tabelas e implementação das regras de negócio. Sobre a infraestrutura, penso em usar node+react e um banco mysql. Stack de Tecnologia Proposta:
+- Backend: Node.js com o framework Express.js (geralmente quando vou hospedar, dá erro no Express 5.1.0, melhor usar o 4.21.2);
+- Frontend: React;
+- Banco de Dados: MySQL;
+- ORM: Sequelize, para abstrair a complexidade do SQL, gerenciar relacionamentos e garantir a segurança das transações;
+- Autenticação: JWT (JSON Web Tokens) para gerenciar as sessões de login e o escopo de dados;
+- Segurança: Biblioteca bcrypt para criptografia de senhas.
+
+Vou colocar backend e frontend em pastas separadas no projeto, mas tudo dentro de um único repositório no github. Depois subirei o projeto no render.com, usando um web service, sem uma página estática, onde o backend serve o frontend em conjunto. Geralmente uso lá os comandos:
+- Build Command: cd backend && npm install && npm run build
+- Start Command: cd backend && npm start
+Sendo que o run build é "cd ../frontend && npm install && npm run build".
+
+Gostaria que escrevesse um arquivo plan.md que traçasse um plano arquitetônico completo e coeso para esse sistema, abordando a lógica de negócios e a estrutura necessária para suportar as ideias listadas e também se baseando no conhecimento que você tenha de um site desse tipo porque posso ter esquecido de algo que seja essencial. Depois revisarei esse documento para criar um arquivo plano.md de criação dele dentro do Cursor, com um passo a passo detalhado de todas as etapas.

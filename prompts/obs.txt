@@ -1,0 +1,7 @@
+Agora que revisei o plano, quero que crie um arquivo task.md com um passo a passo mais detalhado de cada etapa do processo para que eu vá passando os comandos aos poucos para o Cursor desenvolver esse sistema e eu vá revisando cada etapa antes de seguir para a próxima.
+
+--------------------------------
+- limites (1, 2 ou 5 minutos), sistemas (arábicos, romanos, binários)
+- operações: somar n+n, nn+nn, nnn+nnn; subtrair n+n, nn+nn, nnn+nnn; multiplicar nxn, nxnn, nnxnn, nxnnn; dividir nn/n, nnn/n, nnn/nn; raiz nn, nnn, nnnn
+- até 2 conjuntos e participar de 3 no plano grátis
+- plano grátis: 1 minuto, sistema arábico, e operações: somar n+n, nn+nn, nnn+nnn; subtrair n+n, nn+nn, nnn+nnn; multiplicar nxn, nxnn, dividir nn/n
