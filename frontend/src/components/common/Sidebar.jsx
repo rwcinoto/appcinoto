@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Sidebar.css";
@@ -7,6 +7,7 @@ const Sidebar = () => {
   const { usuario, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [cadastrosAberto, setCadastrosAberto] = useState(false);
 
   const menuItems = [
     {
@@ -43,12 +44,44 @@ const Sidebar = () => {
     },
   ];
 
+  const cadastrosSubmenus = [
+    {
+      path: "/cadastros/planos",
+      label: "Planos",
+    },
+    {
+      path: "/cadastros/operacoes",
+      label: "Operações",
+    },
+    {
+      path: "/cadastros/limites",
+      label: "Limites",
+    },
+    {
+      path: "/cadastros/sistemas",
+      label: "Sistemas",
+    },
+  ];
+
   const isActive = (path, exact = false) => {
     if (exact) {
       return location.pathname === path;
     }
     return location.pathname.startsWith(path);
   };
+
+  const isCadastrosActive = cadastrosSubmenus.some((submenu) =>
+    isActive(submenu.path)
+  );
+
+  // Auto-abrir/fechar submenu baseado na rota atual
+  useEffect(() => {
+    if (isCadastrosActive) {
+      setCadastrosAberto(true);
+    } else {
+      setCadastrosAberto(false);
+    }
+  }, [location.pathname, isCadastrosActive]);
 
   const filteredMenuItems = menuItems.filter((item) => {
     if (item.adminOnly && (!usuario || usuario.tipo !== "admin")) {
@@ -77,6 +110,40 @@ const Sidebar = () => {
               </Link>
             </li>
           ))}
+          {usuario?.tipo === "admin" && (
+            <li className="sidebar-menu-item-with-submenu">
+              <button
+                className={`sidebar-link sidebar-link-toggle ${
+                  isCadastrosActive ? "active" : ""
+                }`}
+                onClick={() => setCadastrosAberto(!cadastrosAberto)}
+              >
+                <span className="sidebar-icon">📋</span>
+                <span className="sidebar-label">Cadastros</span>
+                <span
+                  className={`sidebar-arrow ${cadastrosAberto ? "open" : ""}`}
+                >
+                  ▼
+                </span>
+              </button>
+              {cadastrosAberto && (
+                <ul className="sidebar-submenu">
+                  {cadastrosSubmenus.map((submenu) => (
+                    <li key={submenu.path}>
+                      <Link
+                        to={submenu.path}
+                        className={`sidebar-sublink ${
+                          isActive(submenu.path) ? "active" : ""
+                        }`}
+                      >
+                        {submenu.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
       </nav>
       <div className="sidebar-footer">

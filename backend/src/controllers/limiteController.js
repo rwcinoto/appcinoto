@@ -9,11 +9,14 @@ class LimiteController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      // Listar limites baseado no plano do usuário
-      const idPlano = req.usuario.id_plano;
+      // Admin vê todos os limites, usuário comum vê apenas do seu plano
+      const where = {};
+      if (req.usuario.tipo !== "admin") {
+        where.id_plano = req.usuario.id_plano;
+      }
 
       const limites = await Limite.findAll({
-        where: { id_plano: idPlano },
+        where,
         include: [{ association: "plano" }],
         order: [["tempo", "ASC"]],
       });

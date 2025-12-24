@@ -2,9 +2,13 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/common/Layout";
 import { useAuth } from "./context/AuthContext";
+import Limites from "./pages/Limites";
 import Login from "./pages/Login";
 import NovoTreino from "./pages/NovoTreino";
+import Operacoes from "./pages/Operacoes";
 import Perfil from "./pages/Perfil";
+import Planos from "./pages/Planos";
+import Sistemas from "./pages/Sistemas";
 import Usuarios from "./pages/Usuarios";
 
 const PrivateRoute = ({ children }) => {
@@ -32,6 +36,11 @@ const AppRoutes = () => {
         <Route path="/novo-treino" element={<NovoTreino />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/usuarios" element={<Usuarios />} />
+        {/* Rotas de cadastros */}
+        <Route path="/cadastros/planos" element={<Planos />} />
+        <Route path="/cadastros/operacoes" element={<Operacoes />} />
+        <Route path="/cadastros/limites" element={<Limites />} />
+        <Route path="/cadastros/sistemas" element={<Sistemas />} />
         <Route path="/" element={<Navigate to="/novo-treino" replace />} />
         {/* Rotas futuras - descomentar quando criadas */}
         {/* <Route path="/recordes" element={<Recordes />} /> */}

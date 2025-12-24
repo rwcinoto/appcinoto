@@ -1,0 +1,88 @@
+.lista-sistemas {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lista-sistemas table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lista-sistemas thead {
+  background: #f5f5f5;
+}
+
+.lista-sistemas th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #ddd;
+}
+
+.lista-sistemas td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.lista-sistemas tr:hover {
+  background: #f9f9f9;
+}
+
+.badge-tipo {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-arabico {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-romano {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.badge-binario {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-editar,
+.btn-excluir {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: opacity 0.3s;
+}
+
+.btn-editar:hover {
+  opacity: 0.7;
+}
+
+.btn-excluir:hover {
+  opacity: 0.7;
+}
+
+.sem-sistemas {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  background: white;
+  border-radius: 8px;
+}
+

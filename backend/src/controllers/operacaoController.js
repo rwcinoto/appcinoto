@@ -9,11 +9,14 @@ class OperacaoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      // Listar operações baseado no plano do usuário
-      const idPlano = req.usuario.id_plano;
+      // Admin vê todas as operações, usuário comum vê apenas do seu plano
+      const where = {};
+      if (req.usuario.tipo !== "admin") {
+        where.id_plano = req.usuario.id_plano;
+      }
 
       const operacoes = await Operacao.findAll({
-        where: { id_plano: idPlano },
+        where,
         include: [{ association: "plano" }],
         order: [["nome", "ASC"]],
       });
@@ -68,18 +71,12 @@ class OperacaoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      const {
-        nome,
-        descricao,
-        tipo,
-        min_parcela_1,
-        max_parcela_1,
-        min_parcela_2,
-        max_parcela_2,
-        min_parcela_3,
-        max_parcela_3,
-        id_plano,
-      } = req.body;
+      const { nome, descricao, tipo, min_parcela_1, max_parcela_1, id_plano } =
+        req.body;
+
+      // Usar let para variáveis que podem ser modificadas (para tipo raiz)
+      let { min_parcela_2, max_parcela_2, min_parcela_3, max_parcela_3 } =
+        req.body;
 
       // Validar plano existe
       const plano = await Plano.findByPk(id_plano);
@@ -90,16 +87,22 @@ class OperacaoController {
       // Validações específicas por tipo
       if (tipo === "raiz") {
         // Raiz só precisa de parcela_1
+        // Se os campos foram enviados (não são undefined), devem ser null
         if (
-          min_parcela_2 !== null ||
-          max_parcela_2 !== null ||
-          min_parcela_3 !== null ||
-          max_parcela_3 !== null
+          (min_parcela_2 !== undefined && min_parcela_2 !== null) ||
+          (max_parcela_2 !== undefined && max_parcela_2 !== null) ||
+          (min_parcela_3 !== undefined && min_parcela_3 !== null) ||
+          (max_parcela_3 !== undefined && max_parcela_3 !== null)
         ) {
           return res.status(400).json({
             message: "Operação do tipo 'raiz' só utiliza parcela_1",
           });
         }
+        // Garantir que sejam null para raiz
+        min_parcela_2 = null;
+        max_parcela_2 = null;
+        min_parcela_3 = null;
+        max_parcela_3 = null;
       }
 
       // Validar min <= max para cada parcela
@@ -133,10 +136,10 @@ class OperacaoController {
         tipo,
         min_parcela_1,
         max_parcela_1,
-        min_parcela_2: min_parcela_2 || null,
-        max_parcela_2: max_parcela_2 || null,
-        min_parcela_3: min_parcela_3 || null,
-        max_parcela_3: max_parcela_3 || null,
+        min_parcela_2: min_parcela_2 !== undefined ? min_parcela_2 : null,
+        max_parcela_2: max_parcela_2 !== undefined ? max_parcela_2 : null,
+        min_parcela_3: min_parcela_3 !== undefined ? min_parcela_3 : null,
+        max_parcela_3: max_parcela_3 !== undefined ? max_parcela_3 : null,
         id_plano,
         criado_por: req.usuario.id,
         atualizado_por: req.usuario.id,
@@ -172,18 +175,12 @@ class OperacaoController {
         return res.status(404).json({ message: "Operação não encontrada" });
       }
 
-      const {
-        nome,
-        descricao,
-        tipo,
-        min_parcela_1,
-        max_parcela_1,
-        min_parcela_2,
-        max_parcela_2,
-        min_parcela_3,
-        max_parcela_3,
-        id_plano,
-      } = req.body;
+      const { nome, descricao, tipo, min_parcela_1, max_parcela_1, id_plano } =
+        req.body;
+
+      // Usar let para variáveis que podem ser modificadas (para tipo raiz)
+      let { min_parcela_2, max_parcela_2, min_parcela_3, max_parcela_3 } =
+        req.body;
 
       // Validar plano existe (se alterado)
       if (id_plano !== undefined) {
@@ -196,19 +193,33 @@ class OperacaoController {
       // Validações específicas por tipo
       const tipoAtual = tipo !== undefined ? tipo : operacao.tipo;
       if (tipoAtual === "raiz") {
-        const min2 =
-          min_parcela_2 !== undefined ? min_parcela_2 : operacao.min_parcela_2;
-        const max2 =
-          max_parcela_2 !== undefined ? max_parcela_2 : operacao.max_parcela_2;
-        const min3 =
-          min_parcela_3 !== undefined ? min_parcela_3 : operacao.min_parcela_3;
-        const max3 =
-          max_parcela_3 !== undefined ? max_parcela_3 : operacao.max_parcela_3;
-
-        if (min2 !== null || max2 !== null || min3 !== null || max3 !== null) {
+        // Se os campos foram enviados e não são null, é erro
+        if (
+          (min_parcela_2 !== undefined && min_parcela_2 !== null) ||
+          (max_parcela_2 !== undefined && max_parcela_2 !== null) ||
+          (min_parcela_3 !== undefined && min_parcela_3 !== null) ||
+          (max_parcela_3 !== undefined && max_parcela_3 !== null)
+        ) {
           return res.status(400).json({
             message: "Operação do tipo 'raiz' só utiliza parcela_1",
           });
+        }
+        // Garantir que sejam null para raiz
+        if (
+          tipo !== undefined ||
+          min_parcela_2 !== undefined ||
+          max_parcela_2 !== undefined
+        ) {
+          min_parcela_2 = null;
+          max_parcela_2 = null;
+        }
+        if (
+          tipo !== undefined ||
+          min_parcela_3 !== undefined ||
+          max_parcela_3 !== undefined
+        ) {
+          min_parcela_3 = null;
+          max_parcela_3 = null;
         }
       }
 
@@ -257,13 +268,13 @@ class OperacaoController {
       if (max_parcela_1 !== undefined)
         dadosAtualizacao.max_parcela_1 = max_parcela_1;
       if (min_parcela_2 !== undefined)
-        dadosAtualizacao.min_parcela_2 = min_parcela_2 || null;
+        dadosAtualizacao.min_parcela_2 = min_parcela_2;
       if (max_parcela_2 !== undefined)
-        dadosAtualizacao.max_parcela_2 = max_parcela_2 || null;
+        dadosAtualizacao.max_parcela_2 = max_parcela_2;
       if (min_parcela_3 !== undefined)
-        dadosAtualizacao.min_parcela_3 = min_parcela_3 || null;
+        dadosAtualizacao.min_parcela_3 = min_parcela_3;
       if (max_parcela_3 !== undefined)
-        dadosAtualizacao.max_parcela_3 = max_parcela_3 || null;
+        dadosAtualizacao.max_parcela_3 = max_parcela_3;
       if (id_plano !== undefined) dadosAtualizacao.id_plano = id_plano;
 
       dadosAtualizacao.atualizado_por = req.usuario.id;
