@@ -122,7 +122,7 @@ const Usuarios = () => {
       <div className="usuarios-header">
         <h1>Usuários</h1>
         <button className="btn-criar" onClick={handleCriarUsuario}>
-          + Criar Usuário
+          + Criar usuário
         </button>
       </div>
 

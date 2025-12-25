@@ -1,7 +1,7 @@
 {
   "name": "contas-backend",
   "version": "1.0.0",
-  "description": "Backend do sistema de treino matemático",
+  "description": "Backend do sistema numix",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

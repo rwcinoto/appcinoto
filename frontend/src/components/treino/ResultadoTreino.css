@@ -1,0 +1,216 @@
+.resultado-treino-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.resultado-treino-container {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.resultado-treino-header {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+.resultado-treino-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.resultado-treino-body {
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.resultado-pontos {
+  margin-bottom: 24px;
+}
+
+.resultado-pontos-label {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.resultado-pontos-valor {
+  font-size: 72px;
+  font-weight: bold;
+  color: #4caf50;
+  font-family: "Courier New", monospace;
+  line-height: 1;
+}
+
+.resultado-recorde-destaque {
+  background: linear-gradient(135deg, #fff3cd, #ffe082);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+  animation: pulseRecorde 2s ease-in-out infinite;
+}
+
+@keyframes pulseRecorde {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.recorde-badge {
+  display: inline-block;
+  background: #ff9800;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.resultado-recorde-destaque p {
+  margin: 12px 0 0 0;
+  color: #856404;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.resultado-recorde-anterior {
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.recorde-anterior-label {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.recorde-anterior-valor {
+  font-size: 36px;
+  font-weight: bold;
+  color: #666;
+  font-family: "Courier New", monospace;
+}
+
+.resultado-treino-actions {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-recomecar,
+.btn-novo-treino {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-recomecar {
+  background: #2196f3;
+  color: white;
+}
+
+.btn-recomecar:hover {
+  background: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-novo-treino {
+  background: #f5f5f5;
+  color: #333;
+  border: 2px solid #e0e0e0;
+}
+
+.btn-novo-treino:hover {
+  background: #e0e0e0;
+  border-color: #bbb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .resultado-treino-container {
+    width: 95%;
+    max-width: 100%;
+  }
+
+  .resultado-pontos-valor {
+    font-size: 56px;
+  }
+
+  .resultado-treino-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .resultado-treino-header h2 {
+    font-size: 24px;
+  }
+
+  .resultado-pontos-valor {
+    font-size: 48px;
+  }
+
+  .recorde-anterior-valor {
+    font-size: 28px;
+  }
+}
+

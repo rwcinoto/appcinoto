@@ -102,7 +102,7 @@ const Perfil = () => {
   return (
     <div className="perfil-container">
       <div className="perfil-card">
-        <h1>Meu Perfil</h1>
+        <h1>Meu perfil</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome">Nome</label>
@@ -133,7 +133,7 @@ const Perfil = () => {
 
           <div className="form-group">
             <label htmlFor="senha">
-              Nova Senha <span className="opcional">(opcional)</span>
+              Nova senha <span className="opcional">(opcional)</span>
             </label>
             <input
               type="password"
@@ -151,7 +151,7 @@ const Perfil = () => {
           {sucesso && <div className="mensagem sucesso">{sucesso}</div>}
 
           <button type="submit" disabled={carregando} className="btn-salvar">
-            {carregando ? "Salvando..." : "Salvar Alterações"}
+            {carregando ? "Salvando..." : "Salvar alterações"}
           </button>
         </form>
       </div>
@@ -160,4 +160,3 @@ const Perfil = () => {
 };
 
 export default Perfil;
-

@@ -1,0 +1,167 @@
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-tempo {
+  font-size: 48px;
+  font-weight: bold;
+  font-family: "Courier New", monospace;
+  color: #333;
+  letter-spacing: 2px;
+  transition: color 0.3s ease;
+}
+
+.timer-pausado {
+  font-size: 14px;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Estado normal (verde) */
+.timer-container.tempo-normal .timer-tempo {
+  color: #4caf50;
+}
+
+.timer-container.tempo-normal .timer-barra-preenchimento {
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+}
+
+/* Estado de aviso (laranja) */
+.timer-container.tempo-aviso .timer-tempo {
+  color: #ff9800;
+  animation: pulseAviso 1s ease-in-out infinite;
+}
+
+.timer-container.tempo-aviso .timer-barra-preenchimento {
+  background: linear-gradient(90deg, #ff9800, #ffb74d);
+}
+
+@keyframes pulseAviso {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Estado crítico (vermelho) */
+.timer-container.tempo-critico .timer-tempo {
+  color: #f44336;
+  animation: pulseCritico 0.5s ease-in-out infinite;
+}
+
+.timer-container.tempo-critico .timer-barra-preenchimento {
+  background: linear-gradient(90deg, #f44336, #ef5350);
+}
+
+@keyframes pulseCritico {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+.timer-barra-progresso {
+  width: 100%;
+  max-width: 300px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.timer-barra-preenchimento {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+  border-radius: 4px;
+  transition: width 1s linear, background 0.3s ease;
+  position: relative;
+}
+
+/* Animação sutil de brilho na barra */
+.timer-barra-preenchimento::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .timer-container {
+    padding: 15px;
+  }
+
+  .timer-tempo {
+    font-size: 40px;
+    letter-spacing: 1px;
+  }
+
+  .timer-barra-progresso {
+    max-width: 250px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timer-container {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .timer-tempo {
+    font-size: 32px;
+  }
+
+  .timer-pausado {
+    font-size: 12px;
+  }
+
+  .timer-barra-progresso {
+    max-width: 200px;
+    height: 5px;
+  }
+}

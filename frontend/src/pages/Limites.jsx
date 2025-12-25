@@ -115,7 +115,7 @@ const Limites = () => {
       <div className="limites-header">
         <h1>Limites</h1>
         <button className="btn-criar" onClick={handleCriarLimite}>
-          + Criar Limite
+          + Criar limite
         </button>
       </div>
 

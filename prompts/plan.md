@@ -1,4 +1,4 @@
-# Plano arquitetônico - Sistema de treino matemático
+# Plano arquitetônico - Sistema numix
 
 ## 1. Visão geral do sistema
 
@@ -1171,7 +1171,7 @@ REACT_APP_API_URL=https://api.seudominio.com
 
 ## 11. Conclusão
 
-Este plano arquitetônico fornece uma base sólida para o desenvolvimento do sistema de treino matemático. A estrutura proposta permite escalabilidade, manutenibilidade e uma boa experiência do usuário, especialmente em dispositivos móveis.
+Este plano arquitetônico fornece uma base sólida para o desenvolvimento do sistema numix. A estrutura proposta permite escalabilidade, manutenibilidade e uma boa experiência do usuário, especialmente em dispositivos móveis.
 
 Principais pontos a destacar:
 

@@ -138,7 +138,7 @@ const Sistemas = () => {
       <div className="sistemas-header">
         <h1>Sistemas</h1>
         <button className="btn-criar" onClick={handleCriarSistema}>
-          + Criar Sistema
+          + Criar sistema
         </button>
       </div>
 
@@ -200,4 +200,3 @@ const Sistemas = () => {
 };
 
 export default Sistemas;
-
