@@ -98,7 +98,7 @@ const Planos = () => {
       <div className="planos-header">
         <h1>Planos</h1>
         <button className="btn-criar" onClick={handleCriarPlano}>
-          + Criar Plano
+          + Criar plano
         </button>
       </div>
 

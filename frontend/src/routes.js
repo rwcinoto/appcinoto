@@ -9,6 +9,7 @@ import Operacoes from "./pages/Operacoes";
 import Perfil from "./pages/Perfil";
 import Planos from "./pages/Planos";
 import Sistemas from "./pages/Sistemas";
+import TreinoAtivo from "./pages/TreinoAtivo";
 import Usuarios from "./pages/Usuarios";
 
 const PrivateRoute = ({ children }) => {
@@ -34,6 +35,7 @@ const AppRoutes = () => {
         }
       >
         <Route path="/novo-treino" element={<NovoTreino />} />
+        <Route path="/treino-ativo" element={<TreinoAtivo />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/usuarios" element={<Usuarios />} />
         {/* Rotas de cadastros */}

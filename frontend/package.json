@@ -1,7 +1,7 @@
 {
   "name": "contas-frontend",
   "version": "1.0.0",
-  "description": "Frontend do sistema de treino matemático",
+  "description": "Frontend do sistema numix",
   "private": true,
   "proxy": "http://localhost:3000",
   "dependencies": {

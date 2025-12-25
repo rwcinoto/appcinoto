@@ -1,6 +1,6 @@
 # Task.md - Passo a passo detalhado de implementação
 
-Este documento contém o passo a passo detalhado para implementação do sistema de treino matemático. Cada tarefa deve ser executada e revisada antes de seguir para a próxima.
+Este documento contém o passo a passo detalhado para implementação do sistema numix. Cada tarefa deve ser executada e revisada antes de seguir para a próxima.
 
 **Referência**: Consulte `plan.md` para detalhes arquiteturais e de negócio. O arquivo `prompt0.txt` também pode ajudar a esclarecer algumas dúvidas.
 
@@ -69,7 +69,7 @@ npm init -y
 {
   "name": "contas-backend",
   "version": "1.0.0",
-  "description": "Backend do sistema de treino matemático",
+  "description": "Backend do sistema numix",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -2232,7 +2232,7 @@ curl http://localhost:3000/api/health
 {
   "name": "contas-frontend",
   "version": "1.0.0",
-  "description": "Frontend do sistema de treino matemático",
+  "description": "Frontend do sistema numix",
   "private": true,
   "proxy": "http://localhost:3000",
   "dependencies": {
@@ -2805,7 +2805,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>Treino matemático</h1>
+        <h1>numix</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>

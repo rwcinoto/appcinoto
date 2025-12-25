@@ -132,7 +132,7 @@ const Operacoes = () => {
       <div className="operacoes-header">
         <h1>Operações</h1>
         <button className="btn-criar" onClick={handleCriarOperacao}>
-          + Criar Operação
+          + Criar operação
         </button>
       </div>
 

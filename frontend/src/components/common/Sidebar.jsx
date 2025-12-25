@@ -12,7 +12,7 @@ const Sidebar = () => {
   const menuItems = [
     {
       path: "/novo-treino",
-      label: "Novo Treino",
+      label: "Novo treino",
       icon: "🏃",
       exact: true,
     },
@@ -93,7 +93,7 @@ const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h2>Treino Matemático</h2>
+        <h2>numix</h2>
       </div>
       <nav className="sidebar-nav">
         <ul>
