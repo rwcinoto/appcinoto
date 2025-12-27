@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const { Op } = require("sequelize");
 const { Limite, Plano } = require("../models");
 
 class LimiteController {
@@ -9,14 +10,32 @@ class LimiteController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      // Admin vê todos os limites, usuário comum vê apenas do seu plano
-      const where = {};
-      if (req.usuario.tipo !== "admin") {
-        where.id_plano = req.usuario.id_plano;
+      // Buscar a ordem do plano do usuário (admin sempre está no maior plano e verá tudo automaticamente)
+      const ordemPlanoUsuario = req.usuario.plano?.ordem;
+      if (!ordemPlanoUsuario) {
+        return res
+          .status(400)
+          .json({ message: "Plano do usuário não encontrado" });
       }
 
+      // Buscar IDs de planos com ordem <= ordem do plano do usuário
+      const planosDisponiveis = await Plano.findAll({
+        where: {
+          ordem: {
+            [Op.lte]: ordemPlanoUsuario,
+          },
+        },
+        attributes: ["id"],
+      });
+
+      const idsPlanos = planosDisponiveis.map((p) => p.id);
+
       const limites = await Limite.findAll({
-        where,
+        where: {
+          id_plano: {
+            [Op.in]: idsPlanos,
+          },
+        },
         include: [{ association: "plano" }],
         order: [["tempo", "ASC"]],
       });
@@ -43,10 +62,14 @@ class LimiteController {
         return res.status(404).json({ message: "Limite não encontrado" });
       }
 
-      // Verificar se o limite pertence ao plano do usuário
+      // Verificar se o limite está disponível para o plano do usuário (baseado na hierarquia)
+      const ordemPlanoUsuario = req.usuario.plano?.ordem;
+      const ordemPlanoLimite = limite.plano?.ordem;
+
       if (
-        req.usuario.tipo !== "admin" &&
-        limite.id_plano !== req.usuario.id_plano
+        !ordemPlanoUsuario ||
+        !ordemPlanoLimite ||
+        ordemPlanoLimite > ordemPlanoUsuario
       ) {
         return res.status(403).json({
           message:

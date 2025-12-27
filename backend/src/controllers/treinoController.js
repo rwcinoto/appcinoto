@@ -53,11 +53,14 @@ class TreinoController {
         return res.status(404).json({ message: "Operação não encontrada" });
       }
 
-      // Admin pode acessar qualquer operação, comum apenas do seu plano
+      // Verificar se a operação está disponível para o plano do usuário (baseado na hierarquia)
+      const ordemPlanoUsuario = usuario.plano?.ordem;
+      const ordemPlanoOperacao = operacao.plano?.ordem;
+
       if (
-        usuario.tipo !== "admin" &&
-        operacao.id_plano !== null &&
-        operacao.id_plano !== usuario.id_plano
+        !ordemPlanoUsuario ||
+        !ordemPlanoOperacao ||
+        ordemPlanoOperacao > ordemPlanoUsuario
       ) {
         return res.status(403).json({
           message: "Esta operação não está disponível no seu plano",
@@ -73,7 +76,14 @@ class TreinoController {
         return res.status(404).json({ message: "Limite não encontrado" });
       }
 
-      if (usuario.tipo !== "admin" && limite.id_plano !== usuario.id_plano) {
+      // Verificar se o limite está disponível para o plano do usuário (baseado na hierarquia)
+      const ordemPlanoLimite = limite.plano?.ordem;
+
+      if (
+        !ordemPlanoUsuario ||
+        !ordemPlanoLimite ||
+        ordemPlanoLimite > ordemPlanoUsuario
+      ) {
         return res.status(403).json({
           message: "Este limite não está disponível no seu plano",
         });
@@ -88,7 +98,14 @@ class TreinoController {
         return res.status(404).json({ message: "Sistema não encontrado" });
       }
 
-      if (usuario.tipo !== "admin" && sistema.id_plano !== usuario.id_plano) {
+      // Verificar se o sistema está disponível para o plano do usuário (baseado na hierarquia)
+      const ordemPlanoSistema = sistema.plano?.ordem;
+
+      if (
+        !ordemPlanoUsuario ||
+        !ordemPlanoSistema ||
+        ordemPlanoSistema > ordemPlanoUsuario
+      ) {
         return res.status(403).json({
           message: "Este sistema não está disponível no seu plano",
         });

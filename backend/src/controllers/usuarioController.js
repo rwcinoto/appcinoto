@@ -110,13 +110,10 @@ class UsuarioController {
         return res.status(400).json({ message: "Email já está em uso" });
       }
 
-      // Validar plano existe e está ativo
+      // Validar plano existe
       const plano = await Plano.findByPk(id_plano);
       if (!plano) {
         return res.status(400).json({ message: "Plano não encontrado" });
-      }
-      if (!plano.ativo) {
-        return res.status(400).json({ message: "Plano não está ativo" });
       }
 
       // Criar usuário (senha será hasheada automaticamente pelo hook do modelo)
