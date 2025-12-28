@@ -3,6 +3,7 @@
 const { validationResult } = require("express-validator");
 const { Operacao, Limite, Sistema } = require("../models");
 const treinoService = require("../services/treinoService");
+const recordeService = require("../services/recordeService");
 
 // Armazenar treinos ativos em memória (Map: treino_id -> dados do treino)
 // Em produção, isso poderia ser movido para Redis ou banco de dados
@@ -393,37 +394,38 @@ class TreinoController {
       // O totalAcertos do backend é o valor correto, independente do que o frontend enviou
       // Isso evita problemas de sincronia entre frontend e backend
 
-      // Verificar e salvar recorde (usando recordeService quando disponível)
+      // Verificar e salvar recorde
       let bateuRecorde = false;
       let recordeAnterior = null;
+      let erroRecorde = null;
 
       try {
-        // Tentar importar recordeService se existir
-        let recordeService;
-        try {
-          recordeService = require("../services/recordeService");
-        } catch (e) {
-          // recordeService ainda não existe, pular verificação de recorde
-          console.log(
-            "recordeService não encontrado, pulando verificação de recorde"
-          );
-        }
+        console.log("Tentando salvar recorde:", {
+          usuarioId: usuario.id,
+          operacaoId: treino.operacao.id,
+          limiteId: treino.limite.id,
+          sistemaId: treino.sistema.id,
+          totalAcertos: treino.totalAcertos,
+        });
 
-        if (recordeService) {
-          const resultado = await recordeService.verificarESalvarRecorde({
-            id_usuario: usuario.id,
-            id_operacao: treino.operacao.id,
-            id_limite: treino.limite.id,
-            id_sistema: treino.sistema.id,
-            total: treino.totalAcertos,
-          });
+        const resultado = await recordeService.verificarESalvarRecorde(
+          usuario.id,
+          treino.operacao.id,
+          treino.limite.id,
+          treino.sistema.id,
+          treino.totalAcertos
+        );
 
-          bateuRecorde = resultado.bateuRecorde;
-          recordeAnterior = resultado.recordeAnterior || null;
-        }
+        console.log("Resultado do recorde:", resultado);
+
+        bateuRecorde = resultado.bateuRecorde;
+        recordeAnterior = resultado.recordeAnterior || null;
       } catch (error) {
-        console.error("Erro ao verificar recorde:", error);
+        console.error("Erro ao verificar e salvar recorde:", error);
+        console.error("Stack trace:", error.stack);
+        erroRecorde = error.message;
         // Continuar mesmo se houver erro ao verificar recorde
+        // Não bloquear a finalização do treino por erro no recorde
       }
 
       // Remover treino da memória
@@ -433,6 +435,7 @@ class TreinoController {
         total: treino.totalAcertos,
         bateuRecorde,
         recordeAnterior,
+        erroRecorde: erroRecorde || undefined, // Incluir erro apenas se houver (para debug)
       });
     } catch (error) {
       console.error("Erro ao finalizar treino:", error);

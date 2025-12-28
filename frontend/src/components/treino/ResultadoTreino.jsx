@@ -20,18 +20,24 @@ const ResultadoTreino = ({ resultado, onRecomecar, onNovoTreino }) => {
           {bateuRecorde && (
             <div className="resultado-recorde-destaque">
               <span className="recorde-badge">🎉 Novo Recorde!</span>
-              <p>Parabéns! Você bateu seu recorde anterior!</p>
+              <p>
+                {recordeAnterior === null || recordeAnterior === undefined
+                  ? "Parabéns! Você estabeleceu seu primeiro recorde!"
+                  : "Parabéns! Você bateu seu recorde anterior!"}
+              </p>
             </div>
           )}
 
-          {!bateuRecorde && recordeAnterior !== null && (
-            <div className="resultado-recorde-anterior">
-              <div className="recorde-anterior-label">Recorde Anterior</div>
-              <div className="recorde-anterior-valor">
-                {recordeAnterior?.total || 0}
+          {!bateuRecorde &&
+            recordeAnterior !== null &&
+            recordeAnterior !== undefined && (
+              <div className="resultado-recorde-anterior">
+                <div className="recorde-anterior-label">Recorde Anterior</div>
+                <div className="recorde-anterior-valor">
+                  {recordeAnterior?.total || 0}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         <div className="resultado-treino-actions">
@@ -39,7 +45,7 @@ const ResultadoTreino = ({ resultado, onRecomecar, onNovoTreino }) => {
             Recomeçar
           </button>
           <button className="btn-novo-treino" onClick={onNovoTreino}>
-            Novo Treino
+            Finalizar
           </button>
         </div>
       </div>

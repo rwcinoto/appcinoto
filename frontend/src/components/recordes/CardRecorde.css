@@ -1,0 +1,90 @@
+.card-recorde {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+.card-recorde:hover {
+  border-color: #2196f3;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+  transform: translateY(-2px);
+}
+
+.card-recorde-header {
+  margin-bottom: 16px;
+}
+
+.card-recorde-titulo-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-recorde-titulo-linha h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-recorde-acertos-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.card-recorde-valores-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-recorde-tipo {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.card-recorde-acertos-valor {
+  font-size: 24px;
+  font-weight: bold;
+  font-family: "Courier New", monospace;
+}
+
+.card-recorde-info-linha {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.card-recorde-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-recorde-info-label {
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-recorde-info-value {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .card-recorde-info-linha {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

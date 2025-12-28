@@ -14,7 +14,12 @@ const TreinoAtivo = () => {
   const location = useLocation();
 
   // Dados do treino vindos da seleção
-  const treinoData = location.state?.treinoData;
+  // Salvar em estado local para manter disponível mesmo após recomeçar
+  const [treinoData, setTreinoData] = useState(
+    () => location.state?.treinoData
+  );
+  const inicializadoRef = useRef(false); // Ref para controlar se já foi inicializado
+  const finalizadoRef = useRef(false); // Ref para controlar se o treino já foi finalizado
 
   // Estado do treino
   const [treinoId, setTreinoId] = useState(null);
@@ -31,47 +36,70 @@ const TreinoAtivo = () => {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
-  // Inicializar treino
-  useEffect(() => {
-    if (!treinoData) {
-      // Se não tiver dados, redirecionar para seleção
+  // Função para iniciar treino (reutilizável)
+  const iniciarTreino = async (dadosTreino) => {
+    const dados = dadosTreino || treinoData;
+
+    if (!dados) {
       navigate("/novo-treino");
       return;
     }
 
-    const iniciarTreino = async () => {
-      try {
-        setLoading(true);
-        const response = await api.post("/treinos/iniciar", {
-          operacao_id: treinoData.operacao.id,
-          limite_id: treinoData.limite.id,
-          sistema_id: treinoData.sistema.id,
-        });
+    try {
+      setLoading(true);
+      setErro(""); // Limpar erros anteriores
+      const response = await api.post("/treinos/iniciar", {
+        operacao_id: dados.operacao.id,
+        limite_id: dados.limite.id,
+        sistema_id: dados.sistema.id,
+      });
 
-        const { treino_id, contas_iniciais, limite, sistema } = response.data;
+      const { treino_id, contas_iniciais, limite, sistema } = response.data;
 
-        setTreinoId(treino_id);
-        setContas(contas_iniciais);
-        setTempoLimite(limite.tempo);
-        setSistemaTipo(sistema.tipo);
-        setTotalAcertos(0);
-        totalAcertosRef.current = 0;
-        setContaAtualIndex(0);
-        setInicioTreino(Date.now()); // Registrar início do treino
-        setProcessando(false);
-      } catch (error) {
-        const mensagemErro =
-          error.response?.data?.message ||
-          error.response?.data?.errors?.[0]?.msg ||
-          "Erro ao iniciar treino. Tente novamente.";
-        setErro(mensagemErro);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setTreinoId(treino_id);
+      setContas(contas_iniciais);
+      setTempoLimite(limite.tempo);
+      setSistemaTipo(sistema.tipo);
+      setTotalAcertos(0);
+      totalAcertosRef.current = 0;
+      setContaAtualIndex(0);
+      setInicioTreino(Date.now()); // Registrar início do treino
+      setProcessando(false);
+      setMostrarResultado(false); // Garantir que o resultado está oculto
+      finalizadoRef.current = false; // Resetar flag de finalizado
+    } catch (error) {
+      console.error("Erro ao iniciar treino:", error);
+      const mensagemErro =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0]?.msg ||
+        "Erro ao iniciar treino. Tente novamente.";
+      setErro(mensagemErro);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    iniciarTreino();
-  }, [treinoData, navigate]);
+  // Inicializar treino apenas na primeira montagem
+  useEffect(() => {
+    // Evitar múltiplas inicializações
+    if (inicializadoRef.current) {
+      return;
+    }
+
+    // Se não tiver dados do location.state, redirecionar
+    if (!location.state?.treinoData) {
+      navigate("/novo-treino");
+      return;
+    }
+
+    // Salvar treinoData no estado local
+    setTreinoData(location.state.treinoData);
+
+    // Marcar como inicializado e iniciar treino
+    inicializadoRef.current = true;
+    iniciarTreino(location.state.treinoData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Executar apenas uma vez na montagem
 
   const handleAcerto = async (resposta) => {
     if (!resposta || resposta.trim() === "") return;
@@ -127,7 +155,11 @@ const TreinoAtivo = () => {
   };
 
   const finalizarTreino = async () => {
-    if (!treinoId) return;
+    // Prevenir múltiplas finalizações
+    if (!treinoId || finalizadoRef.current) return;
+
+    // Marcar como finalizado imediatamente
+    finalizadoRef.current = true;
 
     try {
       setProcessando(true);
@@ -143,6 +175,8 @@ const TreinoAtivo = () => {
       const mensagemErro =
         error.response?.data?.message || "Erro ao finalizar treino";
       setErro(mensagemErro);
+      // Em caso de erro, permitir tentar novamente
+      finalizadoRef.current = false;
     }
   };
 
@@ -153,35 +187,10 @@ const TreinoAtivo = () => {
   const handleRecomecar = async () => {
     setMostrarResultado(false);
     setResultado(null);
+    setErro(""); // Limpar erros anteriores
 
-    // Reiniciar treino com os mesmos dados
-    try {
-      setLoading(true);
-      const response = await api.post("/treinos/iniciar", {
-        operacao_id: treinoData.operacao.id,
-        limite_id: treinoData.limite.id,
-        sistema_id: treinoData.sistema.id,
-      });
-
-      const { treino_id, contas_iniciais, limite, sistema } = response.data;
-
-      setTreinoId(treino_id);
-      setContas(contas_iniciais);
-      setTempoLimite(limite.tempo);
-      setSistemaTipo(sistema.tipo);
-      setTotalAcertos(0);
-      totalAcertosRef.current = 0;
-      setContaAtualIndex(0);
-      setProcessando(false);
-    } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.msg ||
-        "Erro ao reiniciar treino. Tente novamente.";
-      setErro(mensagemErro);
-    } finally {
-      setLoading(false);
-    }
+    // Reiniciar treino com os mesmos dados usando a função compartilhada
+    await iniciarTreino(treinoData);
   };
 
   const handleNovoTreino = () => {
