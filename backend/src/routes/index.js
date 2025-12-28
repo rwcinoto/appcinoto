@@ -27,4 +27,7 @@ router.use("/sistemas", require("./sistemaRoutes"));
 // Rotas de treinos
 router.use("/treinos", require("./treinoRoutes"));
 
+// Rotas de recordes
+router.use("/recordes", require("./recordeRoutes"));
+
 module.exports = router;
