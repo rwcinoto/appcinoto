@@ -113,6 +113,16 @@ router.get(
   usuarioController.listar.bind(usuarioController)
 );
 
+// Rota para listar convites pendentes do usuário logado
+// DEVE vir ANTES da rota /:id para evitar conflito de rotas
+router.get(
+  "/convites-pendentes",
+  authMiddleware,
+  require("../controllers/usuarioConjuntoController").listarConvitesPendentes.bind(
+    require("../controllers/usuarioConjuntoController")
+  )
+);
+
 router.get(
   "/:id",
   authMiddleware,

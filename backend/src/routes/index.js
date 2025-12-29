@@ -33,4 +33,7 @@ router.use("/recordes", require("./recordeRoutes"));
 // Rotas de rankings
 router.use("/rankings", require("./rankingRoutes"));
 
+// Rotas de conjuntos
+router.use("/conjuntos", require("./conjuntoRoutes"));
+
 module.exports = router;

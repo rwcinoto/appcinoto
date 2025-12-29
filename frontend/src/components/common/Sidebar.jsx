@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useNotifications } from "../../context/NotificationContext";
 import "./Sidebar.css";
 
 const Sidebar = () => {
   const { usuario, logout } = useAuth();
+  const { quantidadeConvitesPendentes } = useNotifications();
   const location = useLocation();
   const navigate = useNavigate();
   const [cadastrosAberto, setCadastrosAberto] = useState(false);
@@ -30,6 +32,7 @@ const Sidebar = () => {
       path: "/conjuntos",
       label: "Conjuntos",
       icon: "👥",
+      showBadge: true,
     },
     {
       path: "/perfil",
@@ -107,6 +110,11 @@ const Sidebar = () => {
               >
                 <span className="sidebar-icon">{item.icon}</span>
                 <span className="sidebar-label">{item.label}</span>
+                {item.showBadge && quantidadeConvitesPendentes > 0 && (
+                  <span className="sidebar-badge">
+                    {quantidadeConvitesPendentes}
+                  </span>
+                )}
               </Link>
             </li>
           ))}

@@ -2,6 +2,8 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/common/Layout";
 import { useAuth } from "./context/AuthContext";
+import Conjuntos from "./pages/Conjuntos";
+import DetalhesConjunto from "./pages/DetalhesConjunto";
 import Limites from "./pages/Limites";
 import Login from "./pages/Login";
 import NovoTreino from "./pages/NovoTreino";
@@ -41,6 +43,8 @@ const AppRoutes = () => {
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/recordes" element={<Recordes />} />
         <Route path="/rankings" element={<Rankings />} />
+        <Route path="/conjuntos" element={<Conjuntos />} />
+        <Route path="/conjuntos/:id" element={<DetalhesConjunto />} />
         <Route path="/usuarios" element={<Usuarios />} />
         {/* Rotas de cadastros */}
         <Route path="/cadastros/planos" element={<Planos />} />
@@ -48,7 +52,6 @@ const AppRoutes = () => {
         <Route path="/cadastros/limites" element={<Limites />} />
         <Route path="/cadastros/sistemas" element={<Sistemas />} />
         <Route path="/" element={<Navigate to="/novo-treino" replace />} />
-        {/* <Route path="/conjuntos" element={<Conjuntos />} /> */}
       </Route>
     </Routes>
   );
