@@ -1,0 +1,159 @@
+.linha-ranking {
+  transition: all 0.2s;
+}
+
+.linha-ranking:hover {
+  background: #f5f5f5;
+}
+
+.linha-ranking.top-3 {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.05) 0%, transparent 100%);
+  font-weight: 600;
+}
+
+.linha-ranking.top-3:hover {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+}
+
+.linha-ranking.usuario-logado {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.1) 0%, transparent 100%);
+  border-left: 3px solid #2196f3;
+}
+
+.linha-ranking.usuario-logado:hover {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.15) 0%, transparent 100%);
+}
+
+.linha-ranking.top-3.usuario-logado {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 215, 0, 0.1) 0%,
+    rgba(33, 150, 243, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.coluna-posicao {
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.posicao-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.emoji-posicao {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.numero-posicao {
+  font-family: "Courier New", monospace;
+  font-size: 1rem;
+}
+
+.coluna-nome {
+  padding: 12px;
+}
+
+.nome-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nome-usuario {
+  font-weight: 500;
+  color: #333;
+}
+
+.badge-usuario-logado {
+  padding: 2px 8px;
+  background: #2196f3;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coluna-pontuacao {
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.pontuacao-valor {
+  font-family: "Courier New", monospace;
+  font-size: 1.1rem;
+  color: #2196f3;
+}
+
+.coluna-data {
+  padding: 12px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.data-recorde {
+  font-family: "Courier New", monospace;
+}
+
+/* Cores específicas para top 3 */
+.linha-ranking.top-3 .coluna-posicao {
+  font-weight: 700;
+}
+
+.linha-ranking.top-3 .pontuacao-valor {
+  font-size: 1.2rem;
+}
+
+/* Posição 1 - Dourado */
+.linha-ranking.top-3:has(.posicao-container:has(.emoji-posicao:first-child)) {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+}
+
+/* Posição 2 - Prateado */
+.linha-ranking.top-3:nth-child(2) {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, transparent 100%);
+}
+
+/* Posição 3 - Bronze */
+.linha-ranking.top-3:nth-child(3) {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.1) 0%, transparent 100%);
+}
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+  .coluna-posicao,
+  .coluna-nome,
+  .coluna-pontuacao,
+  .coluna-data {
+    padding: 8px 4px;
+    font-size: 0.9rem;
+  }
+
+  .emoji-posicao {
+    font-size: 1rem;
+  }
+
+  .numero-posicao {
+    font-size: 0.9rem;
+  }
+
+  .pontuacao-valor {
+    font-size: 1rem;
+  }
+
+  .badge-usuario-logado {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}
+

@@ -30,4 +30,7 @@ router.use("/treinos", require("./treinoRoutes"));
 // Rotas de recordes
 router.use("/recordes", require("./recordeRoutes"));
 
+// Rotas de rankings
+router.use("/rankings", require("./rankingRoutes"));
+
 module.exports = router;
