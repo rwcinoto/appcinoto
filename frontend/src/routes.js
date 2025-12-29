@@ -8,6 +8,7 @@ import NovoTreino from "./pages/NovoTreino";
 import Operacoes from "./pages/Operacoes";
 import Perfil from "./pages/Perfil";
 import Planos from "./pages/Planos";
+import Rankings from "./pages/Rankings";
 import Recordes from "./pages/Recordes";
 import Sistemas from "./pages/Sistemas";
 import TreinoAtivo from "./pages/TreinoAtivo";
@@ -39,6 +40,7 @@ const AppRoutes = () => {
         <Route path="/treino-ativo" element={<TreinoAtivo />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/recordes" element={<Recordes />} />
+        <Route path="/rankings" element={<Rankings />} />
         <Route path="/usuarios" element={<Usuarios />} />
         {/* Rotas de cadastros */}
         <Route path="/cadastros/planos" element={<Planos />} />
@@ -46,7 +48,6 @@ const AppRoutes = () => {
         <Route path="/cadastros/limites" element={<Limites />} />
         <Route path="/cadastros/sistemas" element={<Sistemas />} />
         <Route path="/" element={<Navigate to="/novo-treino" replace />} />
-        {/* <Route path="/rankings" element={<Rankings />} /> */}
         {/* <Route path="/conjuntos" element={<Conjuntos />} /> */}
       </Route>
     </Routes>

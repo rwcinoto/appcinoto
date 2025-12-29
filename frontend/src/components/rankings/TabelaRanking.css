@@ -1,0 +1,156 @@
+.tabela-ranking {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tabela-ranking-container {
+  overflow-x: auto;
+}
+
+.tabela-ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.tabela-ranking-table thead {
+  background: #f5f5f5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabela-ranking-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #ddd;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coluna-posicao-header {
+  text-align: center;
+  width: 100px;
+}
+
+.coluna-nome-header {
+  width: auto;
+}
+
+.coluna-pontuacao-header {
+  text-align: center;
+  width: 120px;
+}
+
+.coluna-data-header {
+  text-align: center;
+  width: 120px;
+}
+
+.tabela-ranking.sem-dados {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.tabela-ranking.sem-dados p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.subtitulo-vazio {
+  margin-top: 8px !important;
+  font-size: 0.9rem !important;
+  color: #bbb !important;
+}
+
+/* Versão mobile (cards) - oculta por padrão */
+.tabela-ranking-mobile {
+  display: none;
+}
+
+.card-ranking-mobile {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.card-ranking-mobile:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-ranking-header-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.card-ranking-posicao-mobile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.emoji-posicao-mobile {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.numero-posicao-mobile {
+  font-family: "Courier New", monospace;
+  color: #333;
+}
+
+.card-ranking-pontuacao-mobile {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2196f3;
+  font-family: "Courier New", monospace;
+}
+
+.card-ranking-nome-mobile {
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.card-ranking-data-mobile {
+  font-size: 0.9rem;
+  color: #666;
+  font-family: "Courier New", monospace;
+}
+
+/* Responsivo: mostrar cards no mobile, tabela no desktop */
+@media (max-width: 768px) {
+  .tabela-ranking-container {
+    display: none;
+  }
+
+  .tabela-ranking-mobile {
+    display: block;
+    padding: 12px;
+  }
+}
+
+/* Desktop: ocultar cards */
+@media (min-width: 769px) {
+  .tabela-ranking-mobile {
+    display: none;
+  }
+}
+
