@@ -69,6 +69,13 @@ class UsuarioController {
     try {
       const id = parseInt(req.params.id);
 
+      // Validar se o ID é um número válido
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({
+          message: "ID do usuário deve ser um número válido",
+        });
+      }
+
       // Verifica se o usuário pode acessar este perfil
       if (req.usuario.tipo !== "admin" && req.usuario.id !== id) {
         return res.status(403).json({

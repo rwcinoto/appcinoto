@@ -1,0 +1,143 @@
+.lista-membros {
+  margin-top: 20px;
+}
+
+.lista-membros table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lista-membros thead {
+  background: #f5f5f5;
+}
+
+.lista-membros th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+}
+
+.lista-membros td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.lista-membros tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.lista-membros tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-dono {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.badge-admin {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.badge-comum {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-aceito {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-pendente {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-rejeitado {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-desconhecido {
+  color: #999;
+  font-style: italic;
+}
+
+.acoes-membro {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-tornar-admin {
+  padding: 6px 12px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-tornar-admin:hover {
+  background: #f57c00;
+}
+
+.btn-remover {
+  padding: 6px 12px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-remover:hover {
+  background: #d32f2f;
+}
+
+.texto-info {
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.sem-membros {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
