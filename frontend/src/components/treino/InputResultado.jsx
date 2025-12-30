@@ -46,7 +46,7 @@ const InputResultado = ({
 
     try {
       // Formatar resultado esperado conforme sistema
-      if (sistema === "arabico") {
+      if (sistema === "natural") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         tamanhoEsperado = respostaEsperadaFormatada.length;
       } else if (sistema === "romano") {
@@ -66,8 +66,8 @@ const InputResultado = ({
       // Para números com múltiplos dígitos, validar apenas quando estiver completo
       const respostaNormalizada = respostaDigitada.trim();
 
-      if (sistema === "arabico") {
-        // Para arábico: validar apenas quando o tamanho for igual
+      if (sistema === "natural") {
+        // Para natural: validar apenas quando o tamanho for igual
         if (respostaNormalizada.length < tamanhoEsperado) {
           // Ainda está digitando, não validar ainda
           setEstadoValidacao(null);
@@ -145,7 +145,7 @@ const InputResultado = ({
     // Filtrar entrada conforme o sistema
     let valorFiltrado = novoValor;
 
-    if (sistema === "arabico") {
+    if (sistema === "natural") {
       // Apenas números (sem negativo, pois resultados de operações básicas são positivos)
       valorFiltrado = novoValor.replace(/[^0-9]/g, "");
     } else if (sistema === "romano") {

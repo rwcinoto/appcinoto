@@ -149,7 +149,7 @@ const Sistemas = () => {
 
   const formatarTipo = (tipo) => {
     const tipos = {
-      arabico: "Arábico",
+      natural: "Natural",
       romano: "Romano",
       binario: "Binário",
     };
@@ -180,7 +180,7 @@ const Sistemas = () => {
           <label>Tipo</label>
           <select value={filtroTipo} onChange={handleFiltroTipoChange}>
             <option value="">Todos</option>
-            <option value="arabico">Arábico</option>
+            <option value="natural">Natural</option>
             <option value="romano">Romano</option>
             <option value="binario">Binário</option>
           </select>

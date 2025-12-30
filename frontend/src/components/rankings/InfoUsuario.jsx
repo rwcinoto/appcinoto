@@ -60,9 +60,11 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking }) => {
       }
     >
       <div className="info-usuario-conteudo">
-        <div className="info-usuario-linha">
+        <div className="info-usuario-coluna info-usuario-pontuacao">
           <span className="info-usuario-label">Sua pontuação</span>
           <span className="info-usuario-valor pontuacao">{pontuacao}</span>
+        </div>
+        <div className="info-usuario-coluna info-usuario-posicao">
           <span className="info-usuario-label">Posição</span>
           <div
             className="info-usuario-valor posicao"
@@ -78,9 +80,11 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking }) => {
           </div>
         </div>
         {estaNoTop3 && (
-          <span className="info-usuario-parabens">
-            Parabéns! Você está entre os 3 primeiros! 🎉
-          </span>
+          <div className="info-usuario-coluna info-usuario-parabens">
+            <span className="info-usuario-parabens-texto">
+              Parabéns! Você está entre os 3 primeiros! 🎉
+            </span>
+          </div>
         )}
       </div>
     </div>

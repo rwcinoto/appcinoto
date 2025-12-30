@@ -20,7 +20,7 @@ const CardRecorde = ({ recorde }) => {
 
   const formatarTipoSistema = (tipo) => {
     const tipos = {
-      arabico: "Arábico",
+      natural: "Natural",
       romano: "Romano",
       binario: "Binário",
     };
@@ -52,22 +52,48 @@ const CardRecorde = ({ recorde }) => {
   const tipoOperacao = recorde.operacao?.tipo || "";
   const corOperacao = obterCorOperacao(tipoOperacao);
 
+  // Calcular tempo médio por conta
+  const calcularTempoMedioPorConta = () => {
+    const totalAcertos = recorde.total || 0;
+    const tempoLimite = recorde.limite?.tempo || 0;
+
+    if (totalAcertos === 0 || tempoLimite === 0) {
+      return null;
+    }
+
+    const tempoMedio = tempoLimite / totalAcertos;
+    return tempoMedio;
+  };
+
+  const tempoMedioPorConta = calcularTempoMedioPorConta();
+  const tempoMedioFormatado =
+    tempoMedioPorConta !== null
+      ? tempoMedioPorConta.toFixed(1).replace(".", ",")
+      : null;
+
   return (
     <div className="card-recorde" style={{ borderColor: corOperacao }}>
       <div className="card-recorde-header">
         <div className="card-recorde-titulo-linha">
           <h3>{recorde.operacao?.nome || "Operação"}</h3>
-          <span className="card-recorde-acertos-label">Acertos</span>
-        </div>
-        <div className="card-recorde-valores-linha">
           <span className="card-recorde-tipo" style={{ color: corOperacao }}>
             {formatarTipoOperacao(tipoOperacao)}
           </span>
-          <span
-            className="card-recorde-acertos-valor"
-            style={{ color: corOperacao }}
-          >
-            {recorde.total || 0}
+        </div>
+        <div className="card-recorde-acertos-linha">
+          <span className="card-recorde-acertos-texto">
+            <strong>Acertos:</strong>{" "}
+            <span
+              className="card-recorde-acertos-valor"
+              style={{ color: corOperacao }}
+            >
+              {recorde.total || 0}
+            </span>
+            {tempoMedioFormatado && (
+              <span className="card-recorde-tempo-medio">
+                {" "}({tempoMedioFormatado} seg/conta)
+              </span>
+            )}
           </span>
         </div>
       </div>

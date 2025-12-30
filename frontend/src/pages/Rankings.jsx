@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import FiltrosRanking from "../components/rankings/FiltrosRanking";
 import InfoUsuario from "../components/rankings/InfoUsuario";
 import TabelaRanking from "../components/rankings/TabelaRanking";
 import Loading from "../components/common/Loading";
@@ -15,12 +14,65 @@ const Rankings = () => {
   const [posicaoUsuario, setPosicaoUsuario] = useState(null);
   const [totalParticipantes, setTotalParticipantes] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [filtros, setFiltros] = useState(null); // null até ter todos os filtros obrigatórios
+  const [operacoes, setOperacoes] = useState([]);
+  const [limites, setLimites] = useState([]);
+  const [sistemas, setSistemas] = useState([]);
+  const [conjuntos, setConjuntos] = useState([]);
+  const [operacaoSelecionada, setOperacaoSelecionada] = useState("");
+  const [limiteSelecionado, setLimiteSelecionado] = useState("");
+  const [sistemaSelecionado, setSistemaSelecionado] = useState("");
+  const [conjuntoSelecionado, setConjuntoSelecionado] = useState("");
+  const [tempoLimite, setTempoLimite] = useState(null);
   const [erro, setErro] = useState("");
+
+  const carregarDados = useCallback(async () => {
+    setErro("");
+
+    try {
+      const [operacoesRes, limitesRes, sistemasRes, conjuntosRes] =
+        await Promise.all([
+          api.get("/operacoes"),
+          api.get("/limites"),
+          api.get("/sistemas"),
+          api.get("/conjuntos").catch(() => ({ data: [] })),
+        ]);
+
+      setOperacoes(operacoesRes.data);
+      setLimites(limitesRes.data);
+      setSistemas(sistemasRes.data);
+      setConjuntos(conjuntosRes.data || []);
+
+      // Definir valores padrão automaticamente
+      if (operacoesRes.data.length > 0) {
+        setOperacaoSelecionada(String(operacoesRes.data[0].id));
+      }
+
+      const limitePadrao =
+        limitesRes.data.find((l) => l.id === 1) || limitesRes.data[0];
+      const sistemaPadrao =
+        sistemasRes.data.find((s) => s.id === 1) || sistemasRes.data[0];
+
+      if (limitePadrao) {
+        setLimiteSelecionado(String(limitePadrao.id));
+      }
+      if (sistemaPadrao) {
+        setSistemaSelecionado(String(sistemaPadrao.id));
+      }
+      // Conjunto começa vazio (global)
+      setConjuntoSelecionado("");
+    } catch (error) {
+      logError("Rankings - carregarDados", error);
+      setErro(getErrorMessage(error));
+    }
+  }, []);
 
   const carregarRanking = useCallback(async () => {
     // Não carregar se filtros não estão completos
-    if (!filtros || !filtros.operacao_id || !filtros.limite_id || !filtros.sistema_id) {
+    if (
+      !operacaoSelecionada ||
+      !limiteSelecionado ||
+      !sistemaSelecionado
+    ) {
       setLoading(false);
       return;
     }
@@ -31,14 +83,14 @@ const Rankings = () => {
     try {
       // Construir query string com filtros
       const params = new URLSearchParams({
-        operacao_id: filtros.operacao_id.toString(),
-        limite_id: filtros.limite_id.toString(),
-        sistema_id: filtros.sistema_id.toString(),
+        operacao_id: operacaoSelecionada,
+        limite_id: limiteSelecionado,
+        sistema_id: sistemaSelecionado,
       });
 
       // Adicionar conjunto_id se fornecido
-      if (filtros.conjunto_id) {
-        params.append("conjunto_id", filtros.conjunto_id.toString());
+      if (conjuntoSelecionado) {
+        params.append("conjunto_id", conjuntoSelecionado);
       }
 
       const url = `/rankings?${params.toString()}`;
@@ -47,26 +99,32 @@ const Rankings = () => {
       setRanking(response.data.ranking || []);
       setPosicaoUsuario(response.data.posicaoUsuario);
       setTotalParticipantes(response.data.totalParticipantes || 0);
+      
+      // Obter tempo do limite para calcular tempo médio
+      setTempoLimite(response.data.filtros?.limite?.tempo || null);
     } catch (error) {
       logError("Rankings - carregarRanking", error);
       setErro(getErrorMessage(error));
       setRanking([]);
       setPosicaoUsuario(null);
       setTotalParticipantes(0);
+      setTempoLimite(null);
     } finally {
       setLoading(false);
     }
-  }, [filtros]);
+  }, [operacaoSelecionada, limiteSelecionado, sistemaSelecionado, conjuntoSelecionado]);
 
   useEffect(() => {
-    if (usuario && filtros) {
+    if (usuario) {
+      carregarDados();
+    }
+  }, [usuario, carregarDados]);
+
+  useEffect(() => {
+    if (usuario && operacaoSelecionada && limiteSelecionado && sistemaSelecionado) {
       carregarRanking();
     }
-  }, [usuario, filtros, carregarRanking]);
-
-  const handleFiltrar = (novosFiltros) => {
-    setFiltros(novosFiltros);
-  };
+  }, [usuario, operacaoSelecionada, limiteSelecionado, sistemaSelecionado, conjuntoSelecionado, carregarRanking]);
 
   if (!usuario) {
     return (
@@ -76,10 +134,130 @@ const Rankings = () => {
     );
   }
 
+  const formatarTipoOperacao = (tipo) => {
+    const tipos = {
+      soma: "Soma",
+      subtracao: "Subtração",
+      multiplicacao: "Multiplicação",
+      divisao: "Divisão",
+      raiz: "Raiz quadrada",
+    };
+    return tipos[tipo] || tipo;
+  };
+
+  const formatarTipoSistema = (tipo) => {
+    const tipos = {
+      natural: "Natural",
+      romano: "Romano",
+      binario: "Binário",
+    };
+    return tipos[tipo] || tipo;
+  };
+
+  const obterDescricaoSistema = (sistema) => {
+    if (sistema.descricao) {
+      return sistema.descricao;
+    }
+    return formatarTipoSistema(sistema.tipo);
+  };
+
   return (
     <div className="rankings-container">
       <div className="rankings-header">
         <h1>Rankings</h1>
+        <div className="filtros-header">
+          {/* Operação */}
+          {operacoes.length > 1 ? (
+            <div className="select-group-filtro">
+              <span className="filtro-label">Operação:</span>
+              <select
+                value={operacaoSelecionada}
+                onChange={(e) => setOperacaoSelecionada(e.target.value)}
+                className="select-operacao"
+              >
+                {operacoes.map((operacao) => (
+                  <option key={operacao.id} value={operacao.id}>
+                    {formatarTipoOperacao(operacao.tipo)}: {operacao.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : operacoes.length === 1 ? (
+            <div className="filtro-valor-unico">
+              <span className="filtro-label">Operação:</span>
+              <span className="filtro-valor">
+                {formatarTipoOperacao(operacoes[0].tipo)}: {operacoes[0].nome}
+              </span>
+            </div>
+          ) : null}
+
+          {/* Limite de tempo */}
+          {limites.length > 1 ? (
+            <div className="select-group-filtro">
+              <span className="filtro-label">Limite:</span>
+              <select
+                value={limiteSelecionado}
+                onChange={(e) => setLimiteSelecionado(e.target.value)}
+                className="select-limite"
+              >
+                {limites.map((limite) => (
+                  <option key={limite.id} value={limite.id}>
+                    {limite.descricao}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : limites.length === 1 ? (
+            <div className="filtro-valor-unico">
+              <span className="filtro-label">Limite:</span>
+              <span className="filtro-valor">{limites[0].descricao}</span>
+            </div>
+          ) : null}
+
+          {/* Sistema numérico */}
+          {sistemas.length > 1 ? (
+            <div className="select-group-filtro">
+              <span className="filtro-label">Sistema:</span>
+              <select
+                value={sistemaSelecionado}
+                onChange={(e) => setSistemaSelecionado(e.target.value)}
+                className="select-sistema"
+              >
+                {sistemas.map((sistema) => (
+                  <option key={sistema.id} value={sistema.id}>
+                    {obterDescricaoSistema(sistema)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : sistemas.length === 1 ? (
+            <div className="filtro-valor-unico">
+              <span className="filtro-label">Sistema:</span>
+              <span className="filtro-valor">
+                {obterDescricaoSistema(sistemas[0])}
+              </span>
+            </div>
+          ) : null}
+
+          {/* Conjunto */}
+          {conjuntos.length > 0 && (
+            <div className="select-group-filtro">
+              <span className="filtro-label">Conjunto:</span>
+              <select
+                value={conjuntoSelecionado}
+                onChange={(e) => setConjuntoSelecionado(e.target.value)}
+                className="select-conjunto"
+              >
+                <option value="">Global</option>
+                {conjuntos.map((conjunto) => (
+                  <option key={conjunto.id} value={conjunto.id}>
+                    {conjunto.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       {erro && (
@@ -91,11 +269,9 @@ const Rankings = () => {
         />
       )}
 
-      <FiltrosRanking onFiltrar={handleFiltrar} />
-
       {loading ? (
         <Loading text="Carregando ranking..." />
-      ) : filtros && filtros.operacao_id && filtros.limite_id && filtros.sistema_id ? (
+      ) : operacaoSelecionada && limiteSelecionado && sistemaSelecionado ? (
         <>
           <InfoUsuario
             posicaoUsuario={posicaoUsuario}
@@ -103,7 +279,11 @@ const Rankings = () => {
             ranking={ranking}
           />
 
-          <TabelaRanking ranking={ranking} posicaoUsuario={posicaoUsuario} />
+          <TabelaRanking 
+            ranking={ranking} 
+            posicaoUsuario={posicaoUsuario}
+            tempoLimite={tempoLimite}
+          />
         </>
       ) : (
         <div className="mensagem-aviso">

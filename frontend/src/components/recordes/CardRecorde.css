@@ -27,7 +27,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .card-recorde-titulo-linha h3 {
@@ -35,29 +35,37 @@
   color: #333;
   font-size: 18px;
   font-weight: 600;
+  flex: 1;
 }
 
-.card-recorde-acertos-label {
-  font-size: 14px;
-  color: #666;
+.card-recorde-titulo-linha .card-recorde-tipo {
   font-weight: 500;
+  font-size: 14px;
+  margin-left: 12px;
 }
 
-.card-recorde-valores-linha {
+.card-recorde-acertos-linha {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
 }
 
-.card-recorde-tipo {
-  font-weight: 500;
-  font-size: 14px;
+.card-recorde-acertos-texto {
+  font-size: 16px;
+  color: #333;
+}
+
+.card-recorde-acertos-texto strong {
+  font-weight: 600;
 }
 
 .card-recorde-acertos-valor {
-  font-size: 24px;
-  font-weight: bold;
-  font-family: "Courier New", monospace;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-recorde-tempo-medio {
+  font-size: 14px;
 }
 
 .card-recorde-info-linha {

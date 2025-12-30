@@ -44,7 +44,7 @@
 
 .coluna-pontuacao-header {
   text-align: center;
-  width: 120px;
+  width: 180px;
 }
 
 .coluna-data-header {
@@ -127,6 +127,15 @@
   font-weight: 700;
   color: #2196f3;
   font-family: "Courier New", monospace;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.card-ranking-tempo-medio-mobile {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 400;
 }
 
 .card-ranking-nome-data-mobile {

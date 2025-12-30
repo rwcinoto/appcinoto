@@ -269,7 +269,7 @@ module.exports = {
         allowNull: true,
       },
       tipo: {
-        type: Sequelize.ENUM("arabico", "romano", "binario"),
+        type: Sequelize.ENUM("natural", "romano", "binario"),
         allowNull: false,
       },
       id_plano: {

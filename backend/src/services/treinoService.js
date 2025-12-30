@@ -19,7 +19,7 @@ class TreinoService {
   /**
    * Aplicar limites do sistema numérico ao número
    * @param {number} numero - Número a limitar
-   * @param {string} sistema - Sistema numérico ('arabico', 'romano', 'binario')
+   * @param {string} sistema - Sistema numérico ('natural', 'romano', 'binario')
    * @returns {number} Número limitado conforme sistema
    */
   aplicarLimiteSistema(numero, sistema) {
@@ -28,16 +28,16 @@ class TreinoService {
     } else if (sistema === "binario") {
       return Math.min(numero, 2047);
     }
-    return numero; // arábico não tem limite (além do limite da operação)
+    return numero; // natural não tem limite (além do limite da operação)
   }
 
   /**
    * Gerar conta matemática conforme tipo de operação
    * @param {object} operacao - Objeto com tipo e limites de parcelas
-   * @param {string} sistema - Sistema numérico ('arabico', 'romano', 'binario')
+   * @param {string} sistema - Sistema numérico ('natural', 'romano', 'binario')
    * @returns {object} { parcela1, parcela2, parcela3, resultado, tipo }
    */
-  gerarConta(operacao, sistema = "arabico") {
+  gerarConta(operacao, sistema = "natural") {
     const {
       tipo,
       min_parcela_1,
@@ -200,7 +200,7 @@ class TreinoService {
    * @param {string} sistema - Sistema numérico
    * @returns {array} Array de contas
    */
-  gerarBufferContas(operacao, quantidade = 10, sistema = "arabico") {
+  gerarBufferContas(operacao, quantidade = 10, sistema = "natural") {
     const contas = [];
     const maxTentativas = quantidade * 50; // Limite máximo de tentativas (50x a quantidade desejada)
     let tentativas = 0;
@@ -238,13 +238,13 @@ class TreinoService {
    * @param {string} sistema - Sistema numérico usado
    * @returns {object} { correto: boolean, respostaEsperada: number|string }
    */
-  validarResposta(conta, respostaUsuario, sistema = "arabico") {
+  validarResposta(conta, respostaUsuario, sistema = "natural") {
     const resultadoEsperado = conta.resultado;
     let respostaEsperadaFormatada;
 
     try {
       // Formatar resultado esperado conforme sistema
-      if (sistema === "arabico") {
+      if (sistema === "natural") {
         respostaEsperadaFormatada = resultadoEsperado;
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = conversaoService.formatarNumero(
@@ -263,8 +263,8 @@ class TreinoService {
       // Comparar resposta do usuário
       let correto = false;
 
-      if (sistema === "arabico") {
-        // Para arábico, comparar números diretamente
+      if (sistema === "natural") {
+        // Para natural, comparar números diretamente
         const respostaNumero =
           typeof respostaUsuario === "string"
             ? parseFloat(respostaUsuario.trim())
@@ -301,7 +301,7 @@ class TreinoService {
       };
     } catch (error) {
       // Se houver erro na formatação (ex: número fora do limite do sistema),
-      // retornar resultado esperado em arábico
+      // retornar resultado esperado em natural
       return {
         correto: false,
         respostaEsperada: resultadoEsperado,

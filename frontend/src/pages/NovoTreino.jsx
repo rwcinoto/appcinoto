@@ -50,24 +50,46 @@ const NovoTreino = () => {
     }
   }, [usuario, carregarDados]);
 
-  // Definir valores padrão para limite e sistema (id = 1)
+  // Definir valores padrão para limite e sistema automaticamente
   useEffect(() => {
     if (limites.length > 0 && !limiteSelecionado) {
-      const limitePadrao = limites.find((limite) => limite.id === 1);
-      if (limitePadrao) {
-        setLimiteSelecionado("1");
+      // Se há apenas um limite, seleciona automaticamente
+      if (limites.length === 1) {
+        setLimiteSelecionado(limites[0].id.toString());
+      } else {
+        // Caso contrário, tenta o id = 1
+        const limitePadrao = limites.find((limite) => limite.id === 1);
+        if (limitePadrao) {
+          setLimiteSelecionado("1");
+        }
       }
     }
   }, [limites, limiteSelecionado]);
 
   useEffect(() => {
     if (sistemas.length > 0 && !sistemaSelecionado) {
-      const sistemaPadrao = sistemas.find((sistema) => sistema.id === 1);
-      if (sistemaPadrao) {
-        setSistemaSelecionado("1");
+      // Se há apenas um sistema, seleciona automaticamente
+      if (sistemas.length === 1) {
+        setSistemaSelecionado(sistemas[0].id.toString());
+      } else {
+        // Caso contrário, tenta o id = 1
+        const sistemaPadrao = sistemas.find((sistema) => sistema.id === 1);
+        if (sistemaPadrao) {
+          setSistemaSelecionado("1");
+        }
       }
     }
   }, [sistemas, sistemaSelecionado]);
+
+  // Definir operação padrão (id = 1)
+  useEffect(() => {
+    if (operacoes.length > 0 && !operacaoSelecionada) {
+      const operacaoPadrao = operacoes.find((operacao) => operacao.id === 1);
+      if (operacaoPadrao) {
+        setOperacaoSelecionada(operacaoPadrao);
+      }
+    }
+  }, [operacoes, operacaoSelecionada]);
 
   const formatarTipoOperacao = (tipo) => {
     const tipos = {
@@ -89,35 +111,6 @@ const NovoTreino = () => {
       raiz: "#F44336", // Vermelho
     };
     return cores[tipo] || "#E0E0E0";
-  };
-
-  const formatarTipoSistema = (tipo) => {
-    const tipos = {
-      arabico: "Arábico",
-      romano: "Romano",
-      binario: "Binário",
-    };
-    return tipos[tipo] || tipo;
-  };
-
-  const formatarTempo = (segundos) => {
-    if (segundos < 60) {
-      return `${segundos}s`;
-    } else if (segundos < 3600) {
-      const minutos = Math.floor(segundos / 60);
-      const segundosRestantes = segundos % 60;
-      return segundosRestantes > 0
-        ? `${minutos}min ${segundosRestantes}s`
-        : `${minutos}min`;
-    } else {
-      const horas = Math.floor(segundos / 3600);
-      const minutos = Math.floor((segundos % 3600) / 60);
-      const segundosRestantes = segundos % 60;
-      let resultado = `${horas}h`;
-      if (minutos > 0) resultado += ` ${minutos}min`;
-      if (segundosRestantes > 0) resultado += ` ${segundosRestantes}s`;
-      return resultado;
-    }
   };
 
   const handleSelecionarOperacao = (operacao) => {
@@ -184,6 +177,55 @@ const NovoTreino = () => {
       <div className="novo-treino-container">
         <div className="novo-treino-header">
           <h1>Novo treino</h1>
+          <div className="filtros-header">
+            {/* Limite de tempo - mostra select se houver múltiplas opções, senão mostra apenas o valor */}
+            {limites.length > 1 ? (
+              <div className="select-group-filtro">
+                <span className="filtro-label">Limite:</span>
+                <select
+                  value={limiteSelecionado}
+                  onChange={(e) => setLimiteSelecionado(e.target.value)}
+                  className="select-limite"
+                >
+                  {limites.map((limite) => (
+                    <option key={limite.id} value={limite.id}>
+                      {limite.descricao}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : limites.length === 1 ? (
+              <div className="filtro-valor-unico">
+                <span className="filtro-label">Limite:</span>
+                <span className="filtro-valor">{limites[0].descricao}</span>
+              </div>
+            ) : null}
+
+            {/* Sistema numérico - mostra select se houver múltiplas opções, senão mostra apenas o valor */}
+            {sistemas.length > 1 ? (
+              <div className="select-group-filtro">
+                <span className="filtro-label">Sistema:</span>
+                <select
+                  value={sistemaSelecionado}
+                  onChange={(e) => setSistemaSelecionado(e.target.value)}
+                  className="select-sistema"
+                >
+                  {sistemas.map((sistema) => (
+                    <option key={sistema.id} value={sistema.id}>
+                      {sistema.descricao}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : sistemas.length === 1 ? (
+              <div className="filtro-valor-unico">
+                <span className="filtro-label">Sistema:</span>
+                <span className="filtro-valor">
+                  {sistemas[0].descricao}
+                </span>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="novo-treino-content">
@@ -198,7 +240,6 @@ const NovoTreino = () => {
 
           {/* Seção de Operações */}
           <section className="secao-selecao">
-            <h2>1. Selecione a operação</h2>
             <div className="cards-operacoes">
               {operacoes.length === 0 ? (
                 <p className="sem-opcoes">
@@ -230,55 +271,6 @@ const NovoTreino = () => {
                 })
               )}
             </div>
-          </section>
-
-          {/* Seção de Limite */}
-          <section className="secao-selecao">
-            <h2>2. Selecione o limite de tempo</h2>
-            <div className="select-group">
-              <select
-                value={limiteSelecionado}
-                onChange={(e) => setLimiteSelecionado(e.target.value)}
-                className="select-limite"
-              >
-                <option value="">Selecione um limite</option>
-                {limites.map((limite) => (
-                  <option key={limite.id} value={limite.id}>
-                    {limite.descricao} - {formatarTempo(limite.tempo)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {limites.length === 0 && (
-              <p className="sem-opcoes">
-                Nenhum limite disponível no seu plano.
-              </p>
-            )}
-          </section>
-
-          {/* Seção de Sistema */}
-          <section className="secao-selecao">
-            <h2>3. Selecione o sistema numérico</h2>
-            <div className="select-group">
-              <select
-                value={sistemaSelecionado}
-                onChange={(e) => setSistemaSelecionado(e.target.value)}
-                className="select-sistema"
-              >
-                <option value="">Selecione um sistema</option>
-                {sistemas.map((sistema) => (
-                  <option key={sistema.id} value={sistema.id}>
-                    {formatarTipoSistema(sistema.tipo)}
-                    {sistema.descricao ? ` - ${sistema.descricao}` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {sistemas.length === 0 && (
-              <p className="sem-opcoes">
-                Nenhum sistema disponível no seu plano.
-              </p>
-            )}
           </section>
 
           {/* Botão Começar */}

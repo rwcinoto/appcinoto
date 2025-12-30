@@ -4,20 +4,44 @@
   align-items: center;
   min-height: 100vh;
   padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 10s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .login-card {
   background: white;
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 
-.login-card h1 {
-  text-align: center;
+.login-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 30px;
+}
+
+.login-logo img {
+  max-width: 100%;
+  height: auto;
+  max-height: 80px;
+  object-fit: contain;
 }
 
 .form-group {
@@ -37,24 +61,83 @@
   font-size: 16px;
 }
 
-button {
+.login-card button {
   width: 100%;
   padding: 12px;
-  background: #2196f3;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-button:disabled {
+.login-card button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.login-card button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-card button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.login-texto-motivacional {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.login-texto-motivacional p {
+  margin: 8px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.login-texto-motivacional p:first-child {
+  color: #333;
+  font-weight: 500;
+  font-size: 15px;
 }
 
 .erro {
   color: #f44336;
   margin-bottom: 15px;
   text-align: center;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+  }
+
+  .login-card {
+    padding: 30px 25px;
+  }
+
+  .login-logo img {
+    max-height: 60px;
+  }
+
+  .login-texto-motivacional {
+    margin-top: 25px;
+    padding-top: 20px;
+  }
+
+  .login-texto-motivacional p {
+    font-size: 13px;
+  }
+
+  .login-texto-motivacional p:first-child {
+    font-size: 14px;
+  }
 }
