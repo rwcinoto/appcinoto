@@ -10,7 +10,7 @@ const FormSistema = ({
 }) => {
   const [formData, setFormData] = useState({
     descricao: "",
-    tipo: "arabico",
+    tipo: "natural",
     id_plano: "",
   });
   const [erro, setErro] = useState("");
@@ -19,13 +19,13 @@ const FormSistema = ({
     if (sistema) {
       setFormData({
         descricao: sistema.descricao || "",
-        tipo: sistema.tipo || "arabico",
+        tipo: sistema.tipo || "natural",
         id_plano: sistema.id_plano?.toString() || "",
       });
     } else {
       setFormData({
         descricao: "",
-        tipo: "arabico",
+        tipo: "natural",
         id_plano: planos.length > 0 ? planos[0].id.toString() : "",
       });
     }
@@ -86,7 +86,7 @@ const FormSistema = ({
           required
           disabled={disabled}
         >
-          <option value="arabico">Arábico</option>
+          <option value="natural">Natural</option>
           <option value="romano">Romano</option>
           <option value="binario">Binário</option>
         </select>

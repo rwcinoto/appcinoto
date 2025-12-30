@@ -64,7 +64,7 @@ const DetalhesConjuntoPage = () => {
   const handleTornarAdmin = async (usuarioId) => {
     if (
       !window.confirm(
-        "Deseja realmente tornar este membro um administrador? Ele terá permissões para gerenciar membros do conjunto."
+        "Deseja realmente tornar este elemento um administrador? Ele terá permissões para gerenciar elementos do conjunto."
       )
     ) {
       return;
@@ -84,7 +84,7 @@ const DetalhesConjuntoPage = () => {
   const handleRemoverMembro = async (usuarioId) => {
     if (
       !window.confirm(
-        "Deseja realmente remover este membro do conjunto? Esta ação não pode ser desfeita."
+        "Deseja realmente remover este elemento do conjunto? Esta ação não pode ser desfeita."
       )
     ) {
       return;
@@ -95,6 +95,24 @@ const DetalhesConjuntoPage = () => {
       carregarDetalhes();
     } catch (error) {
       logError("DetalhesConjunto - handleRemoverMembro", error);
+      alert(getErrorMessage(error));
+    }
+  };
+
+  const handleReenviarConvite = async (usuarioId) => {
+    if (
+      !window.confirm(
+        "Deseja realmente reenviar o convite para este elemento? O convite ficará pendente novamente."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await api.post(`/conjuntos/${id}/usuarios/${usuarioId}/reenviar`);
+      carregarDetalhes();
+    } catch (error) {
+      logError("DetalhesConjunto - handleReenviarConvite", error);
       alert(getErrorMessage(error));
     }
   };
@@ -143,12 +161,13 @@ const DetalhesConjuntoPage = () => {
       {!loading && conjunto && (
         <>
           <div className="membros-section">
-            <h2>Membros do conjunto</h2>
+            <h2>Elementos do conjunto</h2>
             <ListaMembros
               membros={membros}
               meuTipo={meuTipo}
               onTornarAdmin={handleTornarAdmin}
               onRemover={handleRemoverMembro}
+              onReenviarConvite={handleReenviarConvite}
               loading={false}
             />
           </div>

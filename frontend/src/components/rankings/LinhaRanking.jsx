@@ -3,7 +3,7 @@ import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import "./LinhaRanking.css";
 
-const LinhaRanking = ({ item }) => {
+const LinhaRanking = ({ item, tempoLimite }) => {
   const { usuario } = useAuth();
 
   if (!item) {
@@ -11,6 +11,21 @@ const LinhaRanking = ({ item }) => {
   }
 
   const { posicao, nome, total, data_recorde, id_usuario } = item;
+
+  // Calcular tempo médio por conta
+  const calcularTempoMedioPorConta = () => {
+    const totalAcertos = total || 0;
+    const tempo = tempoLimite || 0;
+
+    if (totalAcertos === 0 || tempo === 0) {
+      return null;
+    }
+
+    const tempoMedio = tempo / totalAcertos;
+    return tempoMedio.toFixed(1).replace(".", ",");
+  };
+
+  const tempoMedioFormatado = calcularTempoMedioPorConta();
 
   // Verificar se é o usuário logado
   const eUsuarioLogado = usuario && id_usuario === usuario.id;
@@ -87,6 +102,11 @@ const LinhaRanking = ({ item }) => {
           style={estaNoTop3 ? { color: corPosicao } : {}}
         >
           {total}
+          {tempoMedioFormatado && (
+            <span className="pontuacao-tempo-medio">
+              {" "}({tempoMedioFormatado} seg/conta)
+            </span>
+          )}
         </span>
       </td>
       <td className="coluna-data">

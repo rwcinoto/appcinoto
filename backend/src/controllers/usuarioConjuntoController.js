@@ -632,6 +632,154 @@ class UsuarioConjuntoController {
   }
 
   /**
+   * Sair do conjunto
+   * Permite que membros do tipo 'comum' ou 'admin' saiam do conjunto
+   * Muda o status para 'rejeitado'
+   * Não permite que o dono saia (deve excluir o conjunto)
+   */
+  async sairConjunto(req, res) {
+    try {
+      const erros = validationResult(req);
+      if (!erros.isEmpty()) {
+        return res.status(400).json({ errors: erros.array() });
+      }
+
+      const conjuntoId = parseInt(req.params.conjunto_id || req.params.conjuntoId);
+      const usuarioId = req.usuario.id;
+
+      if (isNaN(conjuntoId)) {
+        return res.status(400).json({ message: "ID do conjunto inválido" });
+      }
+
+      // Buscar registro do usuário no conjunto
+      const usuarioConjunto = await UsuarioConjunto.findOne({
+        where: {
+          id_conjunto: conjuntoId,
+          id_usuario: usuarioId,
+        },
+      });
+
+      if (!usuarioConjunto) {
+        return res.status(404).json({ message: "Você não pertence a este conjunto" });
+      }
+
+      // Validar que o usuário não é dono
+      if (usuarioConjunto.tipo === "dono") {
+        return res.status(400).json({
+          message: "O dono não pode sair do conjunto. Use a opção 'Excluir conjunto' se desejar remover o conjunto.",
+        });
+      }
+
+      // Validar que o status é 'aceito' (membro ativo)
+      if (usuarioConjunto.status !== "aceito") {
+        return res.status(400).json({
+          message: "Você não está ativo neste conjunto",
+        });
+      }
+
+      // Atualizar status para 'rejeitado'
+      await usuarioConjunto.update({
+        status: "rejeitado",
+        atualizado_por: usuarioId,
+        atualizado_em: new Date(),
+      });
+
+      return res.json({ message: "Você saiu do conjunto com sucesso" });
+    } catch (error) {
+      console.error("Erro ao sair do conjunto:", error);
+      return res.status(500).json({
+        message: "Erro ao sair do conjunto",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Reenviar convite
+   * Permite que dono/admin reenvie convite para membros com status 'rejeitado'
+   * Muda o status de 'rejeitado' para 'pendente'
+   */
+  async reenviarConvite(req, res) {
+    try {
+      const erros = validationResult(req);
+      if (!erros.isEmpty()) {
+        return res.status(400).json({ errors: erros.array() });
+      }
+
+      const conjuntoId = parseInt(req.params.conjunto_id || req.params.conjuntoId);
+      const usuarioIdAlvo = parseInt(req.params.usuario_id || req.params.usuarioConjuntoId);
+      const usuarioId = req.usuario.id;
+
+      if (isNaN(conjuntoId) || isNaN(usuarioIdAlvo)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+
+      // Verificar se conjunto existe
+      const conjunto = await Conjunto.findByPk(conjuntoId);
+      if (!conjunto) {
+        return res.status(404).json({ message: "Conjunto não encontrado" });
+      }
+
+      // Verificar se usuário logado é dono ou admin do conjunto
+      const usuarioConjuntoLogado = await UsuarioConjunto.findOne({
+        where: {
+          id_conjunto: conjuntoId,
+          id_usuario: usuarioId,
+          status: "aceito",
+          tipo: { [Op.in]: ["dono", "admin"] },
+        },
+      });
+
+      if (!usuarioConjuntoLogado) {
+        return res.status(403).json({
+          message: "Acesso negado. Apenas dono ou admin podem reenviar convites.",
+        });
+      }
+
+      // Buscar registro do usuário alvo no conjunto
+      const usuarioConjuntoAlvo = await UsuarioConjunto.findOne({
+        where: {
+          id_conjunto: conjuntoId,
+          id_usuario: usuarioIdAlvo,
+        },
+      });
+
+      if (!usuarioConjuntoAlvo) {
+        return res.status(404).json({ message: "Usuário não encontrado neste conjunto" });
+      }
+
+      // Validar que o status é 'rejeitado'
+      if (usuarioConjuntoAlvo.status !== "rejeitado") {
+        return res.status(400).json({
+          message: "Apenas convites rejeitados podem ser reenviados",
+        });
+      }
+
+      // Validar que não é o dono
+      if (usuarioConjuntoAlvo.tipo === "dono") {
+        return res.status(400).json({
+          message: "Não é possível reenviar convite para o dono do conjunto",
+        });
+      }
+
+      // Atualizar status para 'pendente'
+      await usuarioConjuntoAlvo.update({
+        status: "pendente",
+        atualizado_por: usuarioId,
+        atualizado_em: new Date(),
+      });
+
+      return res.json({ message: "Convite reenviado com sucesso" });
+    } catch (error) {
+      console.error("Erro ao reenviar convite:", error);
+      return res.status(500).json({
+        message: "Erro ao reenviar convite",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
    * Listar convites pendentes do usuário logado
    * Incluir informações do conjunto e quem convidou
    * Retornar apenas status='pendente'

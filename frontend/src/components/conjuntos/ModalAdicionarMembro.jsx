@@ -38,7 +38,7 @@ const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
     <div className="modal-overlay" onClick={onFechar}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Adicionar membro</h2>
+          <h2>Adicionar elemento</h2>
           <button className="modal-close" onClick={onFechar} aria-label="Fechar modal">
             ×
           </button>

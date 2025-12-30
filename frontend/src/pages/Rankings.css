@@ -6,12 +6,92 @@
 
 .rankings-header {
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .rankings-header h1 {
   margin: 0;
   color: #333;
-  font-size: 2rem;
+  font-size: 28px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.filtros-header {
+  display: flex;
+  gap: 15px;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.select-group-filtro {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.select-group-filtro .filtro-label {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.select-group-filtro select {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 15px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  min-height: 42px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  min-width: 0;
+}
+
+.select-group-filtro select:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.select-group-filtro select:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.filtro-valor-unico {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f9f9f9;
+  min-height: 42px;
+}
+
+.filtro-valor-unico .filtro-label {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filtro-valor-unico .filtro-valor {
+  color: #333;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -50,8 +130,41 @@
     padding: 12px;
   }
 
+  .rankings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .rankings-header h1 {
     font-size: 1.5rem;
+  }
+
+  .filtros-header {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .select-group-filtro {
+    min-width: 150px;
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .rankings-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .filtros-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .select-group-filtro {
+    min-width: 100%;
+    max-width: 100%;
   }
 }
 

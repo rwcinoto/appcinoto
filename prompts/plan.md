@@ -754,13 +754,13 @@ contas/
 - Lista de conjuntos do usuário
 - Botão "Criar conjunto"
 - Para cada conjunto:
-  - Nome, quantidade de membros
+  - Nome, quantidade de elementos
   - Botões: Ver detalhes, Editar (se dono), Excluir (se dono)
 - Modal de criação/edição de conjunto
 - Página de detalhes do conjunto:
-  - Lista de membros com tipos
-  - Botão adicionar membro (dono/admin)
-  - Gerenciar tipos de membros (dono apenas)
+  - Lista de elementos com tipos
+  - Botão adicionar elemento (dono/admin)
+  - Gerenciar tipos de elementos (dono apenas)
 
 #### 4.3.8 Página: Perfil
 
@@ -1147,7 +1147,7 @@ REACT_APP_API_URL=https://api.seudominio.com
 
 - [ ] CRUD de conjuntos
 - [ ] Sistema de convites
-- [ ] Gerenciamento de membros
+- [ ] Gerenciamento de elementos
 - [ ] Criar tela de conjuntos
 - [ ] Implementar notificações de convites
 

@@ -26,7 +26,7 @@ const validarResposta = [
   body("resposta")
     .notEmpty()
     .withMessage("Resposta é obrigatória"),
-  // resposta pode ser string (para romano/binário) ou number (para arábico)
+  // resposta pode ser string (para romano/binário) ou number (para natural)
   // A validação específica será feita no controller conforme o sistema
 ];
 

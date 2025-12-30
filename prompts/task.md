@@ -4156,14 +4156,14 @@ module.exports = new UsuarioController();
 1. **listar**:
 
    - Listar conjuntos do usuário logado (onde ele participa com status 'aceito')
-   - Incluir quantidade de membros
+   - Incluir quantidade de elementos
    - Retornar apenas conjuntos ativos
 
 2. **obter**:
 
    - Obter conjunto por ID
    - Verificar se usuário tem acesso (participa do conjunto)
-   - Incluir lista de membros com tipos
+   - Incluir lista de elementos com tipos
 
 3. **criar**:
 
@@ -4362,7 +4362,7 @@ module.exports = new UsuarioController();
 **Funcionalidades**:
 
 - Listar conjuntos do usuário logado
-- Mostrar para cada conjunto: nome, quantidade de membros
+- Mostrar para cada conjunto: nome, quantidade de elementos
 - Botão "Criar conjunto"
 - Para cada conjunto:
   - Botão "Ver detalhes"
@@ -4388,21 +4388,21 @@ module.exports = new UsuarioController();
 
 ### Tarefa 7.7: Criar página de detalhes do conjunto
 
-**Objetivo**: Criar página para visualizar e gerenciar membros de um conjunto.
+**Objetivo**: Criar página para visualizar e gerenciar elementos de um conjunto.
 
 **Arquivo a criar**: `frontend/src/pages/DetalhesConjunto.jsx`
 
 **Funcionalidades**:
 
-- Mostrar informações do conjunto (nome, quantidade de membros)
-- Lista de membros com:
+- Mostrar informações do conjunto (nome, quantidade de elementos)
+- Lista de elementos com:
   - Nome, email
   - Tipo (dono, admin, comum) - badge visual
   - Status (aceito, pendente, rejeitado)
   - Botões de ação conforme permissões
-- Botão "Adicionar membro" (dono/admin apenas)
-- Modal para adicionar membro (digitar email)
-- Para cada membro:
+- Botão "Adicionar elemento" (dono/admin apenas)
+- Modal para adicionar elemento (digitar email)
+- Para cada elemento:
   - Botão "Tornar admin" (dono apenas, se for comum)
   - Botão "Remover" (dono/admin apenas, exceto dono do conjunto)
 - Mostrar mensagem se usuário não tem permissão
@@ -4415,7 +4415,7 @@ module.exports = new UsuarioController();
 
 **Arquivo a editar**: `frontend/src/routes.js` - Adicionar rota `/conjuntos/:id`
 
-**Validação**: Testar gerenciamento de membros e verificar permissões.
+**Validação**: Testar gerenciamento de elementos e verificar permissões.
 
 **Próximo passo**: Tarefa 7.8
 

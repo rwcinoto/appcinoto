@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Service para conversão entre sistemas numéricos (arábico, romano, binário)
+ * Service para conversão entre sistemas numéricos (natural, romano, binário)
  */
 class ConversaoService {
   /**
@@ -113,8 +113,8 @@ class ConversaoService {
   /**
    * Formatar número conforme sistema solicitado
    * @param {number} numero - Número decimal
-   * @param {string} sistema - Sistema numérico: 'arabico', 'romano' ou 'binario'
-   * @returns {string|number} Número formatado (string para romano/binário, number para arábico)
+   * @param {string} sistema - Sistema numérico: 'natural', 'romano' ou 'binario'
+   * @returns {string|number} Número formatado (string para romano/binário, number para natural)
    * @throws {Error} Se o sistema for inválido ou o número estiver fora dos limites
    */
   formatarNumero(numero, sistema) {
@@ -123,7 +123,7 @@ class ConversaoService {
     }
 
     switch (sistema) {
-      case "arabico":
+      case "natural":
         return numero;
 
       case "romano":
@@ -134,7 +134,7 @@ class ConversaoService {
 
       default:
         throw new Error(
-          `Sistema inválido: ${sistema}. Use 'arabico', 'romano' ou 'binario'`
+          `Sistema inválido: ${sistema}. Use 'natural', 'romano' ou 'binario'`
         );
     }
   }

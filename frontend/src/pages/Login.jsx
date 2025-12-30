@@ -32,7 +32,9 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>numix</h1>
+        <div className="login-logo">
+          <img src="/logoLargo.png" alt="numix" />
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -68,6 +70,14 @@ const Login = () => {
             {carregando ? "Entrando..." : "Entrar"}
           </button>
         </form>
+        <div className="login-texto-motivacional">
+          <p>
+            Faça cálculos de cabeça mais rápido.
+          </p>
+          <p>
+            Pratique sempre e desenvolva sua agilidade mental.
+          </p>
+        </div>
       </div>
     </div>
   );

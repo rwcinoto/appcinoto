@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import LinhaRanking from "./LinhaRanking";
 import "./TabelaRanking.css";
 
-const TabelaRanking = ({ ranking, posicaoUsuario }) => {
+const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
   const { usuario } = useAuth();
   if (!ranking || ranking.length === 0) {
     return (
@@ -25,12 +25,16 @@ const TabelaRanking = ({ ranking, posicaoUsuario }) => {
               <th className="coluna-posicao-header">Posição</th>
               <th className="coluna-nome-header">Nome</th>
               <th className="coluna-pontuacao-header">Pontuação</th>
-              <th className="coluna-data-header">Data do recorde</th>
+              <th className="coluna-data-header">Data</th>
             </tr>
           </thead>
           <tbody>
             {ranking.map((item) => (
-              <LinhaRanking key={`${item.id_usuario}-${item.posicao}`} item={item} />
+              <LinhaRanking 
+                key={`${item.id_usuario}-${item.posicao}`} 
+                item={item}
+                tempoLimite={tempoLimite}
+              />
             ))}
           </tbody>
         </table>
@@ -40,6 +44,22 @@ const TabelaRanking = ({ ranking, posicaoUsuario }) => {
       <div className="tabela-ranking-mobile">
         {ranking.map((item) => {
           const eUsuarioLogado = usuario && item.id_usuario === usuario.id;
+          
+          // Calcular tempo médio por conta
+          const calcularTempoMedioPorConta = () => {
+            const totalAcertos = item.total || 0;
+            const tempo = tempoLimite || 0;
+
+            if (totalAcertos === 0 || tempo === 0) {
+              return null;
+            }
+
+            const tempoMedio = tempo / totalAcertos;
+            return tempoMedio.toFixed(1).replace(".", ",");
+          };
+
+          const tempoMedioFormatado = calcularTempoMedioPorConta();
+          
           return (
             <div key={`${item.id_usuario}-${item.posicao}`} className="card-ranking-mobile">
               <div className="card-ranking-header-mobile">
@@ -51,7 +71,14 @@ const TabelaRanking = ({ ranking, posicaoUsuario }) => {
                   )}
                   <span className="numero-posicao-mobile">#{item.posicao}</span>
                 </div>
-                <div className="card-ranking-pontuacao-mobile">{item.total}</div>
+                <div className="card-ranking-pontuacao-mobile">
+                  {item.total}
+                  {tempoMedioFormatado && (
+                    <span className="card-ranking-tempo-medio-mobile">
+                      {" "}({tempoMedioFormatado} seg/conta)
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="card-ranking-nome-data-mobile">
                 <div className="card-ranking-nome-mobile">

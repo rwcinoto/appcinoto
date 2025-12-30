@@ -122,6 +122,21 @@ router.post(
   usuarioConjuntoController.rejeitarConvite.bind(usuarioConjuntoController)
 );
 
+router.post(
+  "/:conjunto_id/sair",
+  authMiddleware,
+  validarConjuntoId,
+  usuarioConjuntoController.sairConjunto.bind(usuarioConjuntoController)
+);
+
+router.post(
+  "/:conjunto_id/usuarios/:usuario_id/reenviar",
+  authMiddleware,
+  validarConjuntoId,
+  validarUsuarioId,
+  usuarioConjuntoController.reenviarConvite.bind(usuarioConjuntoController)
+);
+
 router.get(
   "/:id",
   authMiddleware,

@@ -117,6 +117,15 @@
   background: #1976d2;
 }
 
+.btn-sair {
+  background: #f44336;
+  color: white;
+}
+
+.btn-sair:hover {
+  background: #d32f2f;
+}
+
 .btn-editar {
   background: #ff9800;
   color: white;

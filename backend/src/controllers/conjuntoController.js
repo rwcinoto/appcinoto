@@ -8,7 +8,7 @@ class ConjuntoController {
   /**
    * Listar conjuntos do usuário logado
    * Retorna apenas conjuntos onde o usuário participa com status 'aceito'
-   * Inclui quantidade de membros
+   * Inclui quantidade de elementos
    * Retorna apenas conjuntos ativos
    */
   async listar(req, res) {
@@ -38,12 +38,12 @@ class ConjuntoController {
         ],
       });
 
-      // Preparar resposta com quantidade de membros
+      // Preparar resposta com quantidade de elementos
       const conjuntos = await Promise.all(
         usuariosConjuntos.map(async (uc) => {
           const conjunto = uc.conjunto;
 
-          // Contar membros com status 'aceito'
+          // Contar elementos com status 'aceito'
           const quantidadeMembros = await UsuarioConjunto.count({
             where: {
               id_conjunto: conjunto.id,
@@ -78,7 +78,7 @@ class ConjuntoController {
   /**
    * Obter conjunto por ID
    * Verifica se usuário tem acesso (participa do conjunto)
-   * Inclui lista de membros com tipos
+   * Inclui lista de elementos com tipos
    */
   async obter(req, res) {
     try {
@@ -116,12 +116,20 @@ class ConjuntoController {
         });
       }
 
-      // Buscar lista de todos os membros (incluindo pendentes e rejeitados)
-      // Para dono/admin poderem ver convites pendentes
+      // Buscar lista de elementos
+      // Se usuário for do tipo 'comum', mostrar apenas elementos com status 'aceito'
+      // Se for dono/admin, mostrar todos (incluindo pendentes e rejeitados)
+      const whereClause = {
+        id_conjunto: id,
+      };
+
+      // Se o usuário for do tipo 'comum', filtrar apenas aceitos
+      if (usuarioConjunto.tipo === "comum") {
+        whereClause.status = "aceito";
+      }
+
       const membros = await UsuarioConjunto.findAll({
-        where: {
-          id_conjunto: id,
-        },
+        where: whereClause,
         include: [
           {
             model: Usuario,
@@ -284,7 +292,7 @@ class ConjuntoController {
         atualizado_em: new Date(),
       });
 
-      // Retornar conjunto criado com quantidade de membros
+      // Retornar conjunto criado com quantidade de elementos
       const quantidadeMembros = 1; // Apenas o criador
 
       return res.status(201).json({

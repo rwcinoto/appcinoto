@@ -8,12 +8,92 @@
 
 .novo-treino-header {
   margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .novo-treino-header h1 {
   margin: 0;
   color: #333;
   font-size: 28px;
+  flex: 0 0 auto;
+}
+
+.filtros-header {
+  display: flex;
+  gap: 15px;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.select-group-filtro {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.select-group-filtro .filtro-label {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.select-group-filtro select {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 15px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  min-height: 42px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  min-width: 0;
+}
+
+.select-group-filtro select:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.select-group-filtro select:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.filtro-valor-unico {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f9f9f9;
+  min-height: 42px;
+}
+
+.filtro-valor-unico .filtro-label {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filtro-valor-unico .filtro-valor {
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .novo-treino-content {
@@ -53,22 +133,22 @@
 
 .cards-operacoes {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
 }
 
 .card-operacao {
   background: white;
   border: 2px solid;
   border-radius: 8px;
-  padding: 20px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.3s;
   text-align: center;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  min-height: 100px;
+  min-height: 90px;
 }
 
 .card-operacao:hover {
@@ -157,23 +237,23 @@
 }
 
 .card-operacao h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   color: #212121;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .card-operacao .tipo-operacao {
-  margin: 8px 0;
+  margin: 6px 0;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .card-operacao .descricao {
-  margin: 8px 0 0 0;
+  margin: 6px 0 0 0;
   color: #666;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .select-group {
@@ -265,9 +345,35 @@
     padding: 15px 20px;
   }
 
+  .novo-treino-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .novo-treino-header h1 {
+    width: 100%;
+  }
+
+  .filtros-header {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .select-group-filtro {
+    width: 100%;
+    max-width: 100%;
+    min-width: unset;
+  }
+
+  .filtro-valor-unico {
+    width: 100%;
+  }
+
   .cards-operacoes {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .select-group {
@@ -289,7 +395,23 @@
 
   .card-operacao {
     min-height: 80px;
-    padding: 20px 16px;
+    padding: 12px;
+  }
+
+  .card-operacao h3 {
+    font-size: 15px;
+    margin: 0 0 4px 0;
+  }
+
+  .card-operacao .tipo-operacao {
+    font-size: 12px;
+    margin: 4px 0;
+  }
+
+  .card-operacao .descricao {
+    font-size: 12px;
+    margin: 4px 0 0 0;
+    line-height: 1.3;
   }
 
   .form-actions {

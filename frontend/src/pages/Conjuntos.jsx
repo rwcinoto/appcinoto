@@ -100,8 +100,28 @@ const Conjuntos = () => {
   const handleMembroAdicionado = () => {
     handleModalAdicionarMembroFechar();
     carregarConjuntos();
-    // Recarregar convites pendentes após adicionar membro (pode ter criado um novo convite)
+    // Recarregar convites pendentes após adicionar elemento (pode ter criado um novo convite)
     carregarConvitesPendentes();
+  };
+
+  const handleSairConjunto = async (conjuntoId) => {
+    if (
+      !window.confirm(
+        "Deseja realmente sair deste conjunto? Você não aparecerá mais nos rankings deste conjunto."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await api.post(`/conjuntos/${conjuntoId}/sair`);
+      carregarConjuntos();
+    } catch (error) {
+      const mensagemErro =
+        error.response?.data?.message || "Erro ao sair do conjunto";
+      alert(mensagemErro);
+      console.error("Erro ao sair do conjunto:", error);
+    }
   };
 
   if (!usuario) {
@@ -139,6 +159,7 @@ const Conjuntos = () => {
         onEditar={handleEditarConjunto}
         onExcluir={handleExcluirConjunto}
         onAdicionarMembro={handleAdicionarMembro}
+        onSair={handleSairConjunto}
         loading={loading}
       />
 

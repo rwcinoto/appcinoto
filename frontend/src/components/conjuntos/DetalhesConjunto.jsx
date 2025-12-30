@@ -39,7 +39,7 @@ const DetalhesConjunto = ({
           <h1>{conjunto.nome}</h1>
           <div className="detalhes-meta">
             <span className="badge-membros">
-              👥 {conjunto.membros?.length || 0} membro
+              👥 {conjunto.membros?.length || 0} elemento
               {(conjunto.membros?.length || 0) !== 1 ? "s" : ""}
             </span>
             {meuTipo === "dono" && (
@@ -52,7 +52,7 @@ const DetalhesConjunto = ({
         </div>
         {podeGerenciar && (
           <button className="btn-adicionar" onClick={onAdicionarMembro}>
-            + Adicionar membro
+            + Adicionar elemento
           </button>
         )}
       </div>

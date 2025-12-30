@@ -69,7 +69,7 @@ const ListaContas = ({
 
     try {
       // Formatar resultado esperado conforme sistema
-      if (sistema === "arabico") {
+      if (sistema === "natural") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         const respostaNumero = parseInt(respostaDigitada.trim(), 10);
         if (isNaN(respostaNumero)) return false;
@@ -101,7 +101,7 @@ const ListaContas = ({
     // Filtrar entrada conforme o sistema
     let valorFiltrado = novoValor;
 
-    if (sistema === "arabico") {
+    if (sistema === "natural") {
       valorFiltrado = novoValor.replace(/[^0-9]/g, "");
     } else if (sistema === "romano") {
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
@@ -117,7 +117,7 @@ const ListaContas = ({
     let respostaEsperadaFormatada;
 
     try {
-      if (sistema === "arabico") {
+      if (sistema === "natural") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         const tamanhoEsperado = respostaEsperadaFormatada.length;
         const respostaNormalizada = valorFiltrado.trim();

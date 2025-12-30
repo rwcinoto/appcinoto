@@ -56,35 +56,6 @@ const FiltrosRecordes = ({ onFiltrar, totalRecordes }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limiteSelecionado, sistemaSelecionado, loading]);
 
-  const formatarTempo = (segundos) => {
-    if (segundos < 60) {
-      return `${segundos}s`;
-    } else if (segundos < 3600) {
-      const minutos = Math.floor(segundos / 60);
-      const segundosRestantes = segundos % 60;
-      return segundosRestantes > 0
-        ? `${minutos}min ${segundosRestantes}s`
-        : `${minutos}min`;
-    } else {
-      const horas = Math.floor(segundos / 3600);
-      const minutos = Math.floor((segundos % 3600) / 60);
-      const segundosRestantes = segundos % 60;
-      let resultado = `${horas}h`;
-      if (minutos > 0) resultado += ` ${minutos}min`;
-      if (segundosRestantes > 0) resultado += ` ${segundosRestantes}s`;
-      return resultado;
-    }
-  };
-
-  const formatarTipoSistema = (tipo) => {
-    const tipos = {
-      arabico: "Arábico",
-      romano: "Romano",
-      binario: "Binário",
-    };
-    return tipos[tipo] || tipo;
-  };
-
   if (loading) {
     return (
       <div className="filtros-recordes loading">Carregando filtros...</div>
@@ -107,7 +78,7 @@ const FiltrosRecordes = ({ onFiltrar, totalRecordes }) => {
 
       <div className="filtros-campos">
         <div className="campo-filtro">
-          <label htmlFor="limite">Limite de tempo</label>
+          <label htmlFor="limite">Limite</label>
           <select
             id="limite"
             value={limiteSelecionado}
@@ -115,14 +86,14 @@ const FiltrosRecordes = ({ onFiltrar, totalRecordes }) => {
           >
             {limites.map((limite) => (
               <option key={limite.id} value={limite.id}>
-                {limite.descricao} ({formatarTempo(limite.tempo)})
+                {limite.descricao}
               </option>
             ))}
           </select>
         </div>
 
         <div className="campo-filtro">
-          <label htmlFor="sistema">Sistema numérico</label>
+          <label htmlFor="sistema">Sistema</label>
           <select
             id="sistema"
             value={sistemaSelecionado}
@@ -130,8 +101,7 @@ const FiltrosRecordes = ({ onFiltrar, totalRecordes }) => {
           >
             {sistemas.map((sistema) => (
               <option key={sistema.id} value={sistema.id}>
-                {formatarTipoSistema(sistema.tipo)}
-                {sistema.descricao ? ` - ${sistema.descricao}` : ""}
+                {sistema.descricao}
               </option>
             ))}
           </select>

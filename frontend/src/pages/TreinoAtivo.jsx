@@ -35,7 +35,7 @@ const TreinoAtivo = () => {
   const totalAcertosRef = useRef(0); // Ref para rastrear acertos de forma mais confiável
   const [tempoLimite, setTempoLimite] = useState(0);
   const [inicioTreino, setInicioTreino] = useState(null); // Timestamp do início do treino
-  const [sistemaTipo, setSistemaTipo] = useState("arabico");
+  const [sistemaTipo, setSistemaTipo] = useState("natural");
   const [processando, setProcessando] = useState(false); // Flag para prevenir múltiplas chamadas simultâneas
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const [resultado, setResultado] = useState(null);
@@ -286,7 +286,7 @@ const TreinoAtivo = () => {
                 const currentValue = inputAtual.value || "";
                 // Filtrar entrada conforme o sistema
                 let valorFiltrado = currentValue + numero;
-                if (sistemaTipo === "arabico") {
+                if (sistemaTipo === "natural") {
                   valorFiltrado = (currentValue + numero).replace(/[^0-9]/g, "");
                 } else if (sistemaTipo === "romano") {
                   valorFiltrado = (currentValue + numero)

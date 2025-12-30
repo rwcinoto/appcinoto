@@ -16,23 +16,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 24px;
 }
 
-.info-usuario-linha {
+.info-usuario-coluna {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
-.info-usuario-parabens {
+.info-usuario-coluna.info-usuario-pontuacao {
+  flex: 0 0 auto;
+}
+
+.info-usuario-coluna.info-usuario-posicao {
+  flex: 1;
+  justify-content: center;
+}
+
+.info-usuario-coluna.info-usuario-parabens {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.info-usuario-coluna.info-usuario-parabens .info-usuario-parabens-texto {
+  text-align: right;
+}
+
+.info-usuario-parabens-texto {
   color: #333;
   font-size: 0.85rem;
   font-weight: 500;
   white-space: nowrap;
-  margin-left: auto;
 }
 
 .info-usuario-label {
@@ -104,17 +122,28 @@
   .info-usuario-conteudo {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 16px;
   }
 
-  .info-usuario-linha {
+  .info-usuario-coluna {
     width: 100%;
+    flex: none;
   }
 
-  .info-usuario-parabens {
-    margin-left: 0;
-    width: 100%;
+  .info-usuario-coluna.info-usuario-posicao {
+    justify-content: flex-start;
+  }
+
+  .info-usuario-coluna.info-usuario-parabens {
+    justify-content: flex-start;
+  }
+
+  .info-usuario-coluna.info-usuario-parabens .info-usuario-parabens-texto {
     text-align: left;
+  }
+
+  .info-usuario-parabens-texto {
+    white-space: normal;
   }
 }
 
