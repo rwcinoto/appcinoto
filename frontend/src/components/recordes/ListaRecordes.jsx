@@ -1,15 +1,11 @@
 import React from "react";
 import CardRecorde from "./CardRecorde";
+import Loading from "../common/Loading";
 import "./ListaRecordes.css";
 
 const ListaRecordes = ({ recordes, loading }) => {
   if (loading) {
-    return (
-      <div className="lista-recordes-loading">
-        <div className="spinner"></div>
-        <p>Carregando recordes...</p>
-      </div>
-    );
+    return <Loading text="Carregando recordes..." />;
   }
 
   if (!recordes || recordes.length === 0) {

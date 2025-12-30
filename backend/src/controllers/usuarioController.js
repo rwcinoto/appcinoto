@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const { AppError, formatValidationErrors } = require("../utils/errors");
 const { Usuario, Plano } = require("../models");
 const { Op } = require("sequelize");
 
@@ -102,11 +103,15 @@ class UsuarioController {
     }
   }
 
-  async criar(req, res) {
+  async criar(req, res, next) {
     try {
       const erros = validationResult(req);
       if (!erros.isEmpty()) {
-        return res.status(400).json({ errors: erros.array() });
+        const errorResponse = formatValidationErrors(erros.array());
+        return res.status(errorResponse.statusCode).json({
+          message: errorResponse.message,
+          errors: errorResponse.errors,
+        });
       }
 
       const { email, senha, nome, tipo, id_plano, ativo } = req.body;
@@ -145,11 +150,7 @@ class UsuarioController {
 
       return res.status(201).json(usuarioCriado);
     } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-      return res.status(500).json({
-        message: "Erro ao criar usuário",
-        error: error.message,
-      });
+      next(error);
     }
   }
 
@@ -221,11 +222,7 @@ class UsuarioController {
 
       return res.json(usuarioAtualizado);
     } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
-      return res.status(500).json({
-        message: "Erro ao atualizar usuário",
-        error: error.message,
-      });
+      next(error);
     }
   }
 

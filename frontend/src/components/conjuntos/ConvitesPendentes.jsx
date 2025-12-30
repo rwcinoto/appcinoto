@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNotifications } from "../../context/NotificationContext";
+import { useToast } from "../../context/ToastContext";
 import "./ConvitesPendentes.css";
 
 const ConvitesPendentes = ({ onConviteAceito }) => {
@@ -9,13 +10,13 @@ const ConvitesPendentes = ({ onConviteAceito }) => {
     erro,
     aceitarConvite,
     rejeitarConvite,
-    carregarConvitesPendentes,
   } = useNotifications();
-
+  const { showSuccess, showInfo } = useToast();
 
   const handleAceitar = async (convite) => {
     try {
       await aceitarConvite(convite.id_conjunto, convite.id_usuario);
+      showSuccess("Convite aceito com sucesso!");
       if (onConviteAceito) {
         onConviteAceito();
       }
@@ -29,6 +30,7 @@ const ConvitesPendentes = ({ onConviteAceito }) => {
   const handleRejeitar = async (convite) => {
     try {
       await rejeitarConvite(convite.id_conjunto, convite.id_usuario);
+      showInfo("Convite rejeitado");
     } catch (error) {
       const mensagemErro =
         error.response?.data?.message || "Erro ao rejeitar convite";

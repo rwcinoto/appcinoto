@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
 
@@ -33,13 +34,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// Middleware de tratamento de erros
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    message: err.message || "Erro interno do servidor",
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
-  });
-});
+// Middleware de tratamento de erros (deve ser o último)
+app.use(errorHandler);
 
 module.exports = app;

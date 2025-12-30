@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import FiltrosRanking from "../components/rankings/FiltrosRanking";
 import InfoUsuario from "../components/rankings/InfoUsuario";
 import TabelaRanking from "../components/rankings/TabelaRanking";
+import Loading from "../components/common/Loading";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Rankings.css";
 
@@ -45,11 +48,8 @@ const Rankings = () => {
       setPosicaoUsuario(response.data.posicaoUsuario);
       setTotalParticipantes(response.data.totalParticipantes || 0);
     } catch (error) {
-      console.error("Erro ao carregar ranking:", error);
-      const mensagemErro =
-        error.response?.data?.message ||
-        "Erro ao carregar ranking. Tente novamente.";
-      setErro(mensagemErro);
+      logError("Rankings - carregarRanking", error);
+      setErro(getErrorMessage(error));
       setRanking([]);
       setPosicaoUsuario(null);
       setTotalParticipantes(0);
@@ -71,7 +71,7 @@ const Rankings = () => {
   if (!usuario) {
     return (
       <div className="rankings-container">
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando..." />
       </div>
     );
   }
@@ -82,12 +82,19 @@ const Rankings = () => {
         <h1>Rankings</h1>
       </div>
 
-      {erro && <div className="mensagem-erro">{erro}</div>}
+      {erro && (
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+      )}
 
       <FiltrosRanking onFiltrar={handleFiltrar} />
 
       {loading ? (
-        <div className="loading">Carregando ranking...</div>
+        <Loading text="Carregando ranking..." />
       ) : filtros && filtros.operacao_id && filtros.limite_id && filtros.sistema_id ? (
         <>
           <InfoUsuario

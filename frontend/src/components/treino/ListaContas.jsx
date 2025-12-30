@@ -316,6 +316,7 @@ const ListaContas = ({
                     placeholder="?"
                     autoComplete="off"
                     defaultValue=""
+                    aria-label={`Resultado da conta ${index + 1}`}
                   />
                 </div>
               </div>

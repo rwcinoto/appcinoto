@@ -1,8 +1,10 @@
 import React from "react";
+import { useAuth } from "../../context/AuthContext";
 import LinhaRanking from "./LinhaRanking";
 import "./TabelaRanking.css";
 
 const TabelaRanking = ({ ranking, posicaoUsuario }) => {
+  const { usuario } = useAuth();
   if (!ranking || ranking.length === 0) {
     return (
       <div className="tabela-ranking sem-dados">
@@ -36,29 +38,39 @@ const TabelaRanking = ({ ranking, posicaoUsuario }) => {
 
       {/* Versão mobile (cards) */}
       <div className="tabela-ranking-mobile">
-        {ranking.map((item) => (
-          <div key={`${item.id_usuario}-${item.posicao}`} className="card-ranking-mobile">
-            <div className="card-ranking-header-mobile">
-              <div className="card-ranking-posicao-mobile">
-                {item.posicao <= 3 && (
-                  <span className="emoji-posicao-mobile">
-                    {item.posicao === 1 ? "🥇" : item.posicao === 2 ? "🥈" : "🥉"}
-                  </span>
-                )}
-                <span className="numero-posicao-mobile">#{item.posicao}</span>
+        {ranking.map((item) => {
+          const eUsuarioLogado = usuario && item.id_usuario === usuario.id;
+          return (
+            <div key={`${item.id_usuario}-${item.posicao}`} className="card-ranking-mobile">
+              <div className="card-ranking-header-mobile">
+                <div className="card-ranking-posicao-mobile">
+                  {item.posicao <= 3 && (
+                    <span className="emoji-posicao-mobile">
+                      {item.posicao === 1 ? "🥇" : item.posicao === 2 ? "🥈" : "🥉"}
+                    </span>
+                  )}
+                  <span className="numero-posicao-mobile">#{item.posicao}</span>
+                </div>
+                <div className="card-ranking-pontuacao-mobile">{item.total}</div>
               </div>
-              <div className="card-ranking-pontuacao-mobile">{item.total}</div>
+              <div className="card-ranking-nome-data-mobile">
+                <div className="card-ranking-nome-mobile">
+                  <span>{item.nome}</span>
+                  {eUsuarioLogado && (
+                    <span className="badge-usuario-logado badge-usuario-logado-mobile">Você</span>
+                  )}
+                </div>
+                <div className="card-ranking-data-mobile">
+                  {new Date(item.data_recorde).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </div>
+              </div>
             </div>
-            <div className="card-ranking-nome-mobile">{item.nome}</div>
-            <div className="card-ranking-data-mobile">
-              {new Date(item.data_recorde).toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "2-digit",
-              })}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

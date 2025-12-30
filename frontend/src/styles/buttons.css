@@ -1,0 +1,300 @@
+/**
+ * Estilos de botões - Tema do cubo mágico
+ * 
+ * Classes padrão para botões primários, secundários, de perigo e desabilitados
+ */
+
+/* Botão primário - Azul */
+.btn-primary,
+button.btn-primary,
+[type="submit"].btn-primary {
+  background: #2196F3;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1976D2;
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: #1565C0;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+}
+
+/* Botão secundário - Laranja */
+.btn-secondary,
+button.btn-secondary {
+  background: #FF9800;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #FB8C00;
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  background: #F57C00;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
+}
+
+.btn-secondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.3);
+}
+
+/* Botão secundário - Branco/Cinza (cancelar) */
+.btn-cancel,
+button.btn-cancel,
+[type="button"].btn-cancel {
+  background: #F5F5F5;
+  color: #212121;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #EEEEEE;
+  border-color: #BDBDBD;
+}
+
+.btn-cancel:active:not(:disabled) {
+  background: #E0E0E0;
+}
+
+.btn-cancel:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Botão de perigo - Vermelho */
+.btn-danger,
+button.btn-danger {
+  background: #F44336;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #E53935;
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-danger:active:not(:disabled) {
+  background: #D32F2F;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
+}
+
+.btn-danger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.3);
+}
+
+/* Botões desabilitados */
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-cancel:disabled,
+.btn-danger:disabled,
+button:disabled {
+  background: #BDBDBD !important;
+  color: #757575 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: #E0E0E0 !important;
+}
+
+/* Classes auxiliares para botões em formulários */
+.form-actions button[type="submit"] {
+  background: #2196F3;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background: #1976D2;
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+  transform: translateY(-1px);
+}
+
+.form-actions button[type="submit"]:active:not(:disabled) {
+  background: #1565C0;
+  transform: translateY(0);
+}
+
+.form-actions button[type="button"] {
+  background: #F5F5F5;
+  color: #212121;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.form-actions button[type="button"]:hover:not(:disabled) {
+  background: #EEEEEE;
+  border-color: #BDBDBD;
+}
+
+.form-actions button:disabled {
+  background: #BDBDBD !important;
+  color: #757575 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: #E0E0E0 !important;
+}
+
+/* Botões específicos - manter compatibilidade */
+.btn-salvar,
+.btn-salvar[type="submit"] {
+  background: #2196F3;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-salvar:hover:not(:disabled) {
+  background: #1976D2;
+}
+
+.btn-salvar:active:not(:disabled) {
+  background: #1565C0;
+}
+
+.btn-cancelar,
+.btn-cancelar[type="button"] {
+  background: #F5F5F5;
+  color: #212121;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Responsividade: garantir tamanho mínimo no mobile */
+@media (max-width: 768px) {
+  .btn-primary,
+  button.btn-primary,
+  [type="submit"].btn-primary,
+  .btn-secondary,
+  button.btn-secondary,
+  .btn-cancel,
+  button.btn-cancel,
+  [type="button"].btn-cancel,
+  .btn-danger,
+  button.btn-danger,
+  .form-actions button[type="submit"],
+  .form-actions button[type="button"],
+  .btn-salvar,
+  .btn-cancelar {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background: #EEEEEE;
+  border-color: #BDBDBD;
+}
+
+.btn-salvar:disabled,
+.btn-cancelar:disabled {
+  background: #BDBDBD !important;
+  color: #757575 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+

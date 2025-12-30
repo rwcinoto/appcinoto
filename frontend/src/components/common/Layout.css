@@ -1,22 +1,97 @@
 .layout-container {
   display: flex;
   min-height: 100vh;
+  position: relative;
 }
 
 .layout-main {
   flex: 1;
   margin-left: 250px;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #F5F5F5;
+  transition: margin-left 0.3s ease-in-out;
 }
 
-/* Responsividade - será melhorado na FASE 8 */
+/* Menu hamburger */
+.hamburger-menu {
+  display: none;
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 1001;
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.hamburger-menu:hover {
+  background: #F5F5F5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.hamburger-menu:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hamburger-menu span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: #2196F3;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-menu:hover span {
+  background: #1976D2;
+}
+
+/* Overlay para mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsividade - Mobile */
 @media (max-width: 768px) {
-  .sidebar {
-    width: 200px;
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
   }
 
   .layout-main {
-    margin-left: 200px;
+    margin-left: 0;
   }
 }

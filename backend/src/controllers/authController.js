@@ -1,12 +1,17 @@
 const { validationResult } = require("express-validator");
 const authService = require("../services/authService");
+const { AppError, formatValidationErrors } = require("../utils/errors");
 
 class AuthController {
-  async login(req, res) {
+  async login(req, res, next) {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorResponse = formatValidationErrors(errors.array());
+        return res.status(errorResponse.statusCode).json({
+          message: errorResponse.message,
+          errors: errorResponse.errors,
+        });
       }
 
       const { email, senha } = req.body;
@@ -14,11 +19,11 @@ class AuthController {
 
       return res.json(resultado);
     } catch (error) {
-      return res.status(401).json({ message: error.message });
+      next(error);
     }
   }
 
-  async me(req, res) {
+  async me(req, res, next) {
     try {
       const usuario = await req.usuario.reload({
         include: [{ association: "plano" }],
@@ -33,7 +38,7 @@ class AuthController {
         plano: usuario.plano,
       });
     } catch (error) {
-      return res.status(500).json({ message: "Erro ao buscar usuário" });
+      next(error);
     }
   }
 }

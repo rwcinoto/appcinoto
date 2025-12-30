@@ -97,7 +97,7 @@ const FormPlano = ({ plano, onSalvar, onCancelar, disabled = false }) => {
   return (
     <form onSubmit={handleSubmit} className="form-plano">
       <div className="form-group">
-        <label htmlFor="nome">Nome *</label>
+        <label htmlFor="nome">Nome</label>
         <input
           type="text"
           id="nome"
@@ -123,7 +123,7 @@ const FormPlano = ({ plano, onSalvar, onCancelar, disabled = false }) => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="ordem">Ordem *</label>
+        <label htmlFor="ordem">Ordem</label>
         <input
           type="number"
           id="ordem"
@@ -138,7 +138,7 @@ const FormPlano = ({ plano, onSalvar, onCancelar, disabled = false }) => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="conjuntos_criar">Conjuntos Criar *</label>
+        <label htmlFor="conjuntos_criar">Conjuntos criar</label>
         <input
           type="number"
           id="conjuntos_criar"
@@ -153,7 +153,7 @@ const FormPlano = ({ plano, onSalvar, onCancelar, disabled = false }) => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="conjuntos_participar">Conjuntos Participar *</label>
+        <label htmlFor="conjuntos_participar">Conjuntos participar</label>
         <input
           type="number"
           id="conjuntos_participar"

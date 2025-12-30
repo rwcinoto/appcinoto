@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import ListaUsuarios from "../components/usuarios/ListaUsuarios";
 import ModalUsuario from "../components/usuarios/ModalUsuario";
+import Loading from "../components/common/Loading";
 import { useAuth } from "../context/AuthContext";
+import { debounce } from "../utils/debounce";
+import { logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Usuarios.css";
 
@@ -11,6 +14,12 @@ const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtros, setFiltros] = useState({
+    tipo: "",
+    ativo: "",
+    id_plano: "",
+    busca: "",
+  });
+  const [filtrosDebounced, setFiltrosDebounced] = useState({
     tipo: "",
     ativo: "",
     id_plano: "",
@@ -25,6 +34,14 @@ const Usuarios = () => {
   const [modalAberto, setModalAberto] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [planos, setPlanos] = useState([]);
+
+  // Debounce para busca
+  const debouncedBusca = useRef(
+    debounce((valor) => {
+      setFiltrosDebounced((prev) => ({ ...prev, busca: valor }));
+      setPaginacao((prev) => ({ ...prev, pagina: 1 }));
+    }, 300)
+  ).current;
 
   const carregarPlanos = useCallback(async () => {
     try {
@@ -43,10 +60,10 @@ const Usuarios = () => {
         limit: paginacao.limite.toString(),
       });
 
-      if (filtros.tipo) params.append("tipo", filtros.tipo);
-      if (filtros.ativo !== "") params.append("ativo", filtros.ativo);
-      if (filtros.id_plano) params.append("id_plano", filtros.id_plano);
-      if (filtros.busca) params.append("busca", filtros.busca);
+      if (filtrosDebounced.tipo) params.append("tipo", filtrosDebounced.tipo);
+      if (filtrosDebounced.ativo !== "") params.append("ativo", filtrosDebounced.ativo);
+      if (filtrosDebounced.id_plano) params.append("id_plano", filtrosDebounced.id_plano);
+      if (filtrosDebounced.busca) params.append("busca", filtrosDebounced.busca);
 
       const response = await api.get(`/usuarios?${params.toString()}`);
       setUsuarios(response.data.usuarios);
@@ -56,11 +73,11 @@ const Usuarios = () => {
         totalPaginas: response.data.paginacao.totalPaginas,
       }));
     } catch (error) {
-      console.error("Erro ao carregar usuários:", error);
+      logError("Usuarios - carregarUsuarios", error);
     } finally {
       setLoading(false);
     }
-  }, [paginacao.pagina, paginacao.limite, filtros]);
+  }, [paginacao.pagina, paginacao.limite, filtrosDebounced]);
 
   useEffect(() => {
     if (usuario && usuario.tipo === "admin") {
@@ -76,7 +93,14 @@ const Usuarios = () => {
 
   const handleFiltroChange = (campo, valor) => {
     setFiltros((prev) => ({ ...prev, [campo]: valor }));
-    setPaginacao((prev) => ({ ...prev, pagina: 1 }));
+    
+    // Para busca, usar debounce; para outros filtros, aplicar imediatamente
+    if (campo === "busca") {
+      debouncedBusca(valor);
+    } else {
+      setFiltrosDebounced((prev) => ({ ...prev, [campo]: valor }));
+      setPaginacao((prev) => ({ ...prev, pagina: 1 }));
+    }
   };
 
   const handlePageChange = (novaPagina) => {
@@ -178,7 +202,7 @@ const Usuarios = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando usuários..." />
       ) : (
         <>
           <ListaUsuarios

@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useNotifications } from "../../context/NotificationContext";
 import "./Sidebar.css";
 
-const Sidebar = () => {
+const Sidebar = ({ aberto = true, onFechar }) => {
   const { usuario, logout } = useAuth();
   const { quantidadeConvitesPendentes } = useNotifications();
   const location = useLocation();
@@ -93,12 +93,19 @@ const Sidebar = () => {
     return true;
   });
 
+  const handleLinkClick = () => {
+    // Fechar sidebar ao clicar em link (apenas no mobile)
+    if (onFechar && window.innerWidth < 768) {
+      onFechar();
+    }
+  };
+
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${aberto ? "aberto" : "fechado"}`} aria-label="Menu de navegação principal">
       <div className="sidebar-header">
-        <h2>numix</h2>
+        <img src="/logoLargo.png" alt="numix" className="sidebar-logo" />
       </div>
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" role="navigation" aria-label="Navegação principal">
         <ul>
           {filteredMenuItems.map((item) => (
             <li key={item.path}>
@@ -107,6 +114,7 @@ const Sidebar = () => {
                 className={`sidebar-link ${
                   isActive(item.path, item.exact) ? "active" : ""
                 }`}
+                onClick={handleLinkClick}
               >
                 <span className="sidebar-icon">{item.icon}</span>
                 <span className="sidebar-label">{item.label}</span>
@@ -125,6 +133,8 @@ const Sidebar = () => {
                   isCadastrosActive ? "active" : ""
                 }`}
                 onClick={() => setCadastrosAberto(!cadastrosAberto)}
+                aria-expanded={cadastrosAberto}
+                aria-label={`${cadastrosAberto ? "Fechar" : "Abrir"} submenu de cadastros`}
               >
                 <span className="sidebar-icon">📋</span>
                 <span className="sidebar-label">Cadastros</span>
@@ -143,6 +153,7 @@ const Sidebar = () => {
                         className={`sidebar-sublink ${
                           isActive(submenu.path) ? "active" : ""
                         }`}
+                        onClick={handleLinkClick}
                       >
                         {submenu.label}
                       </Link>
@@ -165,6 +176,7 @@ const Sidebar = () => {
             logout();
             navigate("/login");
           }}
+          aria-label="Sair da conta"
         >
           <span className="sidebar-icon">🚪</span>
           <span className="sidebar-label">Sair</span>

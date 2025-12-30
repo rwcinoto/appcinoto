@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import ListaLimites from "../components/limites/ListaLimites";
 import ModalLimite from "../components/limites/ModalLimite";
+import Loading from "../components/common/Loading";
 import { useAuth } from "../context/AuthContext";
+import { debounce } from "../utils/debounce";
+import { logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Limites.css";
 
@@ -12,9 +15,18 @@ const Limites = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
+  const [buscaDebounced, setBuscaDebounced] = useState("");
   const [filtroPlano, setFiltroPlano] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [limiteEditando, setLimiteEditando] = useState(null);
+  const [limitesTodos, setLimitesTodos] = useState([]);
+
+  // Debounce para busca
+  const debouncedBusca = useRef(
+    debounce((valor) => {
+      setBuscaDebounced(valor);
+    }, 300)
+  ).current;
 
   const carregarPlanos = useCallback(async () => {
     try {
@@ -29,27 +41,36 @@ const Limites = () => {
     setLoading(true);
     try {
       const response = await api.get("/limites");
-      let limitesData = response.data;
-
-      if (busca.trim()) {
-        limitesData = limitesData.filter((limite) =>
-          limite.descricao.toLowerCase().includes(busca.toLowerCase())
-        );
-      }
-
-      if (filtroPlano) {
-        limitesData = limitesData.filter(
-          (limite) => limite.id_plano === parseInt(filtroPlano)
-        );
-      }
-
-      setLimites(limitesData);
+      setLimitesTodos(response.data);
     } catch (error) {
-      console.error("Erro ao carregar limites:", error);
+      logError("Limites - carregarLimites", error);
     } finally {
       setLoading(false);
     }
-  }, [busca, filtroPlano]);
+  }, []);
+
+  // Aplicar filtros usando useMemo
+  const limitesFiltrados = useMemo(() => {
+    let limitesData = limitesTodos;
+
+    if (buscaDebounced.trim()) {
+      limitesData = limitesData.filter((limite) =>
+        limite.descricao.toLowerCase().includes(buscaDebounced.toLowerCase())
+      );
+    }
+
+    if (filtroPlano) {
+      limitesData = limitesData.filter(
+        (limite) => limite.id_plano === parseInt(filtroPlano)
+      );
+    }
+
+    return limitesData;
+  }, [limitesTodos, buscaDebounced, filtroPlano]);
+
+  useEffect(() => {
+    setLimites(limitesFiltrados);
+  }, [limitesFiltrados]);
 
   useEffect(() => {
     if (usuario && usuario.tipo === "admin") {
@@ -63,7 +84,9 @@ const Limites = () => {
   }
 
   const handleBuscaChange = (e) => {
-    setBusca(e.target.value);
+    const valor = e.target.value;
+    setBusca(valor);
+    debouncedBusca(valor);
   };
 
   const handleFiltroPlanoChange = (e) => {
@@ -144,7 +167,7 @@ const Limites = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando limites..." />
       ) : (
         <ListaLimites
           limites={limites}

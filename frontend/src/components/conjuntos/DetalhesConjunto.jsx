@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Loading from "../common/Loading";
 import "./DetalhesConjunto.css";
 
 const DetalhesConjunto = ({
@@ -12,7 +13,7 @@ const DetalhesConjunto = ({
   const navigate = useNavigate();
 
   if (loading) {
-    return <div className="loading">Carregando detalhes do conjunto...</div>;
+    return <Loading text="Carregando detalhes do conjunto..." />;
   }
 
   if (!conjunto) {

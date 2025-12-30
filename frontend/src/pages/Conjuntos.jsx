@@ -3,8 +3,11 @@ import ListaConjuntos from "../components/conjuntos/ListaConjuntos";
 import ModalConjunto from "../components/conjuntos/ModalConjunto";
 import ModalAdicionarMembro from "../components/conjuntos/ModalAdicionarMembro";
 import ConvitesPendentes from "../components/conjuntos/ConvitesPendentes";
+import Loading from "../components/common/Loading";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications } from "../context/NotificationContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Conjuntos.css";
 
@@ -29,11 +32,8 @@ const Conjuntos = () => {
       const response = await api.get("/conjuntos");
       setConjuntos(response.data || []);
     } catch (error) {
-      console.error("Erro ao carregar conjuntos:", error);
-      const mensagemErro =
-        error.response?.data?.message ||
-        "Erro ao carregar conjuntos. Tente novamente.";
-      setErro(mensagemErro);
+      logError("Conjuntos - carregarConjuntos", error);
+      setErro(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ const Conjuntos = () => {
   if (!usuario) {
     return (
       <div className="conjuntos-container">
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando..." />
       </div>
     );
   }
@@ -115,13 +115,20 @@ const Conjuntos = () => {
   return (
     <div className="conjuntos-container">
       <div className="conjuntos-header">
-        <h1>Meus conjuntos</h1>
+        <h1>Conjuntos</h1>
         <button className="btn-criar" onClick={handleCriarConjunto}>
           + Criar conjunto
         </button>
       </div>
 
-      {erro && <div className="mensagem-erro">{erro}</div>}
+      {erro && (
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+      )}
 
       <div className="convites-section">
         <ConvitesPendentes onConviteAceito={carregarConjuntos} />

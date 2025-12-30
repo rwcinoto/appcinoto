@@ -4,12 +4,19 @@
   border-radius: 8px;
   padding: 20px;
   transition: all 0.3s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .card-recorde:hover {
   border-color: #2196f3;
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
   transform: translateY(-2px);
+}
+
+.card-recorde:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
 }
 
 .card-recorde-header {
@@ -83,8 +90,20 @@
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .card-recorde {
+    padding: 16px;
+  }
+
   .card-recorde-info-linha {
-    grid-template-columns: 1fr;
     gap: 12px;
+    /* Mantém 3 colunas lado a lado mesmo no mobile */
+  }
+
+  .card-recorde-info-label {
+    font-size: 0.7rem;
+  }
+
+  .card-recorde-info-value {
+    font-size: 0.85rem;
   }
 }

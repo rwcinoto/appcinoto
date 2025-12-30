@@ -3,7 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import DetalhesConjunto from "../components/conjuntos/DetalhesConjunto";
 import ListaMembros from "../components/conjuntos/ListaMembros";
 import ModalAdicionarMembro from "../components/conjuntos/ModalAdicionarMembro";
+import Loading from "../components/common/Loading";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./DetalhesConjunto.css";
 
@@ -32,17 +35,12 @@ const DetalhesConjuntoPage = () => {
       setMembros(response.data.membros || []);
       setMeuTipo(response.data.meu_tipo || null);
     } catch (error) {
-      console.error("Erro ao carregar detalhes do conjunto:", error);
+      logError("DetalhesConjunto - carregarDetalhes", error);
       if (error.response?.status === 403) {
         setSemPermissao(true);
-        setErro("Você não tem permissão para ver este conjunto");
-      } else if (error.response?.status === 404) {
-        setErro("Conjunto não encontrado");
+        setErro(getErrorMessage(error));
       } else {
-        const mensagemErro =
-          error.response?.data?.message ||
-          "Erro ao carregar detalhes do conjunto. Tente novamente.";
-        setErro(mensagemErro);
+        setErro(getErrorMessage(error));
       }
     } finally {
       setLoading(false);
@@ -78,10 +76,8 @@ const DetalhesConjuntoPage = () => {
       });
       carregarDetalhes();
     } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message || "Erro ao atualizar tipo do membro";
-      alert(mensagemErro);
-      console.error("Erro ao tornar admin:", error);
+      logError("DetalhesConjunto - handleTornarAdmin", error);
+      alert(getErrorMessage(error));
     }
   };
 
@@ -98,17 +94,15 @@ const DetalhesConjuntoPage = () => {
       await api.delete(`/conjuntos/${id}/usuarios/${usuarioId}`);
       carregarDetalhes();
     } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message || "Erro ao remover membro";
-      alert(mensagemErro);
-      console.error("Erro ao remover membro:", error);
+      logError("DetalhesConjunto - handleRemoverMembro", error);
+      alert(getErrorMessage(error));
     }
   };
 
   if (!usuario) {
     return (
       <div className="detalhes-conjunto-container">
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando..." />
       </div>
     );
   }
@@ -137,7 +131,14 @@ const DetalhesConjuntoPage = () => {
         loading={loading}
       />
 
-      {erro && !loading && <div className="mensagem-erro">{erro}</div>}
+      {erro && !loading && (
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+      )}
 
       {!loading && conjunto && (
         <>

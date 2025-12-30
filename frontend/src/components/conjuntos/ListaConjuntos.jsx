@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Loading from "../common/Loading";
 import "./ListaConjuntos.css";
 
 const ListaConjuntos = ({
@@ -12,7 +13,7 @@ const ListaConjuntos = ({
   const navigate = useNavigate();
 
   if (loading) {
-    return <div className="loading">Carregando conjuntos...</div>;
+    return <Loading text="Carregando conjuntos..." />;
   }
 
   if (conjuntos.length === 0) {

@@ -81,11 +81,18 @@
   padding: 16px;
   margin-bottom: 12px;
   transition: all 0.2s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .card-ranking-mobile:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+.card-ranking-mobile:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card-ranking-header-mobile {
@@ -122,17 +129,44 @@
   font-family: "Courier New", monospace;
 }
 
+.card-ranking-nome-data-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .card-ranking-nome-mobile {
   font-weight: 500;
   color: #333;
   font-size: 1rem;
-  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.badge-usuario-logado-mobile {
+  padding: 2px 8px;
+  background: #2196F3;
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .card-ranking-data-mobile {
   font-size: 0.9rem;
   color: #666;
   font-family: "Courier New", monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Responsivo: mostrar cards no mobile, tabela no desktop */

@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from "react";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Perfil.css";
 
 const Perfil = () => {
   const { usuario, atualizarUsuario } = useAuth();
+  const { showSuccess } = useToast();
   const [formData, setFormData] = useState({
     email: "",
     nome: "",
     senha: "",
   });
   const [erro, setErro] = useState("");
-  const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
@@ -32,7 +35,6 @@ const Perfil = () => {
     }));
     // Limpar mensagens ao digitar
     setErro("");
-    setSucesso("");
   };
 
   const validarFormulario = () => {
@@ -57,7 +59,6 @@ const Perfil = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro("");
-    setSucesso("");
     setCarregando(true);
 
     if (!validarFormulario()) {
@@ -81,15 +82,12 @@ const Perfil = () => {
       // Recarregar dados do usuário para atualizar o contexto
       await atualizarUsuario();
 
-      setSucesso("Perfil atualizado com sucesso!");
+      showSuccess("Perfil atualizado com sucesso!");
       // Limpar campo de senha após sucesso
       setFormData((prev) => ({ ...prev, senha: "" }));
     } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.msg ||
-        "Erro ao atualizar perfil. Tente novamente.";
-      setErro(mensagemErro);
+      logError("Perfil - handleSubmit", error);
+      setErro(getErrorMessage(error));
     } finally {
       setCarregando(false);
     }
@@ -147,8 +145,14 @@ const Perfil = () => {
             />
           </div>
 
-          {erro && <div className="mensagem erro">{erro}</div>}
-          {sucesso && <div className="mensagem sucesso">{sucesso}</div>}
+          {erro && (
+            <ErrorMessage
+              message={erro}
+              type="error"
+              dismissible
+              onDismiss={() => setErro("")}
+            />
+          )}
 
           <button type="submit" disabled={carregando} className="btn-salvar">
             {carregando ? "Salvando..." : "Salvar alterações"}

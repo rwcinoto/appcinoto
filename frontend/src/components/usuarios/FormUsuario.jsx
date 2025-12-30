@@ -93,7 +93,7 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
   return (
     <form onSubmit={handleSubmit} className="form-usuario">
       <div className="form-group">
-        <label htmlFor="nome">Nome *</label>
+        <label htmlFor="nome">Nome</label>
         <input
           type="text"
           id="nome"
@@ -106,7 +106,7 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
       </div>
 
       <div className="form-group">
-        <label htmlFor="email">Email *</label>
+        <label htmlFor="email">Email</label>
         <input
           type="email"
           id="email"
@@ -119,7 +119,7 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
 
       <div className="form-group">
         <label htmlFor="senha">
-          Senha {usuario ? "(opcional)" : "*"}
+          Senha {usuario ? "(opcional)" : ""}
         </label>
         <input
           type="password"
@@ -133,7 +133,7 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
       </div>
 
       <div className="form-group">
-        <label htmlFor="tipo">Tipo *</label>
+        <label htmlFor="tipo">Tipo</label>
         <select
           id="tipo"
           name="tipo"
@@ -147,7 +147,7 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
       </div>
 
       <div className="form-group">
-        <label htmlFor="id_plano">Plano *</label>
+        <label htmlFor="id_plano">Plano</label>
         <select
           id="id_plano"
           name="id_plano"

@@ -7,30 +7,86 @@
 }
 
 .linha-ranking.top-3 {
-  background: linear-gradient(90deg, rgba(255, 215, 0, 0.05) 0%, transparent 100%);
   font-weight: 600;
 }
 
 .linha-ranking.top-3:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Top 1 - Amarelo/Dourado */
+.linha-ranking.top-1 {
   background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #FFD700;
+}
+
+.linha-ranking.top-1:hover {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.15) 0%, transparent 100%);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+/* Top 2 - Laranja */
+.linha-ranking.top-2 {
+  background: linear-gradient(90deg, rgba(255, 152, 0, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #FF9800;
+}
+
+.linha-ranking.top-2:hover {
+  background: linear-gradient(90deg, rgba(255, 152, 0, 0.15) 0%, transparent 100%);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+/* Top 3 - Azul */
+.linha-ranking.top-3-pos {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #2196F3;
+}
+
+.linha-ranking.top-3-pos:hover {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.15) 0%, transparent 100%);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
 .linha-ranking.usuario-logado {
-  background: linear-gradient(90deg, rgba(33, 150, 243, 0.1) 0%, transparent 100%);
-  border-left: 3px solid #2196f3;
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.08) 0%, transparent 100%);
+  border-right: 3px solid #2196F3;
+  font-weight: 500;
 }
 
 .linha-ranking.usuario-logado:hover {
-  background: linear-gradient(90deg, rgba(33, 150, 243, 0.15) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.12) 0%, transparent 100%);
 }
 
-.linha-ranking.top-3.usuario-logado {
+/* Usuário logado no top 3 - combina cores */
+.linha-ranking.top-1.usuario-logado {
   background: linear-gradient(
     90deg,
-    rgba(255, 215, 0, 0.1) 0%,
-    rgba(33, 150, 243, 0.1) 50%,
+    rgba(255, 215, 0, 0.12) 0%,
+    rgba(33, 150, 243, 0.08) 50%,
     transparent 100%
   );
+  border-right: 3px solid #2196F3;
+}
+
+.linha-ranking.top-2.usuario-logado {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 152, 0, 0.12) 0%,
+    rgba(33, 150, 243, 0.08) 50%,
+    transparent 100%
+  );
+  border-right: 3px solid #2196F3;
+}
+
+.linha-ranking.top-3-pos.usuario-logado {
+  background: linear-gradient(
+    90deg,
+    rgba(33, 150, 243, 0.15) 0%,
+    rgba(33, 150, 243, 0.08) 50%,
+    transparent 100%
+  );
+  border-right: 3px solid #1976D2;
 }
 
 .coluna-posicao {
@@ -91,7 +147,8 @@
 .pontuacao-valor {
   font-family: "Courier New", monospace;
   font-size: 1.1rem;
-  color: #2196f3;
+  color: #2196F3;
+  font-weight: 600;
 }
 
 .coluna-data {
@@ -112,21 +169,19 @@
 
 .linha-ranking.top-3 .pontuacao-valor {
   font-size: 1.2rem;
+  font-weight: 700;
 }
 
-/* Posição 1 - Dourado */
-.linha-ranking.top-3:has(.posicao-container:has(.emoji-posicao:first-child)) {
-  background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+.linha-ranking.top-1 .pontuacao-valor {
+  color: #FFD700;
 }
 
-/* Posição 2 - Prateado */
-.linha-ranking.top-3:nth-child(2) {
-  background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, transparent 100%);
+.linha-ranking.top-2 .pontuacao-valor {
+  color: #FF9800;
 }
 
-/* Posição 3 - Bronze */
-.linha-ranking.top-3:nth-child(3) {
-  background: linear-gradient(90deg, rgba(205, 127, 50, 0.1) 0%, transparent 100%);
+.linha-ranking.top-3-pos .pontuacao-valor {
+  color: #2196F3;
 }
 
 /* Responsivo para mobile */

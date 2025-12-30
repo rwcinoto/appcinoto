@@ -51,15 +51,17 @@
 /* Responsividade */
 @media (max-width: 768px) {
   .contador-pontos-container {
-    padding: 15px;
+    padding: 12px;
+    gap: 6px;
   }
 
   .contador-pontos-valor {
-    font-size: 48px;
+    font-size: 42px;
+    font-weight: 700;
   }
 
   .contador-pontos-label {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 

@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import api from "../../services/api";
 import FormSistema from "./FormSistema";
+import ErrorMessage from "../common/ErrorMessage";
+import { useToast } from "../../context/ToastContext";
+import { getErrorMessage, logError } from "../../utils/errorHandler";
 import "./ModalSistema.css";
 
 const ModalSistema = ({ sistema, planos, onFechar, onSalvo }) => {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
+  const { showSuccess } = useToast();
 
   const handleSalvar = async (dados) => {
     setSalvando(true);
@@ -15,17 +19,16 @@ const ModalSistema = ({ sistema, planos, onFechar, onSalvo }) => {
       if (sistema) {
         // Atualizar
         await api.put(`/sistemas/${sistema.id}`, dados);
+        showSuccess("Sistema atualizado com sucesso!");
       } else {
         // Criar
         await api.post("/sistemas", dados);
+        showSuccess("Sistema criado com sucesso!");
       }
       onSalvo();
     } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.msg ||
-        "Erro ao salvar sistema";
-      setErro(mensagemErro);
+      logError("ModalSistema - handleSalvar", error);
+      setErro(getErrorMessage(error));
     } finally {
       setSalvando(false);
     }
@@ -36,12 +39,19 @@ const ModalSistema = ({ sistema, planos, onFechar, onSalvo }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{sistema ? "Editar Sistema" : "Criar Sistema"}</h2>
-          <button className="modal-close" onClick={onFechar}>
+          <button className="modal-close" onClick={onFechar} aria-label="Fechar modal">
             ×
           </button>
         </div>
         <div className="modal-body">
-          {erro && <div className="erro-modal">{erro}</div>}
+          {erro && (
+            <ErrorMessage
+              message={erro}
+              type="error"
+              dismissible
+              onDismiss={() => setErro("")}
+            />
+          )}
           <FormSistema
             sistema={sistema}
             planos={planos}

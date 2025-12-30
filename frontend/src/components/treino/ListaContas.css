@@ -166,9 +166,9 @@
 .conta-input-resultado {
   font-size: 28px;
   font-weight: 600;
-  color: #333;
+  color: #212121;
   font-family: "Roboto Mono", monospace;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #E0E0E0;
   border-radius: 4px;
   padding: 4px 12px;
   text-align: center;
@@ -176,27 +176,28 @@
   max-width: 150px;
   outline: none;
   transition: all 0.2s ease-in-out;
-  background-color: #fff;
+  background-color: #FFFFFF;
 }
 
 .conta-input-resultado:focus {
-  border-color: #2196f3;
+  border-color: #2196F3;
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
-  background-color: #e3f2fd;
+  background-color: rgba(33, 150, 243, 0.1);
 }
 
 .conta-input-resultado:disabled {
-  background-color: #f5f5f5;
+  background-color: #F5F5F5;
   cursor: not-allowed;
   opacity: 0.6;
-  border-color: #d0d0d0;
+  border-color: #BDBDBD;
 }
 
-/* Estado de erro (vermelho) */
+/* Estado de erro (vermelho) - tema do cubo mágico */
 .conta-input-resultado.errado {
-  border-color: #f44336 !important;
-  background: #ffebee !important;
-  color: #c62828 !important;
+  border-color: #F44336 !important;
+  background: rgba(244, 67, 54, 0.1) !important;
+  color: #D32F2F !important;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
   animation: wrongShake 0.3s ease;
 }
 
@@ -214,14 +215,15 @@
 }
 
 .conta-item.atual .conta-input-resultado {
-  border-color: #2196f3;
-  background-color: #e3f2fd;
+  border-color: #2196F3;
+  background-color: rgba(33, 150, 243, 0.1);
 }
 
 .conta-item.atual .conta-input-resultado.errado {
-  border-color: #f44336 !important;
+  border-color: #F44336 !important;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
-  background: #ffebee !important;
+  background: rgba(244, 67, 54, 0.1) !important;
+  color: #D32F2F !important;
 }
 
 .conta-input-resultado::placeholder {
@@ -238,24 +240,42 @@
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .lista-contas-container {
+    max-height: none;
+    padding: 12px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .conta-item {
+    padding: 16px;
+  }
+
+  .conta-item.atual {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+  }
+
   .conta-expressao {
-    font-size: 24px;
+    font-size: 22px;
+    gap: 10px;
   }
 
   .simbolo-raiz {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .numero-raiz {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .operador {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .igual {
-    font-size: 28px;
+    font-size: 26px;
+    margin: 0 6px;
   }
 
   .parcela {
@@ -269,17 +289,27 @@
   }
 
   .conta-input-resultado {
-    font-size: 24px;
-    min-width: 60px;
-    padding: 4px 10px;
+    font-size: 32px;
+    min-width: 100px;
+    max-width: 200px;
+    padding: 8px 16px;
+    border-width: 3px;
   }
 
   .conta-input-resultado::placeholder {
-    font-size: 18px;
+    font-size: 24px;
   }
 }
 
 @media (max-width: 480px) {
+  .lista-contas-container {
+    padding: 10px;
+  }
+
+  .conta-item {
+    padding: 14px;
+  }
+
   .conta-expressao {
     font-size: 20px;
     gap: 8px;
@@ -303,7 +333,14 @@
     margin: 0 4px;
   }
 
-  .conta-item {
-    padding: 16px 20px;
+  .conta-input-resultado {
+    font-size: 28px;
+    min-width: 90px;
+    max-width: 180px;
+    padding: 6px 14px;
+  }
+
+  .conta-input-resultado::placeholder {
+    font-size: 22px;
   }
 }

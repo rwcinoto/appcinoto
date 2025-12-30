@@ -196,6 +196,7 @@ const InputResultado = ({
         placeholder="Digite a resposta..."
         autoComplete="off"
         autoFocus
+        aria-label="Digite o resultado da conta"
       />
     </div>
   );

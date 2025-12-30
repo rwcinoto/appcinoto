@@ -58,27 +58,55 @@
 }
 
 @media (max-width: 768px) {
+  .treino-ativo-container {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
   .treino-ativo-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-    gap: 15px;
-    padding: 15px;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px;
+    padding: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
-  .treino-coluna-esquerda {
-    order: 2;
-  }
-
+  /* Topo: Timer e Contador lado a lado */
   .treino-coluna-direita {
     order: 1;
     flex-direction: row;
-    gap: 15px;
-    overflow-x: auto;
+    gap: 12px;
+    overflow: visible;
   }
 
   .treino-coluna-direita > * {
     flex: 1;
-    min-width: 200px;
+    min-width: 0;
+  }
+
+  /* Meio: Lista de contas (scrollável) */
+  .treino-coluna-esquerda {
+    order: 2;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Teclado virtual fixo no final */
+  .teclado-virtual-container {
+    order: 3;
+    position: sticky;
+    bottom: 0;
+    background: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+    padding: 12px;
+    z-index: 100;
   }
 }
 
@@ -89,7 +117,12 @@
   }
 
   .treino-coluna-direita {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .treino-coluna-direita > * {
+    min-width: 0;
   }
 }
 

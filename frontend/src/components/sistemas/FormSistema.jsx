@@ -77,7 +77,7 @@ const FormSistema = ({
   return (
     <form onSubmit={handleSubmit} className="form-sistema">
       <div className="form-group">
-        <label htmlFor="tipo">Tipo *</label>
+        <label htmlFor="tipo">Tipo</label>
         <select
           id="tipo"
           name="tipo"
@@ -108,7 +108,7 @@ const FormSistema = ({
       </div>
 
       <div className="form-group">
-        <label htmlFor="id_plano">Plano *</label>
+        <label htmlFor="id_plano">Plano</label>
         <select
           id="id_plano"
           name="id_plano"
