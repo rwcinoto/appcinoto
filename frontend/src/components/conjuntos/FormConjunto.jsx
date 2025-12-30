@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ErrorMessage from "../common/ErrorMessage";
 import "./FormConjunto.css";
 
 const FormConjunto = ({ conjunto, onSalvar, onCancelar, disabled = false }) => {
@@ -34,10 +35,17 @@ const FormConjunto = ({ conjunto, onSalvar, onCancelar, disabled = false }) => {
 
   return (
     <form className="form-conjunto" onSubmit={handleSubmit}>
-      {erro && <div className="erro-form">{erro}</div>}
+      {erro && (
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+      )}
 
       <div className="form-group">
-        <label htmlFor="nome">Nome do conjunto *</label>
+        <label htmlFor="nome">Nome do conjunto</label>
         <input
           type="text"
           id="nome"

@@ -7,7 +7,7 @@ const authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
-      return res.status(401).json({ message: "Token não fornecido" });
+      return next(new AppError("Token não fornecido", 401));
     }
 
     const decoded = jwt.verify(token, jwtConfig.secret);
@@ -18,19 +18,13 @@ const authMiddleware = async (req, res, next) => {
     });
 
     if (!usuario || !usuario.ativo) {
-      return res.status(401).json({ message: "Usuário inválido ou inativo" });
+      return next(new AppError("Usuário inválido ou inativo", 401));
     }
 
     req.usuario = usuario;
     next();
   } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Token inválido" });
-    }
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token expirado" });
-    }
-    return res.status(500).json({ message: "Erro na autenticação" });
+    next(error);
   }
 };
 

@@ -18,11 +18,11 @@ const LinhaRanking = ({ item }) => {
   // Verificar se está no top 3
   const estaNoTop3 = posicao <= 3;
 
-  // Obter cor baseada na posição
+  // Obter cor baseada na posição (tema do cubo mágico)
   const obterCorPosicao = () => {
-    if (posicao === 1) return "#FFD700"; // Dourado
-    if (posicao === 2) return "#C0C0C0"; // Prateado
-    if (posicao === 3) return "#CD7F32"; // Bronze
+    if (posicao === 1) return "#FFD700"; // Amarelo/Dourado
+    if (posicao === 2) return "#FF9800"; // Laranja
+    if (posicao === 3) return "#2196F3"; // Azul
     return null;
   };
 
@@ -54,6 +54,9 @@ const LinhaRanking = ({ item }) => {
   const classesLinha = [
     "linha-ranking",
     estaNoTop3 ? "top-3" : "",
+    posicao === 1 ? "top-1" : "",
+    posicao === 2 ? "top-2" : "",
+    posicao === 3 ? "top-3-pos" : "",
     eUsuarioLogado ? "usuario-logado" : "",
   ]
     .filter(Boolean)
@@ -79,7 +82,12 @@ const LinhaRanking = ({ item }) => {
         </div>
       </td>
       <td className="coluna-pontuacao">
-        <span className="pontuacao-valor">{total}</span>
+        <span 
+          className="pontuacao-valor"
+          style={estaNoTop3 ? { color: corPosicao } : {}}
+        >
+          {total}
+        </span>
       </td>
       <td className="coluna-data">
         <span className="data-recorde">{formatarData(data_recorde)}</span>

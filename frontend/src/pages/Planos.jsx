@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import ListaPlanos from "../components/planos/ListaPlanos";
 import ModalPlano from "../components/planos/ModalPlano";
+import Loading from "../components/common/Loading";
 import { useAuth } from "../context/AuthContext";
+import { debounce } from "../utils/debounce";
+import { logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Planos.css";
 
@@ -11,32 +14,46 @@ const Planos = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
+  const [buscaDebounced, setBuscaDebounced] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [planoEditando, setPlanoEditando] = useState(null);
+  const [planosTodos, setPlanosTodos] = useState([]);
+
+  // Debounce para busca
+  const debouncedBusca = useRef(
+    debounce((valor) => {
+      setBuscaDebounced(valor);
+    }, 300)
+  ).current;
 
   const carregarPlanos = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get("/planos");
-      let planosData = response.data;
-
-      // Aplicar busca se houver
-      if (busca.trim()) {
-        planosData = planosData.filter(
-          (plano) =>
-            plano.nome.toLowerCase().includes(busca.toLowerCase()) ||
-            (plano.descricao &&
-              plano.descricao.toLowerCase().includes(busca.toLowerCase()))
-        );
-      }
-
-      setPlanos(planosData);
+      setPlanosTodos(response.data);
     } catch (error) {
-      console.error("Erro ao carregar planos:", error);
+      logError("Planos - carregarPlanos", error);
     } finally {
       setLoading(false);
     }
-  }, [busca]);
+  }, []);
+
+  // Aplicar busca usando useMemo
+  const planosFiltrados = useMemo(() => {
+    if (buscaDebounced.trim()) {
+      return planosTodos.filter(
+        (plano) =>
+          plano.nome.toLowerCase().includes(buscaDebounced.toLowerCase()) ||
+          (plano.descricao &&
+            plano.descricao.toLowerCase().includes(buscaDebounced.toLowerCase()))
+      );
+    }
+    return planosTodos;
+  }, [planosTodos, buscaDebounced]);
+
+  useEffect(() => {
+    setPlanos(planosFiltrados);
+  }, [planosFiltrados]);
 
   useEffect(() => {
     if (usuario && usuario.tipo === "admin") {
@@ -50,7 +67,9 @@ const Planos = () => {
   }
 
   const handleBuscaChange = (e) => {
-    setBusca(e.target.value);
+    const valor = e.target.value;
+    setBusca(valor);
+    debouncedBusca(valor);
   };
 
   const handleCriarPlano = () => {
@@ -115,7 +134,7 @@ const Planos = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando planos..." />
       ) : (
         <ListaPlanos
           planos={planos}

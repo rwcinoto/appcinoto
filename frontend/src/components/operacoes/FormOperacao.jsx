@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ErrorMessage from "../common/ErrorMessage";
 import "./FormOperacao.css";
 
 const FormOperacao = ({
@@ -267,7 +268,7 @@ const FormOperacao = ({
   return (
     <form onSubmit={handleSubmit} className="form-operacao">
       <div className="form-group">
-        <label htmlFor="nome">Nome *</label>
+        <label htmlFor="nome">Nome</label>
         <input
           type="text"
           id="nome"
@@ -281,7 +282,7 @@ const FormOperacao = ({
       </div>
 
       <div className="form-group">
-        <label htmlFor="tipo">Tipo *</label>
+        <label htmlFor="tipo">Tipo</label>
         <select
           id="tipo"
           name="tipo"
@@ -311,7 +312,7 @@ const FormOperacao = ({
       </div>
 
       <div className="form-group">
-        <label htmlFor="id_plano">Plano *</label>
+        <label htmlFor="id_plano">Plano</label>
         <select
           id="id_plano"
           name="id_plano"
@@ -333,10 +334,10 @@ const FormOperacao = ({
         <h3>Limites das Parcelas</h3>
 
         <div className="parcela-group">
-          <h4>Parcela 1 *</h4>
+          <h4>Parcela 1</h4>
           <div className="parcela-inputs">
             <div className="form-group">
-              <label htmlFor="min_parcela_1">Mínimo *</label>
+              <label htmlFor="min_parcela_1">Mínimo</label>
               <input
                 type="number"
                 id="min_parcela_1"
@@ -348,7 +349,7 @@ const FormOperacao = ({
               />
             </div>
             <div className="form-group">
-              <label htmlFor="max_parcela_1">Máximo *</label>
+              <label htmlFor="max_parcela_1">Máximo</label>
               <input
                 type="number"
                 id="max_parcela_1"
@@ -365,10 +366,10 @@ const FormOperacao = ({
         {!isRaiz && (
           <>
             <div className="parcela-group">
-              <h4>Parcela 2 *</h4>
+              <h4>Parcela 2</h4>
               <div className="parcela-inputs">
                 <div className="form-group">
-                  <label htmlFor="min_parcela_2">Mínimo *</label>
+                  <label htmlFor="min_parcela_2">Mínimo</label>
                   <input
                     type="number"
                     id="min_parcela_2"
@@ -380,7 +381,7 @@ const FormOperacao = ({
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="max_parcela_2">Máximo *</label>
+                  <label htmlFor="max_parcela_2">Máximo</label>
                   <input
                     type="number"
                     id="max_parcela_2"
@@ -431,7 +432,14 @@ const FormOperacao = ({
         )}
       </div>
 
-      {erro && <div className="erro">{erro}</div>}
+      {erro && (
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+      )}
 
       <div className="form-actions">
         <button

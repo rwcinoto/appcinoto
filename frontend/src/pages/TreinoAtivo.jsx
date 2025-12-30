@@ -3,8 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ContadorPontos from "../components/treino/ContadorPontos";
 import ListaContas from "../components/treino/ListaContas";
 import ResultadoTreino from "../components/treino/ResultadoTreino";
+import TecladoVirtual from "../components/treino/TecladoVirtual";
 import Timer from "../components/treino/Timer";
+import Loading from "../components/common/Loading";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./TreinoAtivo.css";
 
@@ -12,6 +17,7 @@ const TreinoAtivo = () => {
   const { usuario } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { showSuccess } = useToast();
 
   // Dados do treino vindos da seleção
   // Salvar em estado local para manter disponível mesmo após recomeçar
@@ -68,12 +74,8 @@ const TreinoAtivo = () => {
       setMostrarResultado(false); // Garantir que o resultado está oculto
       finalizadoRef.current = false; // Resetar flag de finalizado
     } catch (error) {
-      console.error("Erro ao iniciar treino:", error);
-      const mensagemErro =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.msg ||
-        "Erro ao iniciar treino. Tente novamente.";
-      setErro(mensagemErro);
+      logError("TreinoAtivo - iniciarTreino", error);
+      setErro(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -145,10 +147,8 @@ const TreinoAtivo = () => {
       // Reabilitar após processar a resposta
       setProcessando(false);
     } catch (error) {
-      console.error("Erro ao validar resposta:", error);
-      const mensagemErro =
-        error.response?.data?.message || "Erro ao validar resposta";
-      setErro(mensagemErro);
+      logError("TreinoAtivo - handleAcerto", error);
+      setErro(getErrorMessage(error));
       // Reabilitar mesmo em caso de erro
       setProcessando(false);
     }
@@ -170,11 +170,14 @@ const TreinoAtivo = () => {
 
       setResultado(response.data);
       setMostrarResultado(true);
+      
+      // Toast será mostrado se houver recorde
+      if (response.data.bateuRecorde) {
+        showSuccess("Parabéns! Você bateu um novo recorde!");
+      }
     } catch (error) {
-      console.error("Erro ao finalizar treino:", error);
-      const mensagemErro =
-        error.response?.data?.message || "Erro ao finalizar treino";
-      setErro(mensagemErro);
+      logError("TreinoAtivo - finalizarTreino", error);
+      setErro(getErrorMessage(error));
       // Em caso de erro, permitir tentar novamente
       finalizadoRef.current = false;
     }
@@ -198,7 +201,11 @@ const TreinoAtivo = () => {
   };
 
   if (!usuario) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="treino-ativo-container">
+        <Loading text="Carregando..." />
+      </div>
+    );
   }
 
   if (!treinoData) {
@@ -208,7 +215,7 @@ const TreinoAtivo = () => {
   if (loading) {
     return (
       <div className="treino-ativo-container">
-        <div className="loading">Carregando treino...</div>
+        <Loading text="Carregando treino..." />
       </div>
     );
   }
@@ -216,8 +223,17 @@ const TreinoAtivo = () => {
   if (erro && !mostrarResultado) {
     return (
       <div className="treino-ativo-container">
-        <div className="erro">{erro}</div>
-        <button onClick={() => navigate("/novo-treino")}>
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+        <button
+          className="btn-primary"
+          onClick={() => navigate("/novo-treino")}
+          style={{ marginTop: "16px" }}
+        >
           Voltar para seleção
         </button>
       </div>
@@ -235,18 +251,7 @@ const TreinoAtivo = () => {
       )}
       <div className="treino-ativo-container">
         <div className="treino-ativo-grid">
-          {/* Coluna esquerda: Lista de contas */}
-          <div className="treino-coluna-esquerda">
-            <ListaContas
-              contas={contas}
-              sistema={sistemaTipo}
-              contaAtualIndex={contaAtualIndex}
-              onAcerto={handleAcerto}
-              disabled={processando}
-            />
-          </div>
-
-          {/* Coluna direita: Timer, Contador */}
+          {/* Coluna direita: Timer, Contador (topo no mobile) */}
           <div className="treino-coluna-direita">
             <Timer
               tempoLimite={tempoLimite}
@@ -257,6 +262,50 @@ const TreinoAtivo = () => {
 
             <ContadorPontos totalAcertos={totalAcertos} />
           </div>
+
+          {/* Coluna esquerda: Lista de contas (meio no mobile) */}
+          <div className="treino-coluna-esquerda">
+            <ListaContas
+              contas={contas}
+              sistema={sistemaTipo}
+              contaAtualIndex={contaAtualIndex}
+              onAcerto={handleAcerto}
+              disabled={processando}
+            />
+          </div>
+
+          {/* Teclado virtual (apenas mobile, embaixo) */}
+          <TecladoVirtual
+            sistema={sistemaTipo}
+            onNumeroPress={(numero) => {
+              // Encontrar o input atual e inserir o número
+              const inputAtual = document.querySelector(
+                ".conta-item.atual .conta-input-resultado:not([disabled])"
+              );
+              if (inputAtual && !processando && !inputAtual.disabled) {
+                const currentValue = inputAtual.value || "";
+                // Filtrar entrada conforme o sistema
+                let valorFiltrado = currentValue + numero;
+                if (sistemaTipo === "arabico") {
+                  valorFiltrado = (currentValue + numero).replace(/[^0-9]/g, "");
+                } else if (sistemaTipo === "romano") {
+                  valorFiltrado = (currentValue + numero)
+                    .toUpperCase()
+                    .replace(/[^IVXLCDM]/g, "");
+                } else if (sistemaTipo === "binario") {
+                  valorFiltrado = (currentValue + numero).replace(/[^01]/g, "");
+                }
+                
+                inputAtual.value = valorFiltrado;
+                // Disparar evento de mudança para acionar validação
+                const event = new Event("input", { bubbles: true });
+                inputAtual.dispatchEvent(event);
+                // Manter foco no input
+                inputAtual.focus();
+              }
+            }}
+            disabled={processando}
+          />
         </div>
       </div>
     </>

@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import FiltrosRecordes from "../components/recordes/FiltrosRecordes";
 import ListaRecordes from "../components/recordes/ListaRecordes";
+import Loading from "../components/common/Loading";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Recordes.css";
 
@@ -36,11 +39,8 @@ const Recordes = () => {
       const response = await api.get(url);
       setRecordes(response.data);
     } catch (error) {
-      console.error("Erro ao carregar recordes:", error);
-      const mensagemErro =
-        error.response?.data?.message ||
-        "Erro ao carregar recordes. Tente novamente.";
-      setErro(mensagemErro);
+      logError("Recordes - carregarRecordes", error);
+      setErro(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,7 @@ const Recordes = () => {
   if (!usuario) {
     return (
       <div className="recordes-container">
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando..." />
       </div>
     );
   }
@@ -70,7 +70,14 @@ const Recordes = () => {
         <h1>Meus recordes</h1>
       </div>
 
-      {erro && <div className="mensagem-erro">{erro}</div>}
+      {erro && (
+        <ErrorMessage
+          message={erro}
+          type="error"
+          dismissible
+          onDismiss={() => setErro("")}
+        />
+      )}
 
       <FiltrosRecordes
         onFiltrar={handleFiltrar}

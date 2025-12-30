@@ -1,0 +1,468 @@
+/**
+ * CSS Global - Reset e Estilos Base
+ * 
+ * Este arquivo contém:
+ * - Reset CSS básico
+ * - Variáveis CSS com cores do tema
+ * - Estilos base para elementos HTML
+ * - Media queries para breakpoints
+ * - Utilitários comuns
+ */
+
+/* ============================================
+   RESET CSS BÁSICO
+   ============================================ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+   VARIÁVEIS CSS - Tema do Cubo Mágico
+   ============================================ */
+:root {
+  /* Cores base do cubo mágico */
+  --color-white: #FFFFFF;
+  --color-white-light: #FAFAFA;
+  --color-white-dark: #F5F5F5;
+  
+  --color-yellow: #FFD700;
+  --color-yellow-light: #FFEB3B;
+  --color-yellow-dark: #FFC107;
+  
+  --color-green: #4CAF50;
+  --color-green-light: #8BC34A;
+  --color-green-dark: #388E3C;
+  
+  --color-blue: #2196F3;
+  --color-blue-light: #03A9F4;
+  --color-blue-dark: #1976D2;
+  
+  --color-red: #F44336;
+  --color-red-light: #E91E63;
+  --color-red-dark: #D32F2F;
+  
+  --color-orange: #FF9800;
+  --color-orange-light: #FFB74D;
+  --color-orange-dark: #FF5722;
+  
+  --color-gray: #757575;
+  --color-gray-light: #BDBDBD;
+  --color-gray-dark: #424242;
+  --color-black: #000000;
+
+  /* Cores por contexto */
+  --color-primary: #2196F3;
+  --color-primary-light: #03A9F4;
+  --color-primary-dark: #1976D2;
+  --color-primary-hover: #1E88E5;
+  
+  --color-secondary: #FF9800;
+  --color-secondary-light: #FFB74D;
+  --color-secondary-dark: #FF5722;
+  --color-secondary-hover: #FB8C00;
+  
+  --color-success: #4CAF50;
+  --color-success-light: #8BC34A;
+  --color-success-dark: #388E3C;
+  
+  --color-error: #F44336;
+  --color-error-light: #E91E63;
+  --color-error-dark: #D32F2F;
+  
+  --color-warning: #FF9800;
+  --color-info: #2196F3;
+
+  /* Cores para ranking (top 3) */
+  --color-top1: #FFD700;
+  --color-top2: #FF9800;
+  --color-top3: #2196F3;
+
+  /* Cores para operações matemáticas */
+  --color-op-soma: #2196F3;
+  --color-op-subtracao: #4CAF50;
+  --color-op-multiplicacao: #FF9800;
+  --color-op-divisao: #FFD700;
+  --color-op-raiz: #F44336;
+
+  /* Cores para componentes */
+  --color-background: #FFFFFF;
+  --color-background-light: #FAFAFA;
+  --color-background-dark: #F5F5F5;
+  
+  --color-card: #FFFFFF;
+  --color-card-hover: #F5F5F5;
+  --color-card-border: #E0E0E0;
+  
+  --color-text: #212121;
+  --color-text-light: #757575;
+  --color-text-dark: #000000;
+  --color-text-inverse: #FFFFFF;
+  
+  --color-link: #2196F3;
+  --color-link-hover: #1976D2;
+  
+  --color-border: #E0E0E0;
+  --color-border-light: #F5F5F5;
+  --color-border-dark: #BDBDBD;
+
+  /* Estados */
+  --state-hover-light: rgba(0, 0, 0, 0.04);
+  --state-hover-dark: rgba(0, 0, 0, 0.08);
+  --state-active-light: rgba(0, 0, 0, 0.08);
+  --state-active-dark: rgba(0, 0, 0, 0.12);
+  --state-focus-light: rgba(33, 150, 243, 0.12);
+  --state-focus-dark: rgba(33, 150, 243, 0.24);
+  --state-disabled-bg: #F5F5F5;
+  --state-disabled-text: #9E9E9E;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Bordas */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 9999px;
+  
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 4px;
+
+  /* Espaçamentos */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* Tipografia */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family-mono: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Breakpoints (para uso em JavaScript se necessário) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ============================================
+   ESTILOS BASE
+   ============================================ */
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tipografia base */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--font-size-4xl);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+}
+
+p {
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+a:hover,
+a:focus {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Listas */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Imagens */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Código */
+code,
+pre {
+  font-family: var(--font-family-mono);
+  font-size: 0.875em;
+}
+
+code {
+  background-color: var(--color-background-dark);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+}
+
+pre {
+  background-color: var(--color-background-dark);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  overflow-x: auto;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Formulários básicos (estilos mais detalhados em inputs.css) */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Tabelas */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+}
+
+th {
+  font-weight: 600;
+}
+
+/* ============================================
+   UTILITÁRIOS COMUNS
+   ============================================ */
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Espaçamentos */
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }
+
+/* Texto */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+
+.text-light { color: var(--color-text-light); }
+.text-dark { color: var(--color-text-dark); }
+.text-primary { color: var(--color-primary); }
+.text-success { color: var(--color-success); }
+.text-error { color: var(--color-error); }
+.text-warning { color: var(--color-warning); }
+
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Display */
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+
+/* Flexbox */
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+.gap-xs { gap: var(--spacing-xs); }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+.gap-xl { gap: var(--spacing-xl); }
+
+/* Width/Height */
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+/* Border radius */
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-md { border-radius: var(--border-radius-md); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-full { border-radius: var(--border-radius-full); }
+
+/* ============================================
+   MEDIA QUERIES - BREAKPOINTS
+   ============================================ */
+
+/* Mobile First - Base styles são para mobile */
+
+/* Tablet e acima (768px) */
+@media (min-width: 768px) {
+  :root {
+    --spacing-md: 20px;
+    --spacing-lg: 32px;
+  }
+
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+}
+
+/* Desktop (1024px) */
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 var(--spacing-xl);
+  }
+}
+
+/* Large Desktop (1280px) */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* Mobile apenas (até 767px) */
+@media (max-width: 767px) {
+  h1 {
+    font-size: var(--font-size-3xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-xl);
+  }
+}
+

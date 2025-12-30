@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
+import Loading from "../components/common/Loading";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./NovoTreino.css";
 
@@ -34,8 +37,8 @@ const NovoTreino = () => {
       setLimites(limitesRes.data);
       setSistemas(sistemasRes.data);
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-      setErro("Erro ao carregar dados. Tente novamente.");
+      logError("NovoTreino - carregarDados", error);
+      setErro(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -75,6 +78,17 @@ const NovoTreino = () => {
       raiz: "Raiz quadrada",
     };
     return tipos[tipo] || tipo;
+  };
+
+  const obterCorOperacao = (tipo) => {
+    const cores = {
+      soma: "#2196F3", // Azul
+      subtracao: "#4CAF50", // Verde
+      multiplicacao: "#FF9800", // Laranja
+      divisao: "#FFD700", // Amarelo
+      raiz: "#F44336", // Vermelho
+    };
+    return cores[tipo] || "#E0E0E0";
   };
 
   const formatarTipoSistema = (tipo) => {
@@ -130,11 +144,8 @@ const NovoTreino = () => {
       setDadosTreino(response.data);
       setMostrarContagem(true);
     } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.msg ||
-        "Erro ao iniciar treino. Tente novamente.";
-      setErro(mensagemErro);
+      logError("NovoTreino - handleIniciarTreino", error);
+      setErro(getErrorMessage(error));
       setIniciando(false);
     }
   };
@@ -150,13 +161,17 @@ const NovoTreino = () => {
     operacaoSelecionada && limiteSelecionado && sistemaSelecionado;
 
   if (!usuario) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="novo-treino-container">
+        <Loading text="Carregando..." />
+      </div>
+    );
   }
 
   if (loading) {
     return (
       <div className="novo-treino-container">
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando..." />
       </div>
     );
   }
@@ -172,7 +187,14 @@ const NovoTreino = () => {
         </div>
 
         <div className="novo-treino-content">
-          {erro && <div className="erro">{erro}</div>}
+          {erro && (
+            <ErrorMessage
+              message={erro}
+              type="error"
+              dismissible
+              onDismiss={() => setErro("")}
+            />
+          )}
 
           {/* Seção de Operações */}
           <section className="secao-selecao">
@@ -183,25 +205,29 @@ const NovoTreino = () => {
                   Nenhuma operação disponível no seu plano.
                 </p>
               ) : (
-                operacoes.map((operacao) => (
-                  <div
-                    key={operacao.id}
-                    className={`card-operacao ${
-                      operacaoSelecionada?.id === operacao.id
-                        ? "selecionado"
-                        : ""
-                    }`}
-                    onClick={() => handleSelecionarOperacao(operacao)}
-                  >
-                    <h3>{operacao.nome}</h3>
-                    <p className="tipo-operacao">
-                      {formatarTipoOperacao(operacao.tipo)}
-                    </p>
-                    {operacao.descricao && (
-                      <p className="descricao">{operacao.descricao}</p>
-                    )}
-                  </div>
-                ))
+                operacoes.map((operacao) => {
+                  const corOperacao = obterCorOperacao(operacao.tipo);
+                  return (
+                    <div
+                      key={operacao.id}
+                      className={`card-operacao card-operacao-${operacao.tipo} ${
+                        operacaoSelecionada?.id === operacao.id
+                          ? "selecionado"
+                          : ""
+                      }`}
+                      style={{ borderColor: corOperacao }}
+                      onClick={() => handleSelecionarOperacao(operacao)}
+                    >
+                      <h3>{operacao.nome}</h3>
+                      <p className="tipo-operacao">
+                        {formatarTipoOperacao(operacao.tipo)}
+                      </p>
+                      {operacao.descricao && (
+                        <p className="descricao">{operacao.descricao}</p>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </section>

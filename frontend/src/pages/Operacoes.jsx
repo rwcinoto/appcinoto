@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import ListaOperacoes from "../components/operacoes/ListaOperacoes";
 import ModalOperacao from "../components/operacoes/ModalOperacao";
+import Loading from "../components/common/Loading";
 import { useAuth } from "../context/AuthContext";
+import { debounce } from "../utils/debounce";
+import { logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Operacoes.css";
 
@@ -12,10 +15,19 @@ const Operacoes = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
+  const [buscaDebounced, setBuscaDebounced] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroPlano, setFiltroPlano] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [operacaoEditando, setOperacaoEditando] = useState(null);
+  const [operacoesTodos, setOperacoesTodos] = useState([]);
+
+  // Debounce para busca
+  const debouncedBusca = useRef(
+    debounce((valor) => {
+      setBuscaDebounced(valor);
+    }, 300)
+  ).current;
 
   const carregarPlanos = useCallback(async () => {
     try {
@@ -31,37 +43,46 @@ const Operacoes = () => {
     try {
       // Admin vê todas, usuário comum vê apenas do seu plano
       const response = await api.get("/operacoes");
-      let operacoesData = response.data;
-
-      // Aplicar filtros
-      if (busca.trim()) {
-        operacoesData = operacoesData.filter(
-          (operacao) =>
-            operacao.nome.toLowerCase().includes(busca.toLowerCase()) ||
-            (operacao.descricao &&
-              operacao.descricao.toLowerCase().includes(busca.toLowerCase()))
-        );
-      }
-
-      if (filtroTipo) {
-        operacoesData = operacoesData.filter(
-          (operacao) => operacao.tipo === filtroTipo
-        );
-      }
-
-      if (filtroPlano) {
-        operacoesData = operacoesData.filter(
-          (operacao) => operacao.id_plano === parseInt(filtroPlano)
-        );
-      }
-
-      setOperacoes(operacoesData);
+      setOperacoesTodos(response.data);
     } catch (error) {
-      console.error("Erro ao carregar operações:", error);
+      logError("Operacoes - carregarOperacoes", error);
     } finally {
       setLoading(false);
     }
-  }, [busca, filtroTipo, filtroPlano]);
+  }, []);
+
+  // Aplicar filtros usando useMemo para evitar recálculos desnecessários
+  const operacoesFiltradas = useMemo(() => {
+    let operacoesData = operacoesTodos;
+
+    // Aplicar filtros
+    if (buscaDebounced.trim()) {
+      operacoesData = operacoesData.filter(
+        (operacao) =>
+          operacao.nome.toLowerCase().includes(buscaDebounced.toLowerCase()) ||
+          (operacao.descricao &&
+            operacao.descricao.toLowerCase().includes(buscaDebounced.toLowerCase()))
+      );
+    }
+
+    if (filtroTipo) {
+      operacoesData = operacoesData.filter(
+        (operacao) => operacao.tipo === filtroTipo
+      );
+    }
+
+    if (filtroPlano) {
+      operacoesData = operacoesData.filter(
+        (operacao) => operacao.id_plano === parseInt(filtroPlano)
+      );
+    }
+
+    return operacoesData;
+  }, [operacoesTodos, buscaDebounced, filtroTipo, filtroPlano]);
+
+  useEffect(() => {
+    setOperacoes(operacoesFiltradas);
+  }, [operacoesFiltradas]);
 
   useEffect(() => {
     if (usuario && usuario.tipo === "admin") {
@@ -76,7 +97,9 @@ const Operacoes = () => {
   }
 
   const handleBuscaChange = (e) => {
-    setBusca(e.target.value);
+    const valor = e.target.value;
+    setBusca(valor);
+    debouncedBusca(valor);
   };
 
   const handleFiltroTipoChange = (e) => {
@@ -173,7 +196,7 @@ const Operacoes = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando operações..." />
       ) : (
         <ListaOperacoes
           operacoes={operacoes}

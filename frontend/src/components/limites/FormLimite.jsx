@@ -82,7 +82,7 @@ const FormLimite = ({
   return (
     <form onSubmit={handleSubmit} className="form-limite">
       <div className="form-group">
-        <label htmlFor="descricao">Descrição *</label>
+        <label htmlFor="descricao">Descrição</label>
         <input
           type="text"
           id="descricao"
@@ -97,7 +97,7 @@ const FormLimite = ({
       </div>
 
       <div className="form-group">
-        <label htmlFor="tempo">Tempo (em segundos) *</label>
+        <label htmlFor="tempo">Tempo (em segundos)</label>
         <input
           type="number"
           id="tempo"
@@ -112,7 +112,7 @@ const FormLimite = ({
       </div>
 
       <div className="form-group">
-        <label htmlFor="id_plano">Plano *</label>
+        <label htmlFor="id_plano">Plano</label>
         <select
           id="id_plano"
           name="id_plano"

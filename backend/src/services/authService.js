@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const jwtConfig = require("../config/jwt");
 const { Usuario } = require("../models");
+const { AppError } = require("../utils/errors");
 
 class AuthService {
   async login(email, senha) {
@@ -10,17 +11,17 @@ class AuthService {
     });
 
     if (!usuario) {
-      throw new Error("Email ou senha inválidos");
+      throw new AppError("Email ou senha inválidos", 401);
     }
 
     if (!usuario.ativo) {
-      throw new Error("Usuário inativo");
+      throw new AppError("Usuário inativo", 401);
     }
 
     const senhaValida = await usuario.verificarSenha(senha);
 
     if (!senhaValida) {
-      throw new Error("Email ou senha inválidos");
+      throw new AppError("Email ou senha inválidos", 401);
     }
 
     const token = this.gerarToken(usuario);

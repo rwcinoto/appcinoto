@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Login.css";
 
 const Login = () => {
@@ -20,7 +22,8 @@ const Login = () => {
       await login(email, senha);
       navigate("/");
     } catch (error) {
-      setErro(error.response?.data?.message || "Erro ao fazer login");
+      logError("Login - handleSubmit", error);
+      setErro(getErrorMessage(error));
     } finally {
       setCarregando(false);
     }
@@ -53,7 +56,14 @@ const Login = () => {
               autoComplete="current-password"
             />
           </div>
-          {erro && <div className="erro">{erro}</div>}
+          {erro && (
+            <ErrorMessage
+              message={erro}
+              type="error"
+              dismissible
+              onDismiss={() => setErro("")}
+            />
+          )}
           <button type="submit" disabled={carregando}>
             {carregando ? "Entrando..." : "Entrar"}
           </button>

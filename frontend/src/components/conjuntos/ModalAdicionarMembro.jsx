@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import api from "../../services/api";
+import ErrorMessage from "../common/ErrorMessage";
+import { getErrorMessage, logError } from "../../utils/errorHandler";
 import "./ModalAdicionarMembro.css";
 
 const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
@@ -25,11 +27,8 @@ const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
       onMembroAdicionado();
       onFechar();
     } catch (error) {
-      const mensagemErro =
-        error.response?.data?.message ||
-        error.response?.data?.errors?.[0]?.msg ||
-        "Erro ao convidar usuário";
-      setErro(mensagemErro);
+      logError("ModalAdicionarMembro - handleSubmit", error);
+      setErro(getErrorMessage(error));
     } finally {
       setSalvando(false);
     }
@@ -40,15 +39,22 @@ const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Adicionar membro</h2>
-          <button className="modal-close" onClick={onFechar}>
+          <button className="modal-close" onClick={onFechar} aria-label="Fechar modal">
             ×
           </button>
         </div>
         <div className="modal-body">
-          {erro && <div className="erro-modal">{erro}</div>}
+          {erro && (
+            <ErrorMessage
+              message={erro}
+              type="error"
+              dismissible
+              onDismiss={() => setErro("")}
+            />
+          )}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="email">Email do usuário *</label>
+              <label htmlFor="email">Email do usuário</label>
               <input
                 type="email"
                 id="email"

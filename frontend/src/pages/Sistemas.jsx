@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import ListaSistemas from "../components/sistemas/ListaSistemas";
 import ModalSistema from "../components/sistemas/ModalSistema";
+import Loading from "../components/common/Loading";
 import { useAuth } from "../context/AuthContext";
+import { debounce } from "../utils/debounce";
+import { logError } from "../utils/errorHandler";
 import api from "../services/api";
 import "./Sistemas.css";
 
@@ -12,10 +15,19 @@ const Sistemas = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
+  const [buscaDebounced, setBuscaDebounced] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroPlano, setFiltroPlano] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [sistemaEditando, setSistemaEditando] = useState(null);
+  const [sistemasTodos, setSistemasTodos] = useState([]);
+
+  // Debounce para busca
+  const debouncedBusca = useRef(
+    debounce((valor) => {
+      setBuscaDebounced(valor);
+    }, 300)
+  ).current;
 
   const carregarPlanos = useCallback(async () => {
     try {
@@ -30,36 +42,45 @@ const Sistemas = () => {
     setLoading(true);
     try {
       const response = await api.get("/sistemas");
-      let sistemasData = response.data;
-
-      if (busca.trim()) {
-        sistemasData = sistemasData.filter(
-          (sistema) =>
-            (sistema.descricao &&
-              sistema.descricao.toLowerCase().includes(busca.toLowerCase())) ||
-            sistema.tipo.toLowerCase().includes(busca.toLowerCase())
-        );
-      }
-
-      if (filtroTipo) {
-        sistemasData = sistemasData.filter(
-          (sistema) => sistema.tipo === filtroTipo
-        );
-      }
-
-      if (filtroPlano) {
-        sistemasData = sistemasData.filter(
-          (sistema) => sistema.id_plano === parseInt(filtroPlano)
-        );
-      }
-
-      setSistemas(sistemasData);
+      setSistemasTodos(response.data);
     } catch (error) {
-      console.error("Erro ao carregar sistemas:", error);
+      logError("Sistemas - carregarSistemas", error);
     } finally {
       setLoading(false);
     }
-  }, [busca, filtroTipo, filtroPlano]);
+  }, []);
+
+  // Aplicar filtros usando useMemo
+  const sistemasFiltrados = useMemo(() => {
+    let sistemasData = sistemasTodos;
+
+    if (buscaDebounced.trim()) {
+      sistemasData = sistemasData.filter(
+        (sistema) =>
+          (sistema.descricao &&
+            sistema.descricao.toLowerCase().includes(buscaDebounced.toLowerCase())) ||
+          sistema.tipo.toLowerCase().includes(buscaDebounced.toLowerCase())
+      );
+    }
+
+    if (filtroTipo) {
+      sistemasData = sistemasData.filter(
+        (sistema) => sistema.tipo === filtroTipo
+      );
+    }
+
+    if (filtroPlano) {
+      sistemasData = sistemasData.filter(
+        (sistema) => sistema.id_plano === parseInt(filtroPlano)
+      );
+    }
+
+    return sistemasData;
+  }, [sistemasTodos, buscaDebounced, filtroTipo, filtroPlano]);
+
+  useEffect(() => {
+    setSistemas(sistemasFiltrados);
+  }, [sistemasFiltrados]);
 
   useEffect(() => {
     if (usuario && usuario.tipo === "admin") {
@@ -73,7 +94,9 @@ const Sistemas = () => {
   }
 
   const handleBuscaChange = (e) => {
-    setBusca(e.target.value);
+    const valor = e.target.value;
+    setBusca(valor);
+    debouncedBusca(valor);
   };
 
   const handleFiltroTipoChange = (e) => {
@@ -177,7 +200,7 @@ const Sistemas = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Carregando...</div>
+        <Loading text="Carregando sistemas..." />
       ) : (
         <ListaSistemas
           sistemas={sistemas}
