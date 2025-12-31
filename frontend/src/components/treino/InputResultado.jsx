@@ -188,6 +188,8 @@ const InputResultado = ({
       <input
         ref={inputRef}
         type="text"
+        inputMode={sistema === "romano" ? "text" : "numeric"}
+        pattern={sistema === "natural" ? "[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
         value={valor}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

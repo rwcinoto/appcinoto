@@ -19,13 +19,13 @@ const ListaRecordes = ({ recordes, loading }) => {
     );
   }
 
-  // Ordenar recordes: primeiro por operação, depois por limite, depois por sistema
+  // Ordenar recordes: primeiro por operação (ordem), depois por limite, depois por sistema
   const recordesOrdenados = [...recordes].sort((a, b) => {
-    // Ordenar por operação
-    const nomeA = a.operacao?.nome || "";
-    const nomeB = b.operacao?.nome || "";
-    if (nomeA !== nomeB) {
-      return nomeA.localeCompare(nomeB, "pt-BR");
+    // Ordenar por operação (usando campo ordem)
+    const ordemA = a.operacao?.ordem ?? 999999;
+    const ordemB = b.operacao?.ordem ?? 999999;
+    if (ordemA !== ordemB) {
+      return ordemA - ordemB;
     }
 
     // Se mesma operação, ordenar por limite (tempo)

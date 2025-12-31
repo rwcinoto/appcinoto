@@ -20,6 +20,7 @@ const FormOperacao = ({
     min_parcela_3: "",
     max_parcela_3: "",
     id_plano: "",
+    ordem: "",
   });
   const [erro, setErro] = useState("");
 
@@ -69,6 +70,7 @@ const FormOperacao = ({
             ? operacao.max_parcela_3
             : "",
         id_plano: operacao.id_plano?.toString() || "",
+        ordem: operacao.ordem?.toString() || "",
       });
     } else {
       // Ao criar nova operação, inicializar com valores padrão
@@ -84,6 +86,7 @@ const FormOperacao = ({
         min_parcela_3: "",
         max_parcela_3: "",
         id_plano: planos.length > 0 ? planos[0].id.toString() : "",
+        ordem: "",
       });
     }
   }, [operacao, planos]);
@@ -235,6 +238,11 @@ const FormOperacao = ({
       id_plano: parseInt(formData.id_plano),
     };
 
+    // Incluir ordem se fornecida
+    if (formData.ordem !== "" && formData.ordem !== null && formData.ordem !== undefined) {
+      dados.ordem = parseInt(formData.ordem);
+    }
+
     // Se não for raiz, parcela 2 é obrigatória
     if (formData.tipo !== "raiz") {
       dados.min_parcela_2 =
@@ -328,6 +336,23 @@ const FormOperacao = ({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="ordem">Ordem</label>
+        <input
+          type="number"
+          id="ordem"
+          name="ordem"
+          value={formData.ordem}
+          onChange={handleChange}
+          min="1"
+          placeholder="Deixe vazio para colocar no final"
+          disabled={disabled}
+        />
+        <small className="form-help">
+          Ordem de exibição. Se não informado, será colocado no final.
+        </small>
       </div>
 
       <div className="parcelas-section">

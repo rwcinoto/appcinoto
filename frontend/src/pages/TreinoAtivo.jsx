@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ContadorPontos from "../components/treino/ContadorPontos";
 import ListaContas from "../components/treino/ListaContas";
 import ResultadoTreino from "../components/treino/ResultadoTreino";
-import TecladoVirtual from "../components/treino/TecladoVirtual";
 import Timer from "../components/treino/Timer";
 import Loading from "../components/common/Loading";
 import ErrorMessage from "../components/common/ErrorMessage";
@@ -251,18 +250,6 @@ const TreinoAtivo = () => {
       )}
       <div className="treino-ativo-container">
         <div className="treino-ativo-grid">
-          {/* Coluna direita: Timer, Contador (topo no mobile) */}
-          <div className="treino-coluna-direita">
-            <Timer
-              tempoLimite={tempoLimite}
-              inicioTreino={inicioTreino}
-              onTempoEsgotado={handleTempoEsgotado}
-              pausado={false}
-            />
-
-            <ContadorPontos totalAcertos={totalAcertos} />
-          </div>
-
           {/* Coluna esquerda: Lista de contas (meio no mobile) */}
           <div className="treino-coluna-esquerda">
             <ListaContas
@@ -274,38 +261,17 @@ const TreinoAtivo = () => {
             />
           </div>
 
-          {/* Teclado virtual (apenas mobile, embaixo) */}
-          <TecladoVirtual
-            sistema={sistemaTipo}
-            onNumeroPress={(numero) => {
-              // Encontrar o input atual e inserir o número
-              const inputAtual = document.querySelector(
-                ".conta-item.atual .conta-input-resultado:not([disabled])"
-              );
-              if (inputAtual && !processando && !inputAtual.disabled) {
-                const currentValue = inputAtual.value || "";
-                // Filtrar entrada conforme o sistema
-                let valorFiltrado = currentValue + numero;
-                if (sistemaTipo === "natural") {
-                  valorFiltrado = (currentValue + numero).replace(/[^0-9]/g, "");
-                } else if (sistemaTipo === "romano") {
-                  valorFiltrado = (currentValue + numero)
-                    .toUpperCase()
-                    .replace(/[^IVXLCDM]/g, "");
-                } else if (sistemaTipo === "binario") {
-                  valorFiltrado = (currentValue + numero).replace(/[^01]/g, "");
-                }
-                
-                inputAtual.value = valorFiltrado;
-                // Disparar evento de mudança para acionar validação
-                const event = new Event("input", { bubbles: true });
-                inputAtual.dispatchEvent(event);
-                // Manter foco no input
-                inputAtual.focus();
-              }
-            }}
-            disabled={processando}
-          />
+          {/* Coluna direita: Timer, Contador (topo no mobile) */}
+          <div className="treino-coluna-direita">
+            <Timer
+              tempoLimite={tempoLimite}
+              inicioTreino={inicioTreino}
+              onTempoEsgotado={handleTempoEsgotado}
+              pausado={false}
+            />
+
+            <ContadorPontos totalAcertos={totalAcertos} />
+          </div>
         </div>
       </div>
     </>
