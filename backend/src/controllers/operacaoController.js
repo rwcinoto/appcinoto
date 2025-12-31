@@ -37,7 +37,7 @@ class OperacaoController {
           },
         },
         include: [{ association: "plano" }],
-        order: [["nome", "ASC"]],
+        order: [["ordem", "ASC"]],
       });
 
       return res.json(operacoes);
@@ -128,6 +128,13 @@ class OperacaoController {
         max_parcela_3 = null;
       }
 
+      // Se ordem não fornecida, calcular automaticamente (colocar no final)
+      let ordemFinal = ordem;
+      if (ordemFinal === undefined || ordemFinal === null) {
+        const maiorOrdem = await Operacao.max("ordem");
+        ordemFinal = (maiorOrdem || 0) + 1;
+      }
+
       // Validar min <= max para cada parcela
       if (min_parcela_1 > max_parcela_1) {
         return res.status(400).json({
@@ -164,6 +171,7 @@ class OperacaoController {
         min_parcela_3: min_parcela_3 !== undefined ? min_parcela_3 : null,
         max_parcela_3: max_parcela_3 !== undefined ? max_parcela_3 : null,
         id_plano,
+        ordem: ordemFinal,
         criado_por: req.usuario.id,
         atualizado_por: req.usuario.id,
         criado_em: new Date(),
@@ -198,7 +206,7 @@ class OperacaoController {
         return res.status(404).json({ message: "Operação não encontrada" });
       }
 
-      const { nome, descricao, tipo, min_parcela_1, max_parcela_1, id_plano } =
+      const { nome, descricao, tipo, min_parcela_1, max_parcela_1, id_plano, ordem } =
         req.body;
 
       // Usar let para variáveis que podem ser modificadas (para tipo raiz)
@@ -299,6 +307,7 @@ class OperacaoController {
       if (max_parcela_3 !== undefined)
         dadosAtualizacao.max_parcela_3 = max_parcela_3;
       if (id_plano !== undefined) dadosAtualizacao.id_plano = id_plano;
+      if (ordem !== undefined) dadosAtualizacao.ordem = ordem;
 
       dadosAtualizacao.atualizado_por = req.usuario.id;
       dadosAtualizacao.atualizado_em = new Date();

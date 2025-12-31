@@ -97,17 +97,6 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-
-  /* Teclado virtual fixo no final */
-  .teclado-virtual-container {
-    order: 3;
-    position: sticky;
-    bottom: 0;
-    background: #f5f5f5;
-    border-top: 1px solid #e0e0e0;
-    padding: 12px;
-    z-index: 100;
-  }
 }
 
 @media (max-width: 480px) {

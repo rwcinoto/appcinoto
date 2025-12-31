@@ -283,11 +283,11 @@ class RecordeService {
           attributes: ["id", "descricao", "tipo", "id_plano"],
         },
       ],
-      // Ordenar por operação, limite, sistema (usando índices)
+      // Ordenar por operação (ordem), limite, sistema (usando índices)
       // Usar Sequelize.literal para especificar explicitamente a tabela do sistema
       // Isso evita ambiguidade com o campo 'tipo' da operação
       order: [
-        [{ association: "operacao" }, "nome", "ASC"],
+        [{ association: "operacao" }, "ordem", "ASC"],
         [{ association: "limite" }, "tempo", "ASC"],
         [Sequelize.literal("`sistema`.`tipo`"), "ASC"],
       ],
@@ -327,7 +327,7 @@ class RecordeService {
         {
           association: "operacao",
           required: true,
-          attributes: ["id", "nome", "descricao", "tipo", "id_plano"],
+          attributes: ["id", "nome", "descricao", "tipo", "ordem", "id_plano"],
         },
         {
           association: "limite",

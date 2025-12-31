@@ -309,6 +309,8 @@ const ListaContas = ({
                     }}
                     autoFocus={index === contaAtualIndex && !disabled}
                     type="text"
+                    inputMode={sistema === "romano" ? "text" : "numeric"}
+                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
                     className="conta-input-resultado"
                     disabled={disabled || index !== contaAtualIndex}
                     onChange={(e) => handleChange(conta, index, e)}

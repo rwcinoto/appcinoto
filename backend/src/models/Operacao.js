@@ -69,6 +69,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      ordem: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       criado_em: {
         type: DataTypes.DATE,
         allowNull: false,

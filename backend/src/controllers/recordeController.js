@@ -75,6 +75,7 @@ class RecordeController {
               nome: recorde.operacao.nome,
               descricao: recorde.operacao.descricao,
               tipo: recorde.operacao.tipo,
+              ordem: recorde.operacao.ordem,
             }
           : null,
         limite: recorde.limite
@@ -139,6 +140,7 @@ class RecordeController {
               nome: recorde.operacao.nome,
               descricao: recorde.operacao.descricao,
               tipo: recorde.operacao.tipo,
+              ordem: recorde.operacao.ordem,
             }
           : null,
         limite: recorde.limite
