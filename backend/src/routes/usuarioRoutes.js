@@ -10,7 +10,7 @@ const {
 
 // Validações para criar usuário
 const validarCriarUsuario = [
-  body("email").isEmail().withMessage("Email inválido").normalizeEmail(),
+  body("email").isEmail().withMessage("Email inválido"),
   body("senha")
     .isLength({ min: 6 })
     .withMessage("Senha deve ter no mínimo 6 caracteres"),
@@ -41,8 +41,7 @@ const validarAtualizarUsuario = [
   body("email")
     .optional()
     .isEmail()
-    .withMessage("Email inválido")
-    .normalizeEmail(),
+    .withMessage("Email inválido"),
   body("senha")
     .optional()
     .isLength({ min: 6 })
