@@ -165,6 +165,18 @@
   min-width: 0;
 }
 
+.nome-usuario-link-mobile {
+  font-weight: 500;
+  color: #1976d2;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nome-usuario-link-mobile:active {
+  color: #1565c0;
+  text-decoration: underline;
+}
+
 .badge-usuario-logado-mobile {
   padding: 2px 8px;
   background: #2196F3;

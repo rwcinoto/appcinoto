@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import LinhaRanking from "./LinhaRanking";
 import "./TabelaRanking.css";
@@ -82,7 +83,21 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
               </div>
               <div className="card-ranking-nome-data-mobile">
                 <div className="card-ranking-nome-mobile">
-                  <span>{item.nome}</span>
+                  {eUsuarioLogado ? (
+                    <Link 
+                      to="/recordes"
+                      className="nome-usuario-link-mobile"
+                    >
+                      {item.nome}
+                    </Link>
+                  ) : (
+                    <Link 
+                      to={`/recordes?usuario_id=${item.id_usuario}`}
+                      className="nome-usuario-link-mobile"
+                    >
+                      {item.nome}
+                    </Link>
+                  )}
                   {eUsuarioLogado && (
                     <span className="badge-usuario-logado badge-usuario-logado-mobile">Você</span>
                   )}

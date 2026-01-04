@@ -28,6 +28,7 @@ const ListaContas = ({
   const contaProcessandoRef = useRef(null); // ID da conta que já foi processada
   const ultimaPrimeiraContaRef = useRef(null); // ID da última primeira conta para detectar mudanças reais
   const estadoValidacaoRef = useRef({}); // Estado de validação visual por input (index -> "errado" | null)
+  const contaComErroRef = useRef(null); // ID da conta que teve erro (para manter caixa vermelha)
 
   // Ref para manter o foco ativo durante o treino
   const manterFocoRef = useRef(false);
@@ -45,6 +46,7 @@ const ListaContas = ({
       // O importante é que a lista mudou (uma conta foi removida e outra adicionada)
       if (ultimaPrimeiraContaRef.current !== primeiraContaId) {
         contaProcessandoRef.current = null;
+        contaComErroRef.current = null; // Limpar estado de erro quando a conta muda
         ultimaPrimeiraContaRef.current = primeiraContaId;
       } else {
         // Se a conta ID é a mesma mas a lista mudou (por exemplo, mesmo valor mas nova instância),
@@ -52,6 +54,7 @@ const ListaContas = ({
         // Resetar apenas se não estiver processando (para evitar resetar no meio de uma validação)
         if (!disabled) {
           contaProcessandoRef.current = null;
+          // Não limpar contaComErroRef aqui - manter erro visível até acertar
         }
       }
     }
@@ -198,9 +201,22 @@ const ListaContas = ({
     // Atualizar valor do input
     e.target.value = valorFiltrado;
 
+    // ID da conta atual para rastrear erros
+    const contaId = `${conta.parcela1}-${conta.parcela2}-${
+      conta.parcela3 || "null"
+    }-${conta.resultado}-${conta.tipo}`;
+
+    // Verificar se esta conta já teve erro anteriormente (manter caixa vermelha)
+    const contaTeveErro = contaComErroRef.current === contaId;
+    if (contaTeveErro && valorFiltrado === "") {
+      // Se a conta teve erro e o campo está vazio, manter a caixa vermelha
+      e.target.classList.add("errado");
+    }
+
     // Validar localmente para feedback visual
     const resultadoEsperado = conta.resultado;
     let respostaEsperadaFormatada;
+    let detectouErro = false;
 
     try {
       if (sistema === "natural" || sistema === "inteiro") {
@@ -216,28 +232,38 @@ const ListaContas = ({
           // Validar quando o tamanho do valor absoluto for igual ao esperado
           if (tamanhoAbsolutoResposta === tamanhoAbsolutoEsperado) {
             const correto = respostaNumero === resultadoEsperado;
-            // Atualizar estado visual
-            estadoValidacaoRef.current[index] = correto ? null : "errado";
-            // Forçar re-render atualizando classe do input
-            const inputEl = e.target;
-            if (correto) {
-              inputEl.classList.remove("errado");
+            if (!correto) {
+              detectouErro = true;
             } else {
-              inputEl.classList.add("errado");
+              // Atualizar estado visual - acertou
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null; // Limpar estado de erro ao acertar
             }
           } else if (tamanhoAbsolutoResposta < tamanhoAbsolutoEsperado) {
-            // Ainda digitando, remover estado de erro
-            estadoValidacaoRef.current[index] = null;
-            e.target.classList.remove("errado");
+            // Ainda digitando - manter vermelho se já teve erro, senão limpar
+            estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+            if (contaTeveErro) {
+              e.target.classList.add("errado");
+            } else {
+              e.target.classList.remove("errado");
+            }
           } else {
             // Tamanho maior que esperado, já está errado
-            estadoValidacaoRef.current[index] = "errado";
+            detectouErro = true;
+          }
+        } else if (valorFiltrado !== "" && valorFiltrado !== "-") {
+          // Resposta inválida (não é número), manter estado anterior
+          if (contaTeveErro) {
             e.target.classList.add("errado");
           }
         } else {
-          // Resposta inválida, remover estado de erro
-          estadoValidacaoRef.current[index] = null;
-          e.target.classList.remove("errado");
+          // Campo vazio ou apenas "-", manter vermelho se já teve erro
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          } else {
+            e.target.classList.remove("errado");
+          }
         }
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
@@ -247,16 +273,20 @@ const ListaContas = ({
         if (respostaNormalizada.length === tamanhoEsperado) {
           const correto =
             respostaNormalizada === respostaEsperadaFormatada.toUpperCase();
-          estadoValidacaoRef.current[index] = correto ? null : "errado";
-          const inputEl = e.target;
-          if (correto) {
-            inputEl.classList.remove("errado");
+          if (!correto) {
+            detectouErro = true;
           } else {
-            inputEl.classList.add("errado");
+            estadoValidacaoRef.current[index] = null;
+            e.target.classList.remove("errado");
+            contaComErroRef.current = null;
           }
         } else if (respostaNormalizada.length < tamanhoEsperado) {
-          estadoValidacaoRef.current[index] = null;
-          e.target.classList.remove("errado");
+          estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          } else {
+            e.target.classList.remove("errado");
+          }
         }
       } else if (sistema === "binario") {
         respostaEsperadaFormatada = formatarNumero(
@@ -269,31 +299,50 @@ const ListaContas = ({
         if (respostaNormalizada.length === tamanhoEsperado) {
           if (/^[01]+$/.test(respostaNormalizada)) {
             const correto = respostaNormalizada === respostaEsperadaFormatada;
-            estadoValidacaoRef.current[index] = correto ? null : "errado";
-            const inputEl = e.target;
-            if (correto) {
-              inputEl.classList.remove("errado");
+            if (!correto) {
+              detectouErro = true;
             } else {
-              inputEl.classList.add("errado");
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
             }
           } else {
-            estadoValidacaoRef.current[index] = "errado";
-            e.target.classList.add("errado");
+            detectouErro = true;
           }
         } else if (respostaNormalizada.length < tamanhoEsperado) {
-          estadoValidacaoRef.current[index] = null;
-          e.target.classList.remove("errado");
+          estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          } else {
+            e.target.classList.remove("errado");
+          }
         }
+      }
+
+      // Se detectou erro, limpar o campo e marcar que a conta teve erro
+      if (detectouErro) {
+        estadoValidacaoRef.current[index] = "errado";
+        contaComErroRef.current = contaId;
+        
+        // Limpar o campo mas manter a caixa vermelha
+        e.target.value = "";
+        e.target.classList.add("errado");
+        
+        // Manter o foco no input
+        const inputElement = e.target;
+        requestAnimationFrame(() => {
+          if (inputElement && manterFocoRef.current && !disabled) {
+            inputElement.focus();
+          }
+        });
+        
+        return; // Não processar mais, aguardar nova tentativa
       }
     } catch (error) {
       // Ignorar erros de formatação
     }
 
     // Só processar se ainda estamos na conta atual e ela ainda não foi processada
-    const contaId = `${conta.parcela1}-${conta.parcela2}-${
-      conta.parcela3 || "null"
-    }-${conta.resultado}-${conta.tipo}`;
-
     if (
       valorFiltrado &&
       index === contaAtualIndex &&
@@ -306,6 +355,7 @@ const ListaContas = ({
 
       // Limpar estado de erro e input
       estadoValidacaoRef.current[index] = null;
+      contaComErroRef.current = null; // Limpar estado de erro ao acertar
       e.target.classList.remove("errado");
       
       // Manter o foco antes de limpar o input
@@ -390,6 +440,12 @@ const ListaContas = ({
             conta.parcela3 || "null"
           }-${conta.resultado}-${conta.tipo}-${index}`;
 
+          // Verificar se esta conta teve erro (para manter caixa vermelha)
+          const contaIdRender = `${conta.parcela1}-${conta.parcela2}-${
+            conta.parcela3 || "null"
+          }-${conta.resultado}-${conta.tipo}`;
+          const contaTeveErroRender = contaComErroRef.current === contaIdRender && index === contaAtualIndex;
+
           return (
             <React.Fragment key={contaKey}>
               {index === 1 && (
@@ -433,6 +489,10 @@ const ListaContas = ({
                             el.focus();
                           }, 50);
                         }
+                        // Adicionar classe errado se a conta teve erro
+                        if (contaTeveErroRender) {
+                          el.classList.add("errado");
+                        }
                       } else {
                         // Limpar ref quando o componente é desmontado
                         delete inputRefs.current[index];
@@ -442,7 +502,7 @@ const ListaContas = ({
                     type="text"
                     inputMode={sistema === "romano" ? "text" : "numeric"}
                     pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
-                    className="conta-input-resultado"
+                    className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
                     disabled={disabled || index !== contaAtualIndex}
                     onChange={(e) => handleChange(conta, index, e)}
                     onKeyDown={handleKeyDown}
