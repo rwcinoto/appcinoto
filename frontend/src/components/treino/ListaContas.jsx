@@ -12,11 +12,25 @@ const ListaContas = ({
   onAcerto,
   disabled = false,
 }) => {
+  // Função para formatar parcela com parênteses se for negativa (para parcelas 2 e 3)
+  const formatarParcelaComParenteses = (valorNumerico, valorFormatado) => {
+    if (valorNumerico === null || valorNumerico === undefined) {
+      return valorFormatado;
+    }
+    // Se o valor numérico for negativo, adicionar parênteses
+    if (valorNumerico < 0) {
+      return `(${valorFormatado})`;
+    }
+    return valorFormatado;
+  };
   const listaRef = useRef(null);
   const inputRefs = useRef({});
   const contaProcessandoRef = useRef(null); // ID da conta que já foi processada
   const ultimaPrimeiraContaRef = useRef(null); // ID da última primeira conta para detectar mudanças reais
   const estadoValidacaoRef = useRef({}); // Estado de validação visual por input (index -> "errado" | null)
+
+  // Ref para manter o foco ativo durante o treino
+  const manterFocoRef = useRef(false);
 
   // Scroll automático e foco na conta atual
   useEffect(() => {
@@ -42,12 +56,21 @@ const ListaContas = ({
       }
     }
 
+    // Ativar manutenção de foco quando não estiver desabilitado
+    manterFocoRef.current = !disabled;
+
     // Usar setTimeout para garantir que o DOM foi atualizado após mudanças nas contas
     const timer = setTimeout(() => {
       const inputRef = inputRefs.current[contaAtualIndex];
       if (inputRef && !disabled && inputRef.offsetParent !== null) {
         // offsetParent !== null garante que o elemento está visível
         inputRef.focus();
+        // Forçar foco novamente após um pequeno delay para garantir que o teclado apareça
+        setTimeout(() => {
+          if (inputRef && manterFocoRef.current && !disabled) {
+            inputRef.focus();
+          }
+        }, 50);
         inputRef.scrollIntoView({
           behavior: "smooth",
           block: "center",
@@ -56,6 +79,60 @@ const ListaContas = ({
     }, 100); // Aumentar delay para garantir que o DOM foi totalmente atualizado
 
     return () => clearTimeout(timer);
+  }, [contaAtualIndex, disabled, contas]);
+
+  // Manter foco no input durante o treino (para evitar que o teclado suma no mobile)
+  useEffect(() => {
+    if (disabled) {
+      manterFocoRef.current = false;
+      return;
+    }
+
+    manterFocoRef.current = true;
+    const inputRef = inputRefs.current[contaAtualIndex];
+
+    if (!inputRef) return;
+
+    // Função para restaurar foco se perdido
+    const restaurarFoco = () => {
+      if (manterFocoRef.current && inputRef && !disabled) {
+        // Verificar se o input ainda está no DOM e visível
+        if (inputRef.offsetParent !== null && document.activeElement !== inputRef) {
+          // Usar requestAnimationFrame para garantir que o foco seja restaurado após qualquer render
+          requestAnimationFrame(() => {
+            if (inputRef && manterFocoRef.current && !disabled && inputRef.offsetParent !== null) {
+              inputRef.focus();
+              // No mobile, pode ser necessário chamar focus() novamente
+              setTimeout(() => {
+                if (inputRef && manterFocoRef.current && !disabled && inputRef.offsetParent !== null) {
+                  inputRef.focus();
+                }
+              }, 50);
+            }
+          });
+        }
+      }
+    };
+
+    // Listener para detectar quando o foco é perdido
+    const handleBlur = (e) => {
+      // Só restaurar se ainda estivermos no treino e o blur não foi causado por desabilitar
+      if (manterFocoRef.current && !disabled && e.target === inputRef) {
+        // Pequeno delay para evitar conflito com outras ações, mas não muito longo para manter o teclado
+        setTimeout(() => {
+          restaurarFoco();
+        }, 50);
+      }
+    };
+
+    inputRef.addEventListener('blur', handleBlur);
+    // Verificar periodicamente se o foco foi perdido (intervalo menor para resposta mais rápida)
+    const intervalId = setInterval(restaurarFoco, 150);
+    
+    return () => {
+      inputRef.removeEventListener('blur', handleBlur);
+      clearInterval(intervalId);
+    };
   }, [contaAtualIndex, disabled, contas]);
 
   // Função para validar resposta
@@ -69,7 +146,7 @@ const ListaContas = ({
 
     try {
       // Formatar resultado esperado conforme sistema
-      if (sistema === "natural") {
+      if (sistema === "natural" || sistema === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         const respostaNumero = parseInt(respostaDigitada.trim(), 10);
         if (isNaN(respostaNumero)) return false;
@@ -103,6 +180,15 @@ const ListaContas = ({
 
     if (sistema === "natural") {
       valorFiltrado = novoValor.replace(/[^0-9]/g, "");
+    } else if (sistema === "inteiro") {
+      // Números com sinal de menos permitido (apenas no início)
+      if (novoValor === "-") {
+        valorFiltrado = "-";
+      } else if (novoValor.startsWith("-")) {
+        valorFiltrado = "-" + novoValor.slice(1).replace(/[^0-9]/g, "");
+      } else {
+        valorFiltrado = novoValor.replace(/[^0-9]/g, "");
+      }
     } else if (sistema === "romano") {
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
     } else if (sistema === "binario") {
@@ -117,14 +203,18 @@ const ListaContas = ({
     let respostaEsperadaFormatada;
 
     try {
-      if (sistema === "natural") {
+      if (sistema === "natural" || sistema === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
-        const tamanhoEsperado = respostaEsperadaFormatada.length;
         const respostaNormalizada = valorFiltrado.trim();
+        const respostaNumero = parseInt(respostaNormalizada, 10);
 
-        if (respostaNormalizada.length === tamanhoEsperado) {
-          const respostaNumero = parseInt(respostaNormalizada, 10);
-          if (!isNaN(respostaNumero)) {
+        if (!isNaN(respostaNumero)) {
+          // Calcular tamanho do valor absoluto (sem contar o sinal de menos)
+          const tamanhoAbsolutoEsperado = Math.abs(resultadoEsperado).toString().length;
+          const tamanhoAbsolutoResposta = Math.abs(respostaNumero).toString().length;
+
+          // Validar quando o tamanho do valor absoluto for igual ao esperado
+          if (tamanhoAbsolutoResposta === tamanhoAbsolutoEsperado) {
             const correto = respostaNumero === resultadoEsperado;
             // Atualizar estado visual
             estadoValidacaoRef.current[index] = correto ? null : "errado";
@@ -135,9 +225,17 @@ const ListaContas = ({
             } else {
               inputEl.classList.add("errado");
             }
+          } else if (tamanhoAbsolutoResposta < tamanhoAbsolutoEsperado) {
+            // Ainda digitando, remover estado de erro
+            estadoValidacaoRef.current[index] = null;
+            e.target.classList.remove("errado");
+          } else {
+            // Tamanho maior que esperado, já está errado
+            estadoValidacaoRef.current[index] = "errado";
+            e.target.classList.add("errado");
           }
-        } else if (respostaNormalizada.length < tamanhoEsperado) {
-          // Ainda digitando, remover estado de erro
+        } else {
+          // Resposta inválida, remover estado de erro
           estadoValidacaoRef.current[index] = null;
           e.target.classList.remove("errado");
         }
@@ -209,12 +307,39 @@ const ListaContas = ({
       // Limpar estado de erro e input
       estadoValidacaoRef.current[index] = null;
       e.target.classList.remove("errado");
-      e.target.value = "";
-
+      
+      // Manter o foco antes de limpar o input
+      const inputElement = e.target;
+      
+      // Limpar input mas manter foco imediatamente
+      inputElement.value = "";
+      
       // Chamar callback - o backend fará a validação final
       // Chamar diretamente (o handleAcerto já tem proteção contra múltiplas chamadas)
       if (onAcerto) {
         onAcerto(valorFiltrado);
+      }
+
+      // Restaurar foco imediatamente após limpar (múltiplas tentativas para garantir)
+      if (inputElement && manterFocoRef.current && !disabled) {
+        // Foco imediato
+        requestAnimationFrame(() => {
+          if (inputElement && manterFocoRef.current && !disabled) {
+            inputElement.focus();
+          }
+        });
+        // Foco após pequeno delay (para garantir que o teclado não suma)
+        setTimeout(() => {
+          if (inputElement && manterFocoRef.current && !disabled) {
+            inputElement.focus();
+          }
+        }, 10);
+        // Foco após um delay um pouco maior (backup)
+        setTimeout(() => {
+          if (inputElement && manterFocoRef.current && !disabled) {
+            inputElement.focus();
+          }
+        }, 100);
       }
     }
   };
@@ -246,11 +371,17 @@ const ListaContas = ({
           // Na operação de raiz, parcela2 pode ser null
           const parcela2Formatada =
             conta.parcela2 !== null && conta.parcela2 !== undefined
-              ? formatarNumero(conta.parcela2, sistema)
+              ? formatarParcelaComParenteses(
+                  conta.parcela2,
+                  formatarNumero(conta.parcela2, sistema)
+                )
               : "";
           const parcela3Formatada =
             conta.parcela3 !== null && conta.parcela3 !== undefined
-              ? formatarNumero(conta.parcela3, sistema)
+              ? formatarParcelaComParenteses(
+                  conta.parcela3,
+                  formatarNumero(conta.parcela3, sistema)
+                )
               : null;
           const simbolo = obterSimboloOperacao(conta.tipo);
 
@@ -310,7 +441,7 @@ const ListaContas = ({
                     autoFocus={index === contaAtualIndex && !disabled}
                     type="text"
                     inputMode={sistema === "romano" ? "text" : "numeric"}
-                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
+                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
                     className="conta-input-resultado"
                     disabled={disabled || index !== contaAtualIndex}
                     onChange={(e) => handleChange(conta, index, e)}

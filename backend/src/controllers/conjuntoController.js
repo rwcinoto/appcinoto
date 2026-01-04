@@ -44,7 +44,7 @@ class ConjuntoController {
           const conjunto = uc.conjunto;
 
           // Contar elementos com status 'aceito'
-          const quantidadeMembros = await UsuarioConjunto.count({
+          const quantidadeElementos = await UsuarioConjunto.count({
             where: {
               id_conjunto: conjunto.id,
               status: "aceito",
@@ -59,7 +59,7 @@ class ConjuntoController {
             criado_por: conjunto.criado_por,
             atualizado_em: conjunto.atualizado_em,
             atualizado_por: conjunto.atualizado_por,
-            quantidade_membros: quantidadeMembros,
+            quantidade_elementos: quantidadeElementos,
             tipo: uc.tipo, // Tipo do usuário no conjunto
           };
         })
@@ -128,7 +128,7 @@ class ConjuntoController {
         whereClause.status = "aceito";
       }
 
-      const membros = await UsuarioConjunto.findAll({
+      const elementos = await UsuarioConjunto.findAll({
         where: whereClause,
         include: [
           {
@@ -151,12 +151,12 @@ class ConjuntoController {
       });
 
       // Preparar resposta
-      const membrosFormatados = membros.map((m) => ({
-        id: m.usuario.id,
-        nome: m.usuario.nome,
-        email: m.usuario.email,
-        tipo: m.tipo,
-        status: m.status,
+      const elementosFormatados = elementos.map((e) => ({
+        id: e.usuario.id,
+        nome: e.usuario.nome,
+        email: e.usuario.email,
+        tipo: e.tipo,
+        status: e.status,
       }));
 
       return res.json({
@@ -167,7 +167,7 @@ class ConjuntoController {
         criado_por: conjunto.criado_por,
         atualizado_em: conjunto.atualizado_em,
         atualizado_por: conjunto.atualizado_por,
-        membros: membrosFormatados,
+        elementos: elementosFormatados,
         meu_tipo: usuarioConjunto.tipo, // Tipo do usuário logado no conjunto
       });
     } catch (error) {
@@ -293,7 +293,7 @@ class ConjuntoController {
       });
 
       // Retornar conjunto criado com quantidade de elementos
-      const quantidadeMembros = 1; // Apenas o criador
+      const quantidadeElementos = 1; // Apenas o criador
 
       return res.status(201).json({
         id: conjunto.id,
@@ -303,7 +303,7 @@ class ConjuntoController {
         criado_por: conjunto.criado_por,
         atualizado_em: conjunto.atualizado_em,
         atualizado_por: conjunto.atualizado_por,
-        quantidade_membros: quantidadeMembros,
+        quantidade_elementos: quantidadeElementos,
         tipo: "dono",
       });
     } catch (error) {

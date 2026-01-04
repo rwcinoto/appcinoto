@@ -112,6 +112,13 @@ class TreinoController {
         });
       }
 
+      // Validar que sistema "inteiro" não pode ser usado com operação "raiz"
+      if (operacao.tipo === "raiz" && sistema.tipo === "inteiro") {
+        return res.status(400).json({
+          message: "Sistema 'inteiro' não pode ser usado com operação 'raiz quadrada'",
+        });
+      }
+
       // Gerar buffer inicial de contas
       const contasIniciais = treinoService.gerarBufferContas(
         operacao,
@@ -210,6 +217,19 @@ class TreinoController {
       if (treino.id_usuario !== usuario.id) {
         return res.status(403).json({
           message: "Este treino não pertence a você",
+        });
+      }
+
+      // Verificar se o tempo do treino já esgotou
+      const tempoDecorrido = Date.now() - treino.inicio;
+      if (tempoDecorrido > treino.tempoLimite) {
+        // Tempo esgotado - retornar erro mas não bloquear (pode ser uma resposta pendente)
+        // Não contar a resposta no totalAcertos
+        return res.json({
+          correto: false,
+          respostaEsperada: null,
+          proximaConta: null,
+          tempoEsgotado: true,
         });
       }
 

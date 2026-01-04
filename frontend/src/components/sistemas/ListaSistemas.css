@@ -54,6 +54,11 @@
   color: #e65100;
 }
 
+.badge-inteiro {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
 .acoes {
   display: flex;
   gap: 8px;

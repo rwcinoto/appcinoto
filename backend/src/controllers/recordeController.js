@@ -53,9 +53,22 @@ class RecordeController {
         filtros.sistema_id = sistemaId;
       }
 
+      // Determinar qual usuário buscar recordes (padrão: usuário logado)
+      let usuarioIdParaBuscar = req.usuario.id;
+      if (req.query.usuario_id) {
+        const usuarioIdQuery = parseInt(req.query.usuario_id);
+        if (isNaN(usuarioIdQuery)) {
+          return res.status(400).json({
+            message: "usuario_id deve ser um número válido",
+          });
+        }
+        // Permitir que qualquer usuário veja os recordes de outro usuário
+        usuarioIdParaBuscar = usuarioIdQuery;
+      }
+
       // Chamar service para listar recordes
       const recordes = await recordeService.listarRecordes(
-        req.usuario.id,
+        usuarioIdParaBuscar,
         filtros
       );
 

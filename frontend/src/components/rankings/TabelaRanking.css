@@ -9,6 +9,13 @@
   overflow-x: auto;
 }
 
+/* Desktop: esconder barra de rolagem horizontal quando não necessário */
+@media (min-width: 769px) {
+  .tabela-ranking-container {
+    overflow-x: hidden;
+  }
+}
+
 .tabela-ranking-table {
   width: 100%;
   border-collapse: collapse;
@@ -44,7 +51,7 @@
 
 .coluna-pontuacao-header {
   text-align: center;
-  width: 180px;
+  width: 240px;
 }
 
 .coluna-data-header {

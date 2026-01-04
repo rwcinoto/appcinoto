@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import api from "../../services/api";
 import ErrorMessage from "../common/ErrorMessage";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
-import "./ModalAdicionarMembro.css";
+import "./ModalAdicionarElemento.css";
 
-const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
+const ModalAdicionarElemento = ({ conjuntoId, onFechar, onElementoAdicionado }) => {
   const [email, setEmail] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
@@ -24,10 +24,10 @@ const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
       await api.post(`/conjuntos/${conjuntoId}/usuarios`, {
         email: email.trim(),
       });
-      onMembroAdicionado();
+      onElementoAdicionado();
       onFechar();
     } catch (error) {
-      logError("ModalAdicionarMembro - handleSubmit", error);
+      logError("ModalAdicionarElemento - handleSubmit", error);
       setErro(getErrorMessage(error));
     } finally {
       setSalvando(false);
@@ -81,5 +81,5 @@ const ModalAdicionarMembro = ({ conjuntoId, onFechar, onMembroAdicionado }) => {
   );
 };
 
-export default ModalAdicionarMembro;
+export default ModalAdicionarElemento;
 

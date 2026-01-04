@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ListaConjuntos from "../components/conjuntos/ListaConjuntos";
 import ModalConjunto from "../components/conjuntos/ModalConjunto";
-import ModalAdicionarMembro from "../components/conjuntos/ModalAdicionarMembro";
+import ModalAdicionarElemento from "../components/conjuntos/ModalAdicionarElemento";
 import ConvitesPendentes from "../components/conjuntos/ConvitesPendentes";
 import Loading from "../components/common/Loading";
 import ErrorMessage from "../components/common/ErrorMessage";
@@ -19,8 +19,8 @@ const Conjuntos = () => {
   const [erro, setErro] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [conjuntoEditando, setConjuntoEditando] = useState(null);
-  const [modalAdicionarMembroAberto, setModalAdicionarMembroAberto] = useState(false);
-  const [conjuntoParaAdicionarMembro, setConjuntoParaAdicionarMembro] = useState(null);
+  const [modalAdicionarElementoAberto, setModalAdicionarElementoAberto] = useState(false);
+  const [conjuntoParaAdicionarElemento, setConjuntoParaAdicionarElemento] = useState(null);
 
   const carregarConjuntos = useCallback(async () => {
     if (!usuario) return;
@@ -87,18 +87,18 @@ const Conjuntos = () => {
     carregarConjuntos();
   };
 
-  const handleAdicionarMembro = (conjunto) => {
-    setConjuntoParaAdicionarMembro(conjunto);
-    setModalAdicionarMembroAberto(true);
+  const handleAdicionarElemento = (conjunto) => {
+    setConjuntoParaAdicionarElemento(conjunto);
+    setModalAdicionarElementoAberto(true);
   };
 
-  const handleModalAdicionarMembroFechar = () => {
-    setModalAdicionarMembroAberto(false);
-    setConjuntoParaAdicionarMembro(null);
+  const handleModalAdicionarElementoFechar = () => {
+    setModalAdicionarElementoAberto(false);
+    setConjuntoParaAdicionarElemento(null);
   };
 
-  const handleMembroAdicionado = () => {
-    handleModalAdicionarMembroFechar();
+  const handleElementoAdicionado = () => {
+    handleModalAdicionarElementoFechar();
     carregarConjuntos();
     // Recarregar convites pendentes após adicionar elemento (pode ter criado um novo convite)
     carregarConvitesPendentes();
@@ -158,7 +158,7 @@ const Conjuntos = () => {
         conjuntos={conjuntos}
         onEditar={handleEditarConjunto}
         onExcluir={handleExcluirConjunto}
-        onAdicionarMembro={handleAdicionarMembro}
+        onAdicionarElemento={handleAdicionarElemento}
         onSair={handleSairConjunto}
         loading={loading}
       />
@@ -171,11 +171,11 @@ const Conjuntos = () => {
         />
       )}
 
-      {modalAdicionarMembroAberto && conjuntoParaAdicionarMembro && (
-        <ModalAdicionarMembro
-          conjuntoId={conjuntoParaAdicionarMembro.id}
-          onFechar={handleModalAdicionarMembroFechar}
-          onMembroAdicionado={handleMembroAdicionado}
+      {modalAdicionarElementoAberto && conjuntoParaAdicionarElemento && (
+        <ModalAdicionarElemento
+          conjuntoId={conjuntoParaAdicionarElemento.id}
+          onFechar={handleModalAdicionarElementoFechar}
+          onElementoAdicionado={handleElementoAdicionado}
         />
       )}
     </div>

@@ -9,8 +9,8 @@ const { autorizarAdmin } = require("../middlewares/autorizacao");
 const validarCriarSistema = [
   body("descricao").optional().trim(),
   body("tipo")
-    .isIn(["natural", "romano", "binario"])
-    .withMessage("Tipo deve ser: natural, romano ou binario"),
+    .isIn(["natural", "romano", "binario", "inteiro"])
+    .withMessage("Tipo deve ser: natural, romano, binario ou inteiro"),
   body("id_plano")
     .isInt({ min: 1 })
     .withMessage("ID do plano deve ser um número inteiro válido"),
@@ -24,8 +24,8 @@ const validarAtualizarSistema = [
   body("descricao").optional().trim(),
   body("tipo")
     .optional()
-    .isIn(["natural", "romano", "binario"])
-    .withMessage("Tipo deve ser: natural, romano ou binario"),
+    .isIn(["natural", "romano", "binario", "inteiro"])
+    .withMessage("Tipo deve ser: natural, romano, binario ou inteiro"),
   body("id_plano")
     .optional()
     .isInt({ min: 1 })

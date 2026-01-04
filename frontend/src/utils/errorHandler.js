@@ -22,6 +22,11 @@ export const getErrorMessage = (error) => {
   // Erro HTTP do servidor
   const { status, data } = error.response;
 
+  // Mensagem personalizada do backend (verificar antes das mensagens genéricas)
+  if (data?.message) {
+    return data.message;
+  }
+
   // Erro 401 - Não autorizado
   if (status === 401) {
     return "Sessão expirada. Por favor, faça login novamente.";
@@ -37,6 +42,20 @@ export const getErrorMessage = (error) => {
     return "Recurso não encontrado.";
   }
 
+  // Erro 400 - Bad Request (validação)
+  if (status === 400) {
+    // Mensagem personalizada do backend
+    if (data?.message) {
+      return data.message;
+    }
+    // Erros de validação do express-validator
+    if (data?.errors && Array.isArray(data.errors)) {
+      const firstError = data.errors[0];
+      return firstError.msg || firstError.message || "Erro de validação. Verifique os dados informados.";
+    }
+    return "Dados inválidos. Verifique as informações e tente novamente.";
+  }
+
   // Erro 422 - Validação
   if (status === 422 && data?.errors && Array.isArray(data.errors)) {
     const firstError = data.errors[0];
@@ -46,11 +65,6 @@ export const getErrorMessage = (error) => {
   // Erro 500+ - Erro do servidor
   if (status >= 500) {
     return "Erro no servidor. Tente novamente mais tarde.";
-  }
-
-  // Mensagem personalizada do backend
-  if (data?.message) {
-    return data.message;
   }
 
   // Mensagem padrão

@@ -28,6 +28,39 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  gap: 12px;
+}
+
+.card-recorde-botao-treino {
+  background: transparent;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 36px;
+}
+
+.card-recorde-botao-treino:hover {
+  border-color: var(--cor-operacao, #2196f3);
+  background: #f5f5f5;
+  transform: scale(1.05);
+}
+
+.card-recorde-botao-treino:active {
+  transform: scale(0.95);
+}
+
+.card-recorde-botao-treino:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .card-recorde-titulo-linha h3 {
@@ -94,6 +127,28 @@
   font-size: 0.9rem;
   color: #333;
   font-weight: 500;
+}
+
+.card-recorde-posicao-ranking {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-recorde-posicao-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.card-recorde-posicao-valor {
+  font-size: 1rem;
+  color: #2196f3;
+  font-weight: 600;
+  font-family: "Courier New", monospace;
 }
 
 /* Responsividade */

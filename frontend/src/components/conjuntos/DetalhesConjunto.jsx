@@ -5,9 +5,9 @@ import "./DetalhesConjunto.css";
 
 const DetalhesConjunto = ({
   conjunto,
-  membros,
+  elementos,
   meuTipo,
-  onAdicionarMembro,
+  onAdicionarElemento,
   loading = false,
 }) => {
   const navigate = useNavigate();
@@ -38,9 +38,9 @@ const DetalhesConjunto = ({
         <div className="detalhes-info">
           <h1>{conjunto.nome}</h1>
           <div className="detalhes-meta">
-            <span className="badge-membros">
-              👥 {conjunto.membros?.length || 0} elemento
-              {(conjunto.membros?.length || 0) !== 1 ? "s" : ""}
+            <span className="badge-elementos">
+              👥 {conjunto.elementos?.length || elementos?.length || 0} elemento
+              {(conjunto.elementos?.length || elementos?.length || 0) !== 1 ? "s" : ""}
             </span>
             {meuTipo === "dono" && (
               <span className="badge-dono">Você é o dono</span>
@@ -51,7 +51,7 @@ const DetalhesConjunto = ({
           </div>
         </div>
         {podeGerenciar && (
-          <button className="btn-adicionar" onClick={onAdicionarMembro}>
+          <button className="btn-adicionar" onClick={onAdicionarElemento}>
             + Adicionar elemento
           </button>
         )}

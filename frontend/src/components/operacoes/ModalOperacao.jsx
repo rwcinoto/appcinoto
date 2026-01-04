@@ -41,7 +41,7 @@ const ModalOperacao = ({ operacao, planos, onFechar, onSalvo }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2>{operacao ? "Editar Operação" : "Criar Operação"}</h2>
+          <h2>{operacao ? "Editar operação" : "Criar operação"}</h2>
           <button className="modal-close" onClick={onFechar} aria-label="Fechar modal">
             ×
           </button>

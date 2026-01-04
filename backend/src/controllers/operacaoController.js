@@ -94,7 +94,7 @@ class OperacaoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      const { nome, descricao, tipo, min_parcela_1, max_parcela_1, id_plano } =
+      const { nome, descricao, tipo, min_parcela_1, max_parcela_1, id_plano, ordem } =
         req.body;
 
       // Usar let para variáveis que podem ser modificadas (para tipo raiz)

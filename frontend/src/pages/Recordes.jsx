@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ListaRecordes from "../components/recordes/ListaRecordes";
 import Loading from "../components/common/Loading";
 import ErrorMessage from "../components/common/ErrorMessage";
@@ -9,6 +10,9 @@ import "./Recordes.css";
 
 const Recordes = () => {
   const { usuario } = useAuth();
+  const [searchParams] = useSearchParams();
+  const usuarioIdParam = searchParams.get("usuario_id");
+  const [usuarioVisualizado, setUsuarioVisualizado] = useState(null);
   const [recordes, setRecordes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [limites, setLimites] = useState([]);
@@ -47,6 +51,32 @@ const Recordes = () => {
     }
   }, []);
 
+  // Carregar dados do usuário visualizado se houver usuario_id na URL
+  useEffect(() => {
+    const carregarUsuarioVisualizado = async () => {
+      if (usuarioIdParam) {
+        const usuarioId = parseInt(usuarioIdParam);
+        if (!isNaN(usuarioId) && usuarioId !== usuario?.id) {
+          try {
+            const response = await api.get(`/usuarios/${usuarioId}/nome`);
+            setUsuarioVisualizado(response.data);
+          } catch (error) {
+            logError("Recordes - carregarUsuarioVisualizado", error);
+            setErro("Usuário não encontrado");
+          }
+        } else {
+          setUsuarioVisualizado(null);
+        }
+      } else {
+        setUsuarioVisualizado(null);
+      }
+    };
+
+    if (usuario) {
+      carregarUsuarioVisualizado();
+    }
+  }, [usuarioIdParam, usuario]);
+
   const carregarRecordes = useCallback(async () => {
     if (!limiteSelecionado || !sistemaSelecionado) {
       return;
@@ -60,6 +90,14 @@ const Recordes = () => {
       const params = new URLSearchParams();
       params.append("limite_id", limiteSelecionado);
       params.append("sistema_id", sistemaSelecionado);
+      
+      // Adicionar usuario_id se estiver visualizando outro usuário
+      if (usuarioIdParam) {
+        const usuarioId = parseInt(usuarioIdParam);
+        if (!isNaN(usuarioId) && usuarioId !== usuario?.id) {
+          params.append("usuario_id", usuarioId.toString());
+        }
+      }
 
       const queryString = params.toString();
       const url = `/recordes?${queryString}`;
@@ -72,7 +110,7 @@ const Recordes = () => {
     } finally {
       setLoading(false);
     }
-  }, [limiteSelecionado, sistemaSelecionado]);
+  }, [limiteSelecionado, sistemaSelecionado, usuarioIdParam, usuario]);
 
   useEffect(() => {
     if (usuario) {
@@ -99,6 +137,7 @@ const Recordes = () => {
       natural: "Natural",
       romano: "Romano",
       binario: "Binário",
+      inteiro: "Inteiro",
     };
     return tipos[tipo] || tipo;
   };
@@ -110,10 +149,14 @@ const Recordes = () => {
     return formatarTipoSistema(sistema.tipo);
   };
 
+  const titulo = usuarioVisualizado 
+    ? `Recordes de ${usuarioVisualizado.nome}` 
+    : "Meus recordes";
+
   return (
     <div className="recordes-container">
       <div className="recordes-header">
-        <h1>Meus recordes</h1>
+        <h1>{titulo}</h1>
         <div className="filtros-header">
           {/* Limite de tempo */}
           {limites.length > 1 ? (
@@ -174,7 +217,11 @@ const Recordes = () => {
         />
       )}
 
-      <ListaRecordes recordes={recordes} loading={loading} />
+      <ListaRecordes 
+        recordes={recordes} 
+        loading={loading} 
+        usuarioIdVisualizado={usuarioIdParam ? parseInt(usuarioIdParam) : null}
+      />
     </div>
   );
 };
