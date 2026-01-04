@@ -38,7 +38,7 @@
   font-size: 20px;
 }
 
-.btn-adicionar-membro-card {
+.btn-adicionar-elemento-card {
   padding: 8px 16px;
   background: #4caf50;
   color: white;
@@ -54,7 +54,7 @@
   max-width: fit-content;
 }
 
-.btn-adicionar-membro-card:hover {
+.btn-adicionar-elemento-card:hover {
   background: #45a049;
 }
 
@@ -66,7 +66,7 @@
   flex-wrap: wrap;
 }
 
-.badge-membros {
+.badge-elementos {
   background: #e3f2fd;
   color: #1976d2;
   padding: 4px 12px;

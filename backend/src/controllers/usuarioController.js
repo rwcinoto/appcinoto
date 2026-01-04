@@ -45,7 +45,7 @@ class UsuarioController {
         offset,
         attributes: { exclude: ["senha"] },
         include: [{ association: "plano" }],
-        order: [["criado_em", "DESC"]],
+        order: [["nome", "ASC"]],
       });
 
       return res.json({
@@ -61,6 +61,41 @@ class UsuarioController {
       console.error("Erro ao listar usuários:", error);
       return res.status(500).json({
         message: "Erro ao listar usuários",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Obtém apenas o nome do usuário (público para usuários autenticados)
+   */
+  async obterNome(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+
+      if (isNaN(id)) {
+        return res.status(400).json({
+          message: "ID deve ser um número válido",
+        });
+      }
+
+      const usuario = await Usuario.findByPk(id, {
+        attributes: ["id", "nome", "email"],
+      });
+
+      if (!usuario) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      return res.json({
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+      });
+    } catch (error) {
+      console.error("Erro ao obter nome do usuário:", error);
+      return res.status(500).json({
+        message: "Erro ao obter nome do usuário",
         error: error.message,
       });
     }

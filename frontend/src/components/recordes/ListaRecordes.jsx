@@ -3,7 +3,7 @@ import CardRecorde from "./CardRecorde";
 import Loading from "../common/Loading";
 import "./ListaRecordes.css";
 
-const ListaRecordes = ({ recordes, loading }) => {
+const ListaRecordes = ({ recordes, loading, usuarioIdVisualizado = null }) => {
   if (loading) {
     return <Loading text="Carregando recordes..." />;
   }
@@ -44,7 +44,11 @@ const ListaRecordes = ({ recordes, loading }) => {
   return (
     <div className="cards-recordes">
       {recordesOrdenados.map((recorde) => (
-        <CardRecorde key={recorde.id} recorde={recorde} />
+        <CardRecorde 
+          key={recorde.id} 
+          recorde={recorde} 
+          usuarioIdVisualizado={usuarioIdVisualizado}
+        />
       ))}
     </div>
   );

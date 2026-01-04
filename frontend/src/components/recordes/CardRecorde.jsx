@@ -1,8 +1,53 @@
 import { format } from "date-fns";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ContagemRegressiva from "../treino/ContagemRegressiva";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
+import { getErrorMessage, logError } from "../../utils/errorHandler";
 import "./CardRecorde.css";
 
-const CardRecorde = ({ recorde }) => {
+const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
+  const { usuario } = useAuth();
+  const navigate = useNavigate();
+  const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [iniciandoTreino, setIniciandoTreino] = useState(false);
+  const [mostrarContagem, setMostrarContagem] = useState(false);
+  const [dadosTreino, setDadosTreino] = useState(null);
+
+  // Determinar qual usuário usar para buscar a posição
+  const usuarioIdParaPosicao = usuarioIdVisualizado || (usuario?.id || null);
+
+  // Buscar posição no ranking global
+  useEffect(() => {
+    const buscarPosicaoRanking = async () => {
+      if (!recorde || !usuarioIdParaPosicao || !recorde.operacao || !recorde.limite || !recorde.sistema) {
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams({
+          operacao_id: recorde.operacao.id.toString(),
+          limite_id: recorde.limite.id.toString(),
+          sistema_id: recorde.sistema.id.toString(),
+        });
+
+        // Adicionar usuario_id se estiver visualizando outro usuário
+        if (usuarioIdVisualizado && usuarioIdVisualizado !== usuario?.id) {
+          params.append("usuario_id", usuarioIdVisualizado.toString());
+        }
+
+        const response = await api.get(`/rankings/posicao?${params.toString()}`);
+        setPosicaoRanking(response.data.posicao);
+      } catch (error) {
+        console.error("Erro ao buscar posição no ranking:", error);
+        setPosicaoRanking(null);
+      }
+    };
+
+    buscarPosicaoRanking();
+  }, [recorde, usuarioIdParaPosicao, usuarioIdVisualizado, usuario]);
+
   if (!recorde) {
     return null;
   }
@@ -23,6 +68,7 @@ const CardRecorde = ({ recorde }) => {
       natural: "Natural",
       romano: "Romano",
       binario: "Binário",
+      inteiro: "Inteiro",
     };
     return tipos[tipo] || tipo;
   };
@@ -71,10 +117,54 @@ const CardRecorde = ({ recorde }) => {
       ? tempoMedioPorConta.toFixed(1).replace(".", ",")
       : null;
 
+  const handleIniciarTreino = async () => {
+    if (!recorde?.operacao || !recorde?.limite || !recorde?.sistema) {
+      return;
+    }
+
+    setIniciandoTreino(true);
+
+    try {
+      const response = await api.post("/treinos/iniciar", {
+        operacao_id: recorde.operacao.id,
+        limite_id: recorde.limite.id,
+        sistema_id: recorde.sistema.id,
+      });
+
+      // Salvar dados do treino e mostrar contagem regressiva
+      setDadosTreino(response.data);
+      setMostrarContagem(true);
+    } catch (error) {
+      logError("CardRecorde - handleIniciarTreino", error);
+      alert(getErrorMessage(error));
+      setIniciandoTreino(false);
+    }
+  };
+
+  const handleContagemTerminar = () => {
+    setMostrarContagem(false);
+    setIniciandoTreino(false);
+    // Navegar para tela de treino ativo com dados do treino
+    navigate("/treino-ativo", { state: { treinoData: dadosTreino } });
+  };
+
   return (
-    <div className="card-recorde" style={{ borderColor: corOperacao }}>
+    <>
+      {mostrarContagem && (
+        <ContagemRegressiva onTerminar={handleContagemTerminar} />
+      )}
+      <div className="card-recorde" style={{ borderColor: corOperacao, "--cor-operacao": corOperacao }}>
       <div className="card-recorde-header">
         <div className="card-recorde-titulo-linha">
+          <button
+            className="card-recorde-botao-treino"
+            onClick={handleIniciarTreino}
+            disabled={iniciandoTreino}
+            title="Iniciar treino com estas configurações"
+            aria-label="Iniciar treino com estas configurações"
+          >
+            {iniciandoTreino ? "..." : "🏃"}
+          </button>
           <h3>{recorde.operacao?.nome || "Operação"}</h3>
           <span className="card-recorde-tipo" style={{ color: corOperacao }}>
             {formatarTipoOperacao(tipoOperacao)}
@@ -122,7 +212,15 @@ const CardRecorde = ({ recorde }) => {
           </span>
         </div>
       </div>
+
+      {posicaoRanking !== null && (
+        <div className="card-recorde-posicao-ranking">
+          <span className="card-recorde-posicao-label">Posição no ranking global:</span>
+          <span className="card-recorde-posicao-valor">#{posicaoRanking}</span>
+        </div>
+      )}
     </div>
+    </>
   );
 };
 

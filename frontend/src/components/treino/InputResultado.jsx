@@ -46,7 +46,7 @@ const InputResultado = ({
 
     try {
       // Formatar resultado esperado conforme sistema
-      if (sistema === "natural") {
+      if (sistema === "natural" || sistema === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         tamanhoEsperado = respostaEsperadaFormatada.length;
       } else if (sistema === "romano") {
@@ -66,32 +66,35 @@ const InputResultado = ({
       // Para números com múltiplos dígitos, validar apenas quando estiver completo
       const respostaNormalizada = respostaDigitada.trim();
 
-      if (sistema === "natural") {
-        // Para natural: validar apenas quando o tamanho for igual
-        if (respostaNormalizada.length < tamanhoEsperado) {
-          // Ainda está digitando, não validar ainda
-          setEstadoValidacao(null);
-          return false;
-        }
-
-        // Se chegou aqui, o tamanho é igual ou maior
+      if (sistema === "natural" || sistema === "inteiro") {
+        // Para natural e inteiro: validar quando o tamanho do valor absoluto for igual
+        // Calcular tamanho do valor absoluto (sem contar o sinal de menos)
+        const tamanhoAbsolutoEsperado = Math.abs(resultadoEsperado).toString().length;
         const respostaNumero = parseInt(respostaNormalizada, 10);
+        
         if (!isNaN(respostaNumero)) {
-          const correto = respostaNumero === resultadoEsperado;
-
-          // Mostrar estado apenas se estiver completo
-          if (respostaNormalizada.length === tamanhoEsperado) {
+          const tamanhoAbsolutoResposta = Math.abs(respostaNumero).toString().length;
+          
+          // Validar quando o tamanho do valor absoluto for igual ao esperado
+          if (tamanhoAbsolutoResposta === tamanhoAbsolutoEsperado) {
+            const correto = respostaNumero === resultadoEsperado;
             setEstadoValidacao(correto ? "correto" : "errado");
 
             if (correto) {
               return true;
             }
+          } else if (tamanhoAbsolutoResposta < tamanhoAbsolutoEsperado) {
+            // Ainda está digitando, não validar ainda
+            setEstadoValidacao(null);
+            return false;
           } else {
             // Tamanho maior que esperado, já está errado
             setEstadoValidacao("errado");
           }
         } else {
+          // Resposta inválida, não validar ainda
           setEstadoValidacao(null);
+          return false;
         }
       } else if (sistema === "romano") {
         // Para romano: validar apenas quando o tamanho for igual
@@ -148,6 +151,16 @@ const InputResultado = ({
     if (sistema === "natural") {
       // Apenas números (sem negativo, pois resultados de operações básicas são positivos)
       valorFiltrado = novoValor.replace(/[^0-9]/g, "");
+    } else if (sistema === "inteiro") {
+      // Números com sinal de menos permitido (apenas no início)
+      // Permitir: - no início, seguido de números
+      if (novoValor === "-") {
+        valorFiltrado = "-";
+      } else if (novoValor.startsWith("-")) {
+        valorFiltrado = "-" + novoValor.slice(1).replace(/[^0-9]/g, "");
+      } else {
+        valorFiltrado = novoValor.replace(/[^0-9]/g, "");
+      }
     } else if (sistema === "romano") {
       // Apenas letras romanas (I, V, X, L, C, D, M)
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
@@ -189,7 +202,7 @@ const InputResultado = ({
         ref={inputRef}
         type="text"
         inputMode={sistema === "romano" ? "text" : "numeric"}
-        pattern={sistema === "natural" ? "[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
+        pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
         value={valor}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

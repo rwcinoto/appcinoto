@@ -66,7 +66,7 @@ export const paraBinario = (numero) => {
 /**
  * Formatar número conforme sistema numérico
  * @param {number|null} numero - Número decimal (pode ser null)
- * @param {string} sistema - 'natural', 'romano' ou 'binario'
+ * @param {string} sistema - 'natural', 'romano', 'binario' ou 'inteiro'
  * @returns {string|number} Número formatado
  */
 export const formatarNumero = (numero, sistema) => {
@@ -82,6 +82,8 @@ export const formatarNumero = (numero, sistema) => {
 
   switch (sistema) {
     case "natural":
+      return numero;
+    case "inteiro":
       return numero;
     case "romano":
       return paraRomano(numero);

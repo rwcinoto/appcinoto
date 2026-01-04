@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ContadorPontos from "../components/treino/ContadorPontos";
+import ContagemRegressiva from "../components/treino/ContagemRegressiva";
 import ListaContas from "../components/treino/ListaContas";
 import ResultadoTreino from "../components/treino/ResultadoTreino";
 import Timer from "../components/treino/Timer";
@@ -40,6 +41,8 @@ const TreinoAtivo = () => {
   const [resultado, setResultado] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [mostrarContagem, setMostrarContagem] = useState(false);
+  const [treinoFinalizado, setTreinoFinalizado] = useState(false);
 
   // Função para iniciar treino (reutilizável)
   const iniciarTreino = async (dadosTreino) => {
@@ -72,6 +75,7 @@ const TreinoAtivo = () => {
       setProcessando(false);
       setMostrarResultado(false); // Garantir que o resultado está oculto
       finalizadoRef.current = false; // Resetar flag de finalizado
+      setTreinoFinalizado(false); // Resetar flag de treino finalizado
     } catch (error) {
       logError("TreinoAtivo - iniciarTreino", error);
       setErro(getErrorMessage(error));
@@ -104,7 +108,7 @@ const TreinoAtivo = () => {
 
   const handleAcerto = async (resposta) => {
     if (!resposta || resposta.trim() === "") return;
-    if (!treinoId || processando) {
+    if (!treinoId || processando || treinoFinalizado) {
       return;
     }
 
@@ -117,7 +121,13 @@ const TreinoAtivo = () => {
         resposta: resposta,
       });
 
-      const { correto, proximaConta } = response.data;
+      const { correto, proximaConta, tempoEsgotado } = response.data;
+
+      // Se o tempo esgotou, não processar a resposta
+      if (tempoEsgotado) {
+        setProcessando(false);
+        return;
+      }
 
       // Incrementar contador IMEDIATAMENTE quando acerta
       // Usar ref + setState para garantir sincronização perfeita
@@ -157,18 +167,30 @@ const TreinoAtivo = () => {
     // Prevenir múltiplas finalizações
     if (!treinoId || finalizadoRef.current) return;
 
-    // Marcar como finalizado imediatamente
+    // Marcar como finalizado imediatamente para bloquear novas respostas
     finalizadoRef.current = true;
+    setTreinoFinalizado(true);
+    setProcessando(true); // Bloquear processamento de novas respostas
 
     try {
-      setProcessando(true);
+      // Aguardar um pouco para garantir que qualquer resposta pendente seja processada
+      // Mas não esperar muito para não atrasar a finalização
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const response = await api.post("/treinos/finalizar", {
         treino_id: treinoId,
-        total: totalAcertos,
+        total: totalAcertosRef.current, // Usar ref para garantir valor mais atualizado
       });
 
-      setResultado(response.data);
+      // IMPORTANTE: Usar o valor retornado pelo backend como fonte da verdade
+      setResultado({
+        ...response.data,
+        total: response.data.total, // Garantir que usamos o valor do backend
+      });
       setMostrarResultado(true);
+      
+      // Atualizar o estado visual com o valor correto do backend
+      setTotalAcertos(response.data.total);
       
       // Toast será mostrado se houver recorde
       if (response.data.bateuRecorde) {
@@ -179,6 +201,8 @@ const TreinoAtivo = () => {
       setErro(getErrorMessage(error));
       // Em caso de erro, permitir tentar novamente
       finalizadoRef.current = false;
+      setTreinoFinalizado(false);
+      setProcessando(false);
     }
   };
 
@@ -186,11 +210,17 @@ const TreinoAtivo = () => {
     finalizarTreino();
   };
 
-  const handleRecomecar = async () => {
+  const handleRecomecar = () => {
     setMostrarResultado(false);
     setResultado(null);
     setErro(""); // Limpar erros anteriores
 
+    // Mostrar contagem regressiva antes de reiniciar
+    setMostrarContagem(true);
+  };
+
+  const handleContagemTerminar = async () => {
+    setMostrarContagem(false);
     // Reiniciar treino com os mesmos dados usando a função compartilhada
     await iniciarTreino(treinoData);
   };
@@ -241,6 +271,9 @@ const TreinoAtivo = () => {
 
   return (
     <>
+      {mostrarContagem && (
+        <ContagemRegressiva onTerminar={handleContagemTerminar} />
+      )}
       {mostrarResultado && resultado && (
         <ResultadoTreino
           resultado={resultado}
@@ -257,7 +290,7 @@ const TreinoAtivo = () => {
               sistema={sistemaTipo}
               contaAtualIndex={contaAtualIndex}
               onAcerto={handleAcerto}
-              disabled={processando}
+              disabled={processando || treinoFinalizado}
             />
           </div>
 

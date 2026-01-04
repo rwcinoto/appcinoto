@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DetalhesConjunto from "../components/conjuntos/DetalhesConjunto";
-import ListaMembros from "../components/conjuntos/ListaMembros";
-import ModalAdicionarMembro from "../components/conjuntos/ModalAdicionarMembro";
+import ListaElementos from "../components/conjuntos/ListaElementos";
+import ModalAdicionarElemento from "../components/conjuntos/ModalAdicionarElemento";
 import Loading from "../components/common/Loading";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
@@ -15,7 +15,7 @@ const DetalhesConjuntoPage = () => {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const [conjunto, setConjunto] = useState(null);
-  const [membros, setMembros] = useState([]);
+  const [elementos, setElementos] = useState([]);
   const [meuTipo, setMeuTipo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -32,7 +32,7 @@ const DetalhesConjuntoPage = () => {
     try {
       const response = await api.get(`/conjuntos/${id}`);
       setConjunto(response.data);
-      setMembros(response.data.membros || []);
+      setElementos(response.data.elementos || []);
       setMeuTipo(response.data.meu_tipo || null);
     } catch (error) {
       logError("DetalhesConjunto - carregarDetalhes", error);
@@ -53,11 +53,11 @@ const DetalhesConjuntoPage = () => {
     }
   }, [usuario, carregarDetalhes]);
 
-  const handleAdicionarMembro = () => {
+  const handleAdicionarElemento = () => {
     setModalAdicionarAberto(true);
   };
 
-  const handleMembroAdicionado = () => {
+  const handleElementoAdicionado = () => {
     carregarDetalhes();
   };
 
@@ -81,7 +81,7 @@ const DetalhesConjuntoPage = () => {
     }
   };
 
-  const handleRemoverMembro = async (usuarioId) => {
+  const handleRemoverElemento = async (usuarioId) => {
     if (
       !window.confirm(
         "Deseja realmente remover este elemento do conjunto? Esta ação não pode ser desfeita."
@@ -94,7 +94,7 @@ const DetalhesConjuntoPage = () => {
       await api.delete(`/conjuntos/${id}/usuarios/${usuarioId}`);
       carregarDetalhes();
     } catch (error) {
-      logError("DetalhesConjunto - handleRemoverMembro", error);
+      logError("DetalhesConjunto - handleRemoverElemento", error);
       alert(getErrorMessage(error));
     }
   };
@@ -143,9 +143,9 @@ const DetalhesConjuntoPage = () => {
     <div className="detalhes-conjunto-container">
       <DetalhesConjunto
         conjunto={conjunto}
-        membros={membros}
+        elementos={elementos}
         meuTipo={meuTipo}
-        onAdicionarMembro={handleAdicionarMembro}
+        onAdicionarElemento={handleAdicionarElemento}
         loading={loading}
       />
 
@@ -160,13 +160,13 @@ const DetalhesConjuntoPage = () => {
 
       {!loading && conjunto && (
         <>
-          <div className="membros-section">
+          <div className="elementos-section">
             <h2>Elementos do conjunto</h2>
-            <ListaMembros
-              membros={membros}
+            <ListaElementos
+              elementos={elementos}
               meuTipo={meuTipo}
               onTornarAdmin={handleTornarAdmin}
-              onRemover={handleRemoverMembro}
+              onRemover={handleRemoverElemento}
               onReenviarConvite={handleReenviarConvite}
               loading={false}
             />
@@ -175,10 +175,10 @@ const DetalhesConjuntoPage = () => {
       )}
 
       {modalAdicionarAberto && (
-        <ModalAdicionarMembro
+        <ModalAdicionarElemento
           conjuntoId={id}
           onFechar={() => setModalAdicionarAberto(false)}
-          onMembroAdicionado={handleMembroAdicionado}
+          onElementoAdicionado={handleElementoAdicionado}
         />
       )}
     </div>

@@ -148,6 +148,90 @@ class RankingController {
       });
     }
   }
+
+  /**
+   * Obtém apenas a posição do usuário no ranking global
+   * Filtros via query params: operacao_id, limite_id, sistema_id
+   */
+  async obterPosicao(req, res) {
+    try {
+      const erros = validationResult(req);
+      if (!erros.isEmpty()) {
+        return res.status(400).json({ errors: erros.array() });
+      }
+
+      // Obter filtros da query string
+      const { operacao_id, limite_id, sistema_id } = req.query;
+
+      // Validar filtros obrigatórios
+      if (!operacao_id || !limite_id || !sistema_id) {
+        return res.status(400).json({
+          message:
+            "Filtros obrigatórios: operacao_id, limite_id, sistema_id",
+        });
+      }
+
+      // Converter para números
+      const operacaoId = parseInt(operacao_id);
+      const limiteId = parseInt(limite_id);
+      const sistemaId = parseInt(sistema_id);
+
+      // Validar que são números válidos
+      if (isNaN(operacaoId) || isNaN(limiteId) || isNaN(sistemaId)) {
+        return res.status(400).json({
+          message:
+            "operacao_id, limite_id e sistema_id devem ser números válidos",
+        });
+      }
+
+      const usuario = req.usuario;
+
+      // Preparar filtros para o service
+      const filtros = {
+        operacao_id: operacaoId,
+        limite_id: limiteId,
+        sistema_id: sistemaId,
+      };
+
+      // Determinar qual usuário buscar posição (padrão: usuário logado)
+      let usuarioIdParaBuscar = usuario.id;
+      if (req.query.usuario_id) {
+        const usuarioIdQuery = parseInt(req.query.usuario_id);
+        if (isNaN(usuarioIdQuery)) {
+          return res.status(400).json({
+            message: "usuario_id deve ser um número válido",
+          });
+        }
+        // Permitir que qualquer usuário veja a posição de outro usuário
+        usuarioIdParaBuscar = usuarioIdQuery;
+      }
+
+      // Chamar service para obter posição
+      const posicao = await rankingService.obterPosicaoUsuario(
+        filtros,
+        usuarioIdParaBuscar
+      );
+
+      return res.json({ posicao });
+    } catch (error) {
+      console.error("Erro ao obter posição:", error);
+
+      // Tratar erros específicos do service
+      if (
+        error.message === "Filtros obrigatórios: operacao_id, limite_id, sistema_id" ||
+        error.message === "Operação não encontrada" ||
+        error.message === "Limite não encontrado" ||
+        error.message === "Sistema não encontrado"
+      ) {
+        return res.status(404).json({ message: error.message });
+      }
+
+      return res.status(500).json({
+        message: "Erro ao obter posição",
+        error: error.message,
+      });
+    }
+  }
 }
 
 module.exports = new RankingController();

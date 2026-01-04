@@ -122,6 +122,15 @@ router.get(
   )
 );
 
+// Rota pública para buscar apenas nome do usuário (para visualizar recordes)
+// DEVE vir ANTES da rota /:id para evitar conflito de rotas
+router.get(
+  "/:id/nome",
+  authMiddleware,
+  validarId,
+  usuarioController.obterNome.bind(usuarioController)
+);
+
 router.get(
   "/:id",
   authMiddleware,

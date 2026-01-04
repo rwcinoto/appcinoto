@@ -11,7 +11,6 @@
 }
 
 .linha-ranking.top-3:hover {
-  transform: scale(1.01);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -26,26 +25,26 @@
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
-/* Top 2 - Laranja */
+/* Top 2 - Prateado/Cinza */
 .linha-ranking.top-2 {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #C0C0C0;
+}
+
+.linha-ranking.top-2:hover {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.15) 0%, transparent 100%);
+  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.2);
+}
+
+/* Top 3 - Laranja/Bronze */
+.linha-ranking.top-3-pos {
   background: linear-gradient(90deg, rgba(255, 152, 0, 0.1) 0%, transparent 100%);
   border-left: 4px solid #FF9800;
 }
 
-.linha-ranking.top-2:hover {
+.linha-ranking.top-3-pos:hover {
   background: linear-gradient(90deg, rgba(255, 152, 0, 0.15) 0%, transparent 100%);
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
-}
-
-/* Top 3 - Azul */
-.linha-ranking.top-3-pos {
-  background: linear-gradient(90deg, rgba(33, 150, 243, 0.1) 0%, transparent 100%);
-  border-left: 4px solid #2196F3;
-}
-
-.linha-ranking.top-3-pos:hover {
-  background: linear-gradient(90deg, rgba(33, 150, 243, 0.15) 0%, transparent 100%);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
 .linha-ranking.usuario-logado {
@@ -72,7 +71,7 @@
 .linha-ranking.top-2.usuario-logado {
   background: linear-gradient(
     90deg,
-    rgba(255, 152, 0, 0.12) 0%,
+    rgba(192, 192, 192, 0.12) 0%,
     rgba(33, 150, 243, 0.08) 50%,
     transparent 100%
   );
@@ -127,6 +126,18 @@
   color: #333;
 }
 
+.nome-usuario-link {
+  font-weight: 500;
+  color: #1976d2;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nome-usuario-link:hover {
+  color: #1565c0;
+  text-decoration: underline;
+}
+
 .badge-usuario-logado {
   padding: 2px 8px;
   background: #2196f3;
@@ -142,13 +153,13 @@
   padding: 12px;
   text-align: center;
   font-weight: 600;
-  min-width: 180px;
+  min-width: 240px;
 }
 
 .pontuacao-valor {
   font-family: "Courier New", monospace;
   font-size: 1.1rem;
-  color: #2196F3;
+  color: #4CAF50;
   font-weight: 600;
 }
 
@@ -184,11 +195,11 @@
 }
 
 .linha-ranking.top-2 .pontuacao-valor {
-  color: #FF9800;
+  color: #C0C0C0;
 }
 
 .linha-ranking.top-3-pos .pontuacao-valor {
-  color: #2196F3;
+  color: #FF9800;
 }
 
 /* Responsivo para mobile */

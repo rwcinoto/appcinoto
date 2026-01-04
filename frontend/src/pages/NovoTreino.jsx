@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
 import Loading from "../components/common/Loading";
@@ -91,6 +91,30 @@ const NovoTreino = () => {
     }
   }, [operacoes, operacaoSelecionada]);
 
+  // Filtrar sistemas disponíveis: se operação for raiz, remover sistema "inteiro"
+  const sistemasDisponiveis = useMemo(() => {
+    if (operacaoSelecionada?.tipo === "raiz") {
+      return sistemas.filter((sistema) => sistema.tipo !== "inteiro");
+    }
+    return sistemas;
+  }, [sistemas, operacaoSelecionada]);
+
+  // Se o sistema selecionado atual não está mais disponível, ajustar seleção
+  useEffect(() => {
+    if (sistemaSelecionado && sistemasDisponiveis.length > 0) {
+      const sistemaAtual = sistemasDisponiveis.find(
+        (s) => s.id.toString() === sistemaSelecionado
+      );
+      if (!sistemaAtual) {
+        // Sistema selecionado não está mais disponível, selecionar o primeiro disponível
+        setSistemaSelecionado(sistemasDisponiveis[0].id.toString());
+      }
+    } else if (sistemaSelecionado && sistemasDisponiveis.length === 0) {
+      // Não há sistemas disponíveis, limpar seleção
+      setSistemaSelecionado("");
+    }
+  }, [sistemasDisponiveis, sistemaSelecionado]);
+
   const formatarTipoOperacao = (tipo) => {
     const tipos = {
       soma: "Soma",
@@ -113,8 +137,29 @@ const NovoTreino = () => {
     return cores[tipo] || "#E0E0E0";
   };
 
+  const formatarTipoSistema = (tipo) => {
+    const tipos = {
+      natural: "Natural",
+      romano: "Romano",
+      binario: "Binário",
+      inteiro: "Inteiro",
+    };
+    return tipos[tipo] || tipo;
+  };
+
   const handleSelecionarOperacao = (operacao) => {
     setOperacaoSelecionada(operacao);
+    
+    // Se a operação for raiz quadrada e o sistema selecionado for "inteiro",
+    // limpar a seleção do sistema
+    if (operacao.tipo === "raiz" && sistemaSelecionado) {
+      const sistemaAtual = sistemas.find(
+        (s) => s.id.toString() === sistemaSelecionado
+      );
+      if (sistemaAtual && sistemaAtual.tipo === "inteiro") {
+        setSistemaSelecionado("");
+      }
+    }
   };
 
   const handleIniciarTreino = async () => {
@@ -202,7 +247,7 @@ const NovoTreino = () => {
             ) : null}
 
             {/* Sistema numérico - mostra select se houver múltiplas opções, senão mostra apenas o valor */}
-            {sistemas.length > 1 ? (
+            {sistemasDisponiveis.length > 1 ? (
               <div className="select-group-filtro">
                 <span className="filtro-label">Sistema:</span>
                 <select
@@ -210,18 +255,18 @@ const NovoTreino = () => {
                   onChange={(e) => setSistemaSelecionado(e.target.value)}
                   className="select-sistema"
                 >
-                  {sistemas.map((sistema) => (
+                  {sistemasDisponiveis.map((sistema) => (
                     <option key={sistema.id} value={sistema.id}>
-                      {sistema.descricao}
+                      {sistema.descricao || formatarTipoSistema(sistema.tipo)}
                     </option>
                   ))}
                 </select>
               </div>
-            ) : sistemas.length === 1 ? (
+            ) : sistemasDisponiveis.length === 1 ? (
               <div className="filtro-valor-unico">
                 <span className="filtro-label">Sistema:</span>
                 <span className="filtro-valor">
-                  {sistemas[0].descricao}
+                  {sistemasDisponiveis[0].descricao || formatarTipoSistema(sistemasDisponiveis[0].tipo)}
                 </span>
               </div>
             ) : null}

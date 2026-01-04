@@ -633,7 +633,7 @@ class UsuarioConjuntoController {
 
   /**
    * Sair do conjunto
-   * Permite que membros do tipo 'comum' ou 'admin' saiam do conjunto
+   * Permite que elementos do tipo 'comum' ou 'admin' saiam do conjunto
    * Muda o status para 'rejeitado'
    * Não permite que o dono saia (deve excluir o conjunto)
    */
@@ -670,7 +670,7 @@ class UsuarioConjuntoController {
         });
       }
 
-      // Validar que o status é 'aceito' (membro ativo)
+      // Validar que o status é 'aceito' (elemento ativo)
       if (usuarioConjunto.status !== "aceito") {
         return res.status(400).json({
           message: "Você não está ativo neste conjunto",
@@ -696,7 +696,7 @@ class UsuarioConjuntoController {
 
   /**
    * Reenviar convite
-   * Permite que dono/admin reenvie convite para membros com status 'rejeitado'
+   * Permite que dono/admin reenvie convite para elementos com status 'rejeitado'
    * Muda o status de 'rejeitado' para 'pendente'
    */
   async reenviarConvite(req, res) {

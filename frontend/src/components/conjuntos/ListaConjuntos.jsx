@@ -7,7 +7,7 @@ const ListaConjuntos = ({
   conjuntos,
   onEditar,
   onExcluir,
-  onAdicionarMembro,
+  onAdicionarElemento,
   onSair,
   loading = false,
 }) => {
@@ -34,9 +34,9 @@ const ListaConjuntos = ({
             <div className="conjunto-info">
               <h3>{conjunto.nome}</h3>
               <div className="conjunto-detalhes">
-                <span className="badge-membros">
-                  👥 {conjunto.quantidade_membros} elemento
-                  {conjunto.quantidade_membros !== 1 ? "s" : ""}
+                <span className="badge-elementos">
+                  👥 {conjunto.quantidade_elementos} elemento
+                  {conjunto.quantidade_elementos !== 1 ? "s" : ""}
                 </span>
                 {conjunto.tipo === "dono" && (
                   <span className="badge-dono">Dono</span>
@@ -48,8 +48,8 @@ const ListaConjuntos = ({
             </div>
             {(conjunto.tipo === "dono" || conjunto.tipo === "admin") && (
               <button
-                className="btn-adicionar-membro-card"
-                onClick={() => onAdicionarMembro(conjunto)}
+                className="btn-adicionar-elemento-card"
+                onClick={() => onAdicionarElemento(conjunto)}
                 title="Adicionar elemento"
               >
                 + Elemento

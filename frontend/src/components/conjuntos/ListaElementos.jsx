@@ -1,21 +1,24 @@
 import React from "react";
-import "./ListaMembros.css";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import "./ListaElementos.css";
 
-const ListaMembros = ({
-  membros,
+const ListaElementos = ({
+  elementos,
   meuTipo,
   onTornarAdmin,
   onRemover,
   onReenviarConvite,
   loading = false,
 }) => {
+  const { usuario } = useAuth();
   if (loading) {
     return <div className="loading">Carregando elementos...</div>;
   }
 
-  if (membros.length === 0) {
+  if (elementos.length === 0) {
     return (
-      <div className="sem-membros">
+      <div className="sem-elementos">
         <p>Nenhum elemento encontrado neste conjunto.</p>
       </div>
     );
@@ -25,7 +28,7 @@ const ListaMembros = ({
   const mostrarStatus = meuTipo !== "comum"; // Não mostrar status para usuários comuns
 
   return (
-    <div className="lista-membros">
+    <div className="lista-elementos">
       <table>
         <thead>
           <tr>
@@ -37,82 +40,101 @@ const ListaMembros = ({
           </tr>
         </thead>
         <tbody>
-          {membros.map((membro) => (
-            <tr key={membro.id}>
-              <td>{membro.nome}</td>
-              <td>{membro.email}</td>
+          {elementos.map((elemento) => {
+            const eUsuarioLogado = usuario && elemento.id === usuario.id;
+            return (
+            <tr key={elemento.id}>
               <td>
-                {membro.tipo === "dono" && (
+                {eUsuarioLogado ? (
+                  <Link 
+                    to="/recordes"
+                    className="nome-elemento-link"
+                  >
+                    {elemento.nome}
+                  </Link>
+                ) : (
+                  <Link 
+                    to={`/recordes?usuario_id=${elemento.id}`}
+                    className="nome-elemento-link"
+                  >
+                    {elemento.nome}
+                  </Link>
+                )}
+              </td>
+              <td>{elemento.email}</td>
+              <td>
+                {elemento.tipo === "dono" && (
                   <span className="badge badge-dono">Dono</span>
                 )}
-                {membro.tipo === "admin" && (
+                {elemento.tipo === "admin" && (
                   <span className="badge badge-admin">Admin</span>
                 )}
-                {membro.tipo === "comum" && (
+                {elemento.tipo === "comum" && (
                   <span className="badge badge-comum">Comum</span>
                 )}
               </td>
               {mostrarStatus && (
                 <td>
-                  {membro.status === "aceito" && (
+                  {elemento.status === "aceito" && (
                     <span className="status status-aceito">Aceito</span>
                   )}
-                  {membro.status === "pendente" && (
+                  {elemento.status === "pendente" && (
                     <span className="status status-pendente">Pendente</span>
                   )}
-                  {membro.status === "rejeitado" && (
+                  {elemento.status === "rejeitado" && (
                     <span className="status status-rejeitado">Rejeitado</span>
                   )}
-                  {!membro.status && (
+                  {!elemento.status && (
                     <span className="status status-desconhecido">-</span>
                   )}
                 </td>
               )}
               {podeGerenciar && (
                 <td>
-                  <div className="acoes-membro">
+                  <div className="acoes-elemento">
                     {meuTipo === "dono" &&
-                      membro.tipo === "comum" &&
-                      membro.status === "aceito" && (
+                      elemento.tipo === "comum" &&
+                      elemento.status === "aceito" && (
                         <button
                           className="btn-tornar-admin"
-                          onClick={() => onTornarAdmin(membro.id)}
+                          onClick={() => onTornarAdmin(elemento.id)}
                           title="Tornar admin"
                         >
                           Tornar admin
                         </button>
                       )}
-                    {membro.status === "rejeitado" && (
+                    {elemento.status === "rejeitado" && (
                       <button
                         className="btn-reenviar"
-                        onClick={() => onReenviarConvite(membro.id)}
+                        onClick={() => onReenviarConvite(elemento.id)}
                         title="Reenviar convite"
                       >
                         Reenviar convite
                       </button>
                     )}
-                    {membro.tipo !== "dono" && membro.status === "aceito" && (
+                    {elemento.tipo !== "dono" && elemento.status === "aceito" && (
                       <button
                         className="btn-remover"
-                        onClick={() => onRemover(membro.id)}
+                        onClick={() => onRemover(elemento.id)}
                         title="Remover elemento"
                       >
                         Remover
                       </button>
                     )}
-                    {membro.tipo === "dono" && (
+                    {elemento.tipo === "dono" && (
                       <span className="texto-info">Dono do conjunto</span>
                     )}
                   </div>
                 </td>
               )}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 };
 
-export default ListaMembros;
+export default ListaElementos;
 

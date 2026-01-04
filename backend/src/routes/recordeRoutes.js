@@ -14,6 +14,10 @@ const validarListarRecordes = [
     .optional()
     .isInt({ min: 1 })
     .withMessage("sistema_id deve ser um número inteiro válido"),
+  query("usuario_id")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("usuario_id deve ser um número inteiro válido"),
 ];
 
 // Validações para obter recorde específico
@@ -24,7 +28,7 @@ const validarId = [
 ];
 
 // Rotas
-// GET /api/recordes - Listar recordes do usuário logado (filtros: limite_id, sistema_id)
+// GET /api/recordes - Listar recordes do usuário logado ou de outro usuário (filtros: limite_id, sistema_id, usuario_id - opcional)
 router.get(
   "/",
   authMiddleware,

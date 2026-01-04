@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import React from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./LinhaRanking.css";
 
@@ -36,8 +37,8 @@ const LinhaRanking = ({ item, tempoLimite }) => {
   // Obter cor baseada na posição (tema do cubo mágico)
   const obterCorPosicao = () => {
     if (posicao === 1) return "#FFD700"; // Amarelo/Dourado
-    if (posicao === 2) return "#FF9800"; // Laranja
-    if (posicao === 3) return "#2196F3"; // Azul
+    if (posicao === 2) return "#C0C0C0"; // Prateado/Cinza
+    if (posicao === 3) return "#FF9800"; // Laranja/Bronze
     return null;
   };
 
@@ -90,7 +91,21 @@ const LinhaRanking = ({ item, tempoLimite }) => {
       </td>
       <td className="coluna-nome">
         <div className="nome-container">
-          <span className="nome-usuario">{nome}</span>
+          {eUsuarioLogado ? (
+            <Link 
+              to="/recordes"
+              className="nome-usuario-link"
+            >
+              {nome}
+            </Link>
+          ) : (
+            <Link 
+              to={`/recordes?usuario_id=${id_usuario}`}
+              className="nome-usuario-link"
+            >
+              {nome}
+            </Link>
+          )}
           {eUsuarioLogado && (
             <span className="badge-usuario-logado">Você</span>
           )}
@@ -110,7 +125,12 @@ const LinhaRanking = ({ item, tempoLimite }) => {
         </span>
       </td>
       <td className="coluna-data">
-        <span className="data-recorde">{formatarData(data_recorde)}</span>
+        <span 
+          className="data-recorde"
+          style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
+        >
+          {formatarData(data_recorde)}
+        </span>
       </td>
     </tr>
   );

@@ -1,8 +1,8 @@
-.lista-membros {
+.lista-elementos {
   margin-top: 20px;
 }
 
-.lista-membros table {
+.lista-elementos table {
   width: 100%;
   border-collapse: collapse;
   background: white;
@@ -11,11 +11,11 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.lista-membros thead {
+.lista-elementos thead {
   background: #f5f5f5;
 }
 
-.lista-membros th {
+.lista-elementos th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
@@ -23,16 +23,28 @@
   border-bottom: 2px solid #ddd;
 }
 
-.lista-membros td {
+.lista-elementos td {
   padding: 12px;
   border-bottom: 1px solid #eee;
 }
 
-.lista-membros tbody tr:hover {
+.nome-elemento-link {
+  color: #2196f3;
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.nome-elemento-link:hover {
+  color: #1976d2;
+  text-decoration: underline;
+}
+
+.lista-elementos tbody tr:hover {
   background: #f9f9f9;
 }
 
-.lista-membros tbody tr:last-child td {
+.lista-elementos tbody tr:last-child td {
   border-bottom: none;
 }
 
@@ -87,7 +99,7 @@
   font-style: italic;
 }
 
-.acoes-membro {
+.acoes-elemento {
   display: flex;
   gap: 10px;
   align-items: center;
@@ -195,7 +207,7 @@
   font-style: italic;
 }
 
-.sem-membros {
+.sem-elementos {
   text-align: center;
   padding: 40px;
   color: #666;
