@@ -20,8 +20,15 @@ const ListaConjuntos = ({
   if (conjuntos.length === 0) {
     return (
       <div className="sem-conjuntos">
-        <p>Você ainda não participa de nenhum conjunto.</p>
-        <p>Crie um conjunto para começar!</p>
+        <div className="sem-conjuntos-content">
+          <h2>Você ainda não participa de nenhum conjunto</h2>
+          <p>
+            Os conjuntos permitem que você crie grupos com outros usuários e veja rankings específicos apenas dos elementos daquele conjunto.
+          </p>
+          <p>
+            Para começar, crie um conjunto e adicione os e-mails dos usuários que você deseja convidar. Eles receberão um convite e, ao aceitarem, poderão participar do conjunto e visualizar o ranking apenas dos elementos do grupo.
+          </p>
+        </div>
       </div>
     );
   }
