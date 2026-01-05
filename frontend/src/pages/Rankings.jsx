@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import InfoUsuario from "../components/rankings/InfoUsuario";
 import TabelaRanking from "../components/rankings/TabelaRanking";
 import Loading from "../components/common/Loading";
@@ -10,6 +11,7 @@ import "./Rankings.css";
 
 const Rankings = () => {
   const { usuario } = useAuth();
+  const [searchParams] = useSearchParams();
   const [ranking, setRanking] = useState([]);
   const [posicaoUsuario, setPosicaoUsuario] = useState(null);
   const [totalParticipantes, setTotalParticipantes] = useState(0);
@@ -42,29 +44,50 @@ const Rankings = () => {
       setSistemas(sistemasRes.data);
       setConjuntos(conjuntosRes.data || []);
 
-      // Definir valores padrão automaticamente
-      if (operacoesRes.data.length > 0) {
+      // Ler query params da URL para inicializar filtros
+      const operacaoIdParam = searchParams.get("operacao_id");
+      const limiteIdParam = searchParams.get("limite_id");
+      const sistemaIdParam = searchParams.get("sistema_id");
+      const conjuntoIdParam = searchParams.get("conjunto_id");
+
+      // Definir valores: usar query params se disponíveis, senão usar padrões
+      if (operacaoIdParam && operacoesRes.data.find((o) => String(o.id) === operacaoIdParam)) {
+        setOperacaoSelecionada(operacaoIdParam);
+      } else if (operacoesRes.data.length > 0) {
         setOperacaoSelecionada(String(operacoesRes.data[0].id));
       }
 
-      const limitePadrao =
-        limitesRes.data.find((l) => l.id === 1) || limitesRes.data[0];
-      const sistemaPadrao =
-        sistemasRes.data.find((s) => s.id === 1) || sistemasRes.data[0];
+      if (limiteIdParam && limitesRes.data.find((l) => String(l.id) === limiteIdParam)) {
+        setLimiteSelecionado(limiteIdParam);
+      } else {
+        const limitePadrao =
+          limitesRes.data.find((l) => l.id === 1) || limitesRes.data[0];
+        if (limitePadrao) {
+          setLimiteSelecionado(String(limitePadrao.id));
+        }
+      }
 
-      if (limitePadrao) {
-        setLimiteSelecionado(String(limitePadrao.id));
+      if (sistemaIdParam && sistemasRes.data.find((s) => String(s.id) === sistemaIdParam)) {
+        setSistemaSelecionado(sistemaIdParam);
+      } else {
+        const sistemaPadrao =
+          sistemasRes.data.find((s) => s.id === 1) || sistemasRes.data[0];
+        if (sistemaPadrao) {
+          setSistemaSelecionado(String(sistemaPadrao.id));
+        }
       }
-      if (sistemaPadrao) {
-        setSistemaSelecionado(String(sistemaPadrao.id));
+
+      // Conjunto: usar query param se disponível, senão começar vazio (global)
+      if (conjuntoIdParam && conjuntosRes.data.find((c) => String(c.id) === conjuntoIdParam)) {
+        setConjuntoSelecionado(conjuntoIdParam);
+      } else {
+        setConjuntoSelecionado("");
       }
-      // Conjunto começa vazio (global)
-      setConjuntoSelecionado("");
     } catch (error) {
       logError("Rankings - carregarDados", error);
       setErro(getErrorMessage(error));
     }
-  }, []);
+  }, [searchParams]);
 
   const carregarRanking = useCallback(async () => {
     // Não carregar se filtros não estão completos
@@ -118,7 +141,8 @@ const Rankings = () => {
     if (usuario) {
       carregarDados();
     }
-  }, [usuario, carregarDados]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuario]);
 
   useEffect(() => {
     if (usuario && operacaoSelecionada && limiteSelecionado && sistemaSelecionado) {
