@@ -32,10 +32,6 @@ const ListaContas = ({
 
   // Ref para manter o foco ativo durante o treino
   const manterFocoRef = useRef(false);
-  
-  // Ref para input fantasma (apenas mobile) - sempre mantém foco para evitar que teclado suma
-  const inputFantasmaRef = useRef(null);
-  const isMobileRef = useRef(window.innerWidth < 768);
 
   // Limpar input quando a conta atual mudar (para input fixo)
   useEffect(() => {
@@ -51,17 +47,6 @@ const ListaContas = ({
           // Limpar valor do input e remover classe de erro
           inputRef.value = "";
           inputRef.classList.remove("errado");
-          
-          // No mobile, limpar também o input fantasma e garantir que tem foco
-          if (isMobileRef.current && inputFantasmaRef.current) {
-            inputFantasmaRef.current.value = "";
-            // Garantir que fantasma tem foco para manter teclado aberto
-            setTimeout(() => {
-              if (inputFantasmaRef.current && !disabled) {
-                inputFantasmaRef.current.focus();
-              }
-            }, 50);
-          }
         }
       }
     }
@@ -102,12 +87,6 @@ const ListaContas = ({
       if (inputRef && !disabled && inputRef.offsetParent !== null) {
         // offsetParent !== null garante que o elemento está visível
         inputRef.focus();
-        // Forçar foco novamente após um pequeno delay para garantir que o teclado apareça
-        setTimeout(() => {
-          if (inputRef && manterFocoRef.current && !disabled) {
-            inputRef.focus();
-          }
-        }, 50);
         inputRef.scrollIntoView({
           behavior: "smooth",
           block: "center",
@@ -118,155 +97,6 @@ const ListaContas = ({
     return () => clearTimeout(timer);
   }, [contaAtualIndex, disabled, contas]);
 
-  // Manter foco no input durante o treino (para evitar que o teclado suma no mobile)
-  useEffect(() => {
-    if (disabled) {
-      manterFocoRef.current = false;
-      return;
-    }
-
-    manterFocoRef.current = true;
-    const inputRef = inputRefs.current[contaAtualIndex];
-
-    if (!inputRef) return;
-
-    // Função para restaurar foco se perdido
-    const restaurarFoco = () => {
-      if (manterFocoRef.current && inputRef && !disabled) {
-        // Verificar se o input ainda está no DOM e visível
-        if (inputRef.offsetParent !== null && document.activeElement !== inputRef) {
-          // Usar requestAnimationFrame para garantir que o foco seja restaurado após qualquer render
-          requestAnimationFrame(() => {
-            if (inputRef && manterFocoRef.current && !disabled && inputRef.offsetParent !== null) {
-              inputRef.focus();
-              // No mobile, pode ser necessário chamar focus() novamente
-              setTimeout(() => {
-                if (inputRef && manterFocoRef.current && !disabled && inputRef.offsetParent !== null) {
-                  inputRef.focus();
-                }
-              }, 50);
-            }
-          });
-        }
-      }
-    };
-
-    // Listener para detectar quando o foco é perdido
-    const handleBlur = (e) => {
-      // Só restaurar se ainda estivermos no treino e o blur não foi causado por desabilitar
-      if (manterFocoRef.current && !disabled && e.target === inputRef) {
-        setTimeout(() => {
-          restaurarFoco();
-        }, 50);
-      }
-    };
-
-    inputRef.addEventListener('blur', handleBlur);
-    // Verificar periodicamente se o foco foi perdido
-    const intervalId = setInterval(restaurarFoco, 150);
-    
-    return () => {
-      inputRef.removeEventListener('blur', handleBlur);
-      clearInterval(intervalId);
-    };
-  }, [contaAtualIndex, disabled, contas]);
-
-  // Gerenciar input fantasma no mobile (sempre mantém foco para evitar que teclado suma)
-  useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    isMobileRef.current = isMobile;
-
-    if (!isMobile || disabled) {
-      // Remover input fantasma se não for mobile ou se estiver desabilitado
-      if (inputFantasmaRef.current && inputFantasmaRef.current.parentNode) {
-        inputFantasmaRef.current.remove();
-        inputFantasmaRef.current = null;
-      }
-      return;
-    }
-
-    // Criar input fantasma se não existir
-    if (!inputFantasmaRef.current) {
-      const fantasma = document.createElement('input');
-      fantasma.type = 'text';
-      fantasma.style.position = 'fixed';
-      fantasma.style.top = '-9999px';
-      fantasma.style.left = '-9999px';
-      fantasma.style.opacity = '0';
-      fantasma.style.pointerEvents = 'none';
-      fantasma.style.width = '1px';
-      fantasma.style.height = '1px';
-      fantasma.style.zIndex = '-1';
-      fantasma.tabIndex = -1;
-      // Não usar readOnly - precisa aceitar input para manter teclado aberto
-      document.body.appendChild(fantasma);
-      inputFantasmaRef.current = fantasma;
-      
-      // Função para focar fantasma quando input visível perder foco
-      const focarFantasma = () => {
-        if (fantasma && !disabled && manterFocoRef.current) {
-          const inputVisivel = inputRefs.current[contaAtualIndex];
-          // Só focar fantasma se o input visível não estiver focado
-          // Isso mantém o teclado aberto mesmo quando o input visível perde foco
-          if (!inputVisivel || document.activeElement !== inputVisivel) {
-            fantasma.focus();
-          }
-        }
-      };
-      
-      // Listener para quando input visível perder foco - transferir foco para fantasma
-      const handleBlurVisivel = (e) => {
-        const inputVisivel = inputRefs.current[contaAtualIndex];
-        if (inputVisivel && e.target === inputVisivel && !disabled) {
-          // Quando input visível perde foco, focar fantasma imediatamente
-          // para manter teclado aberto (especialmente durante re-renders)
-          requestAnimationFrame(() => {
-            focarFantasma();
-          });
-        }
-      };
-      
-      // Listener para quando input visível ganhar foco - não interferir
-      const handleFocusVisivel = () => {
-        // Quando input visível ganha foco, não fazer nada
-        // O usuário está digitando, deixar ele usar o input visível normalmente
-      };
-      
-      // Adicionar listeners no input visível
-      const inputVisivel = inputRefs.current[contaAtualIndex];
-      if (inputVisivel) {
-        inputVisivel.addEventListener('blur', handleBlurVisivel);
-        inputVisivel.addEventListener('focus', handleFocusVisivel);
-      }
-      
-      // Verificar periodicamente se o fantasma precisa de foco
-      // (quando input visível não está focado e não está desabilitado)
-      const intervalFantasma = setInterval(() => {
-        if (!disabled && manterFocoRef.current) {
-          const inputVisivel = inputRefs.current[contaAtualIndex];
-          if (!inputVisivel || document.activeElement !== inputVisivel) {
-            focarFantasma();
-          }
-        }
-      }, 100);
-      
-      // Focar fantasma inicialmente após um delay
-      setTimeout(focarFantasma, 100);
-      
-      // Cleanup
-      return () => {
-        clearInterval(intervalFantasma);
-        if (inputVisivel) {
-          inputVisivel.removeEventListener('blur', handleBlurVisivel);
-          inputVisivel.removeEventListener('focus', handleFocusVisivel);
-        }
-        if (fantasma && fantasma.parentNode) {
-          fantasma.remove();
-        }
-        inputFantasmaRef.current = null;
-      };
-    }
-  }, [disabled, contaAtualIndex]);
 
   // Função para validar resposta
   const validarResposta = (conta, respostaDigitada) => {
@@ -330,16 +160,6 @@ const ListaContas = ({
 
     // Atualizar valor do input
     e.target.value = valorFiltrado;
-    
-    // No mobile, sincronizar valor filtrado com input fantasma (para manter teclado aberto)
-    if (isMobileRef.current && inputFantasmaRef.current) {
-      inputFantasmaRef.current.value = valorFiltrado;
-    }
-    
-    // No mobile, sincronizar valor com input fantasma (para manter teclado aberto)
-    if (isMobileRef.current && inputFantasmaRef.current) {
-      inputFantasmaRef.current.value = valorFiltrado;
-    }
 
     // ID da conta atual para rastrear erros
     const contaId = `${conta.parcela1}-${conta.parcela2}-${
@@ -504,34 +324,19 @@ const ListaContas = ({
       // Limpar input mas manter foco imediatamente
       inputElement.value = "";
       
-      // No mobile, limpar também o input fantasma
-      if (isMobileRef.current && inputFantasmaRef.current) {
-        inputFantasmaRef.current.value = "";
-      }
-      
       // Chamar callback - o backend fará a validação final
       // Chamar diretamente (o handleAcerto já tem proteção contra múltiplas chamadas)
       if (onAcerto) {
         onAcerto(valorFiltrado);
       }
 
-      // Restaurar foco imediatamente após limpar
+      // Restaurar foco após limpar
       if (inputElement && manterFocoRef.current && !disabled) {
-        requestAnimationFrame(() => {
-          if (inputElement && manterFocoRef.current && !disabled) {
-            inputElement.focus();
-          }
-        });
         setTimeout(() => {
           if (inputElement && manterFocoRef.current && !disabled) {
             inputElement.focus();
           }
-        }, 10);
-        setTimeout(() => {
-          if (inputElement && manterFocoRef.current && !disabled) {
-            inputElement.focus();
-          }
-        }, 100);
+        }, 50);
       }
     }
   };
