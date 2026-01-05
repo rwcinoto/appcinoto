@@ -6,7 +6,7 @@ import { useToast } from "../../context/ToastContext";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
 import "./ModalOperacao.css";
 
-const ModalOperacao = ({ operacao, planos, onFechar, onSalvo }) => {
+const ModalOperacao = ({ operacao, planos, operacoes, onFechar, onSalvo }) => {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const { showSuccess } = useToast();
@@ -58,6 +58,7 @@ const ModalOperacao = ({ operacao, planos, onFechar, onSalvo }) => {
           <FormOperacao
             operacao={operacao}
             planos={planos}
+            operacoes={operacoes}
             onSalvar={handleSalvar}
             onCancelar={onFechar}
             disabled={salvando}

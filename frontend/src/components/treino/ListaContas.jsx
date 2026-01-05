@@ -33,6 +33,31 @@ const ListaContas = ({
   // Ref para manter o foco ativo durante o treino
   const manterFocoRef = useRef(false);
 
+  // Limpar input quando a conta atual mudar (para input fixo)
+  useEffect(() => {
+    if (contas.length > 0 && contas[0] && contaAtualIndex === 0) {
+      const primeiraContaId = `${contas[0].parcela1}-${contas[0].parcela2}-${
+        contas[0].parcela3 || "null"
+      }-${contas[0].resultado}-${contas[0].tipo}`;
+
+      // Se a conta mudou, limpar o input (similar ao que fazemos quando há erro)
+      if (ultimaPrimeiraContaRef.current !== primeiraContaId && ultimaPrimeiraContaRef.current !== null) {
+        const inputRef = inputRefs.current[0];
+        if (inputRef && !disabled) {
+          // Limpar valor do input e remover classe de erro
+          inputRef.value = "";
+          inputRef.classList.remove("errado");
+          // Manter o foco no input (para evitar que o teclado suma no mobile)
+          requestAnimationFrame(() => {
+            if (inputRef && manterFocoRef.current && !disabled) {
+              inputRef.focus();
+            }
+          });
+        }
+      }
+    }
+  }, [contas, contaAtualIndex, disabled]);
+
   // Scroll automático e foco na conta atual
   useEffect(() => {
     // Resetar conta processada quando a primeira conta mudar ou quando a lista mudar
@@ -436,9 +461,12 @@ const ListaContas = ({
           const simbolo = obterSimboloOperacao(conta.tipo);
 
           // Criar uma chave única baseada no conteúdo da conta para ajudar o React a detectar mudanças
-          const contaKey = `${conta.parcela1}-${conta.parcela2}-${
-            conta.parcela3 || "null"
-          }-${conta.resultado}-${conta.tipo}-${index}`;
+          // Para a conta atual (index 0), usar key fixa para evitar remontagem do input
+          const contaKey = index === contaAtualIndex 
+            ? "conta-atual-fixa"
+            : `${conta.parcela1}-${conta.parcela2}-${
+                conta.parcela3 || "null"
+              }-${conta.resultado}-${conta.tipo}-${index}`;
 
           // Verificar se esta conta teve erro (para manter caixa vermelha)
           const contaIdRender = `${conta.parcela1}-${conta.parcela2}-${
@@ -479,7 +507,7 @@ const ListaContas = ({
                   )}
                   <span className="igual">=</span>
                   <input
-                    key={contaKey}
+                    key={index === contaAtualIndex ? "input-atual-fixo" : contaKey}
                     ref={(el) => {
                       if (el) {
                         inputRefs.current[index] = el;

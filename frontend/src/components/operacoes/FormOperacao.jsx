@@ -5,6 +5,7 @@ import "./FormOperacao.css";
 const FormOperacao = ({
   operacao,
   planos,
+  operacoes, // Lista de operações disponíveis (para seleção em aleatório)
   onSalvar,
   onCancelar,
   disabled = false,
@@ -21,12 +22,20 @@ const FormOperacao = ({
     max_parcela_3: "",
     id_plano: "",
     ordem: "",
+    operacoes_incluidas: [], // IDs das operações incluídas (para tipo aleatorio)
   });
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     if (operacao) {
       const isRaiz = operacao.tipo === "raiz";
+      const isAleatorio = operacao.tipo === "aleatorio";
+      
+      // Extrair IDs das operações incluídas se houver
+      const operacoesIncluidas = operacao.operacoes_incluidas 
+        ? operacao.operacoes_incluidas.map(op => op.id)
+        : [];
+      
       setFormData({
         nome: operacao.nome || "",
         descricao: operacao.descricao || "",
@@ -41,9 +50,9 @@ const FormOperacao = ({
           operacao.max_parcela_1 !== undefined
             ? operacao.max_parcela_1
             : 9,
-        // Se não for raiz e vier null, inicializar com 0 (obrigatório)
-        // Se for raiz e vier null, deixar como string vazia
-        min_parcela_2: isRaiz
+        // Se não for raiz/aleatorio e vier null, inicializar com 0 (obrigatório)
+        // Se for raiz/aleatorio e vier null, deixar como string vazia
+        min_parcela_2: isRaiz || isAleatorio
           ? operacao.min_parcela_2 !== null
             ? operacao.min_parcela_2
             : ""
@@ -51,7 +60,7 @@ const FormOperacao = ({
             operacao.min_parcela_2 !== undefined
           ? operacao.min_parcela_2
           : 0,
-        max_parcela_2: isRaiz
+        max_parcela_2: isRaiz || isAleatorio
           ? operacao.max_parcela_2 !== null
             ? operacao.max_parcela_2
             : ""
@@ -71,6 +80,7 @@ const FormOperacao = ({
             : "",
         id_plano: operacao.id_plano?.toString() || "",
         ordem: operacao.ordem?.toString() || "",
+        operacoes_incluidas: operacoesIncluidas,
       });
     } else {
       // Ao criar nova operação, inicializar com valores padrão
@@ -87,6 +97,7 @@ const FormOperacao = ({
         max_parcela_3: "",
         id_plano: planos.length > 0 ? planos[0].id.toString() : "",
         ordem: "",
+        operacoes_incluidas: [],
       });
     }
   }, [operacao, planos]);
@@ -114,17 +125,21 @@ const FormOperacao = ({
         [name]: processedValue,
       };
 
-      // Se tipo mudou para "raiz", limpar parcelas 2 e 3
-      if (name === "tipo" && value === "raiz") {
+      // Se tipo mudou para "raiz" ou "aleatorio", limpar parcelas 2 e 3
+      if (name === "tipo" && (value === "raiz" || value === "aleatorio")) {
         newData.min_parcela_2 = "";
         newData.max_parcela_2 = "";
         newData.min_parcela_3 = "";
         newData.max_parcela_3 = "";
+        if (value === "aleatorio") {
+          newData.operacoes_incluidas = [];
+        }
       }
-      // Se tipo mudou de "raiz" para outro, preencher parcela 2 com valores padrão
-      if (name === "tipo" && value !== "raiz" && formData.tipo === "raiz") {
+      // Se tipo mudou de "raiz" ou "aleatorio" para outro, preencher parcela 2 com valores padrão
+      if (name === "tipo" && value !== "raiz" && value !== "aleatorio" && (formData.tipo === "raiz" || formData.tipo === "aleatorio")) {
         newData.min_parcela_2 = 0;
         newData.max_parcela_2 = 9;
+        newData.operacoes_incluidas = [];
       }
 
       return newData;
@@ -143,8 +158,8 @@ const FormOperacao = ({
       return false;
     }
 
-    // Validar parcela 1
-    if (formData.min_parcela_1 > formData.max_parcela_1) {
+    // Validar parcela 1 (exceto para tipo aleatorio)
+    if (formData.tipo !== "aleatorio" && formData.min_parcela_1 > formData.max_parcela_1) {
       setErro("min_parcela_1 deve ser menor ou igual a max_parcela_1");
       return false;
     }
@@ -157,6 +172,12 @@ const FormOperacao = ({
       }
       if (formData.min_parcela_3 !== "" || formData.max_parcela_3 !== "") {
         setErro("Operação do tipo 'raiz' só utiliza parcela_1");
+        return false;
+      }
+    } else if (formData.tipo === "aleatorio") {
+      // Para aleatório, validar que há pelo menos uma operação incluída
+      if (!formData.operacoes_incluidas || formData.operacoes_incluidas.length === 0) {
+        setErro("Operação do tipo 'aleatorio' deve ter pelo menos uma operação incluída");
         return false;
       }
     } else {
@@ -227,24 +248,32 @@ const FormOperacao = ({
       nome: formData.nome.trim(),
       descricao: formData.descricao.trim() || null,
       tipo: formData.tipo,
-      min_parcela_1:
-        typeof formData.min_parcela_1 === "number"
-          ? formData.min_parcela_1
-          : parseInt(formData.min_parcela_1),
-      max_parcela_1:
-        typeof formData.max_parcela_1 === "number"
-          ? formData.max_parcela_1
-          : parseInt(formData.max_parcela_1),
       id_plano: parseInt(formData.id_plano),
     };
+
+    // Para tipo aleatorio, não enviar parcelas (ou enviar como 0)
+    if (formData.tipo !== "aleatorio") {
+      dados.min_parcela_1 =
+        typeof formData.min_parcela_1 === "number"
+          ? formData.min_parcela_1
+          : parseInt(formData.min_parcela_1);
+      dados.max_parcela_1 =
+        typeof formData.max_parcela_1 === "number"
+          ? formData.max_parcela_1
+          : parseInt(formData.max_parcela_1);
+    } else {
+      // Para aleatorio, enviar 0 como padrão (não será usado)
+      dados.min_parcela_1 = 0;
+      dados.max_parcela_1 = 0;
+    }
 
     // Incluir ordem se fornecida
     if (formData.ordem !== "" && formData.ordem !== null && formData.ordem !== undefined) {
       dados.ordem = parseInt(formData.ordem);
     }
 
-    // Se não for raiz, parcela 2 é obrigatória
-    if (formData.tipo !== "raiz") {
+    // Se não for raiz nem aleatorio, parcela 2 é obrigatória
+    if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio") {
       dados.min_parcela_2 =
         typeof formData.min_parcela_2 === "number"
           ? formData.min_parcela_2
@@ -254,12 +283,12 @@ const FormOperacao = ({
           ? formData.max_parcela_2
           : parseInt(formData.max_parcela_2);
     } else {
-      // Para raiz, garantir que min_parcela_2, max_parcela_2, min_parcela_3 e max_parcela_3 não sejam enviados
+      // Para raiz e aleatorio, garantir que min_parcela_2, max_parcela_2, min_parcela_3 e max_parcela_3 não sejam enviados
       // Não incluir esses campos no objeto dados
     }
 
-    // Parcela 3 é sempre opcional (apenas se não for raiz)
-    if (formData.tipo !== "raiz") {
+    // Parcela 3 é sempre opcional (apenas se não for raiz nem aleatorio)
+    if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio") {
       if (formData.min_parcela_3 !== "") {
         dados.min_parcela_3 = parseInt(formData.min_parcela_3);
       }
@@ -268,10 +297,36 @@ const FormOperacao = ({
       }
     }
 
+    // Se for tipo aleatorio, incluir operações incluídas
+    if (formData.tipo === "aleatorio") {
+      dados.operacoes_incluidas = formData.operacoes_incluidas;
+    }
+
     onSalvar(dados);
   };
 
   const isRaiz = formData.tipo === "raiz";
+  const isAleatorio = formData.tipo === "aleatorio";
+
+  // Filtrar operações disponíveis para incluir em aleatório
+  // Excluir operações aleatórias e a própria operação sendo editada
+  const operacoesDisponiveis = operacoes
+    ? operacoes.filter(op => 
+        op.tipo !== "aleatorio" && 
+        (!operacao || op.id !== operacao.id)
+      )
+    : [];
+
+  const handleOperacaoIncluidaChange = (operacaoId, checked) => {
+    setFormData(prev => {
+      const ids = prev.operacoes_incluidas || [];
+      if (checked) {
+        return { ...prev, operacoes_incluidas: [...ids, operacaoId] };
+      } else {
+        return { ...prev, operacoes_incluidas: ids.filter(id => id !== operacaoId) };
+      }
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="form-operacao">
@@ -304,6 +359,7 @@ const FormOperacao = ({
           <option value="multiplicacao">Multiplicação</option>
           <option value="divisao">Divisão</option>
           <option value="raiz">Raiz</option>
+          <option value="aleatorio">Aleatório</option>
         </select>
       </div>
 
@@ -355,40 +411,41 @@ const FormOperacao = ({
         </small>
       </div>
 
-      <div className="parcelas-section">
-        <h3>Limites das Parcelas</h3>
+      {!isAleatorio && (
+        <div className="parcelas-section">
+          <h3>Limites das Parcelas</h3>
 
-        <div className="parcela-group">
-          <h4>Parcela 1</h4>
-          <div className="parcela-inputs">
-            <div className="form-group">
-              <label htmlFor="min_parcela_1">Mínimo</label>
-              <input
-                type="number"
-                id="min_parcela_1"
-                name="min_parcela_1"
-                value={formData.min_parcela_1}
-                onChange={handleChange}
-                required
-                disabled={disabled}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="max_parcela_1">Máximo</label>
-              <input
-                type="number"
-                id="max_parcela_1"
-                name="max_parcela_1"
-                value={formData.max_parcela_1}
-                onChange={handleChange}
-                required
-                disabled={disabled}
-              />
+          <div className="parcela-group">
+            <h4>Parcela 1</h4>
+            <div className="parcela-inputs">
+              <div className="form-group">
+                <label htmlFor="min_parcela_1">Mínimo</label>
+                <input
+                  type="number"
+                  id="min_parcela_1"
+                  name="min_parcela_1"
+                  value={formData.min_parcela_1}
+                  onChange={handleChange}
+                  required
+                  disabled={disabled}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="max_parcela_1">Máximo</label>
+                <input
+                  type="number"
+                  id="max_parcela_1"
+                  name="max_parcela_1"
+                  value={formData.max_parcela_1}
+                  onChange={handleChange}
+                  required
+                  disabled={disabled}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {!isRaiz && (
+        {!isRaiz && !isAleatorio && (
           <>
             <div className="parcela-group">
               <h4>Parcela 2</h4>
@@ -455,7 +512,39 @@ const FormOperacao = ({
             <small>ⓘ Operação do tipo "Raiz" utiliza apenas a parcela 1.</small>
           </div>
         )}
-      </div>
+        </div>
+      )}
+
+      {isAleatorio && (
+        <div className="parcelas-section">
+          <h3>Operações incluídas</h3>
+          <div className="operacoes-incluidas-section">
+            <h4>Operações incluídas</h4>
+            <div className="info-aleatorio">
+              <small>ⓘ Selecione quais operações farão parte desta operação aleatória.</small>
+            </div>
+            {operacoesDisponiveis.length === 0 ? (
+              <div className="aviso-sem-operacoes">
+                <small>Não há operações disponíveis para incluir. Crie outras operações primeiro.</small>
+              </div>
+            ) : (
+              <div className="operacoes-checkboxes">
+                {operacoesDisponiveis.map(op => (
+                  <label key={op.id} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={formData.operacoes_incluidas.includes(op.id)}
+                      onChange={(e) => handleOperacaoIncluidaChange(op.id, e.target.checked)}
+                      disabled={disabled}
+                    />
+                    <span>{op.nome} ({op.tipo})</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {erro && (
         <ErrorMessage

@@ -36,7 +36,10 @@ class OperacaoController {
             [Op.in]: idsPlanos,
           },
         },
-        include: [{ association: "plano" }],
+        include: [
+          { association: "plano" },
+          { association: "operacoes_incluidas" },
+        ],
         order: [["ordem", "ASC"]],
       });
 
@@ -55,7 +58,10 @@ class OperacaoController {
       const id = parseInt(req.params.id);
 
       const operacao = await Operacao.findByPk(id, {
-        include: [{ association: "plano" }],
+        include: [
+          { association: "plano" },
+          { association: "operacoes_incluidas" },
+        ],
       });
 
       if (!operacao) {
@@ -126,6 +132,23 @@ class OperacaoController {
         max_parcela_2 = null;
         min_parcela_3 = null;
         max_parcela_3 = null;
+      } else if (tipo === "aleatorio") {
+        // Aleatório não usa parcelas próprias, usa as operações relacionadas
+        // Permitir parcelas null ou não enviadas
+        if (min_parcela_1 === undefined) min_parcela_1 = 0;
+        if (max_parcela_1 === undefined) max_parcela_1 = 0;
+        min_parcela_2 = null;
+        max_parcela_2 = null;
+        min_parcela_3 = null;
+        max_parcela_3 = null;
+
+        // Validar que há operações incluídas
+        const { operacoes_incluidas } = req.body;
+        if (!operacoes_incluidas || !Array.isArray(operacoes_incluidas) || operacoes_incluidas.length === 0) {
+          return res.status(400).json({
+            message: "Operação do tipo 'aleatorio' deve ter pelo menos uma operação incluída",
+          });
+        }
       }
 
       // Se ordem não fornecida, calcular automaticamente (colocar no final)
@@ -135,8 +158,8 @@ class OperacaoController {
         ordemFinal = (maiorOrdem || 0) + 1;
       }
 
-      // Validar min <= max para cada parcela
-      if (min_parcela_1 > max_parcela_1) {
+      // Validar min <= max para cada parcela (exceto para tipo aleatorio)
+      if (tipo !== "aleatorio" && min_parcela_1 > max_parcela_1) {
         return res.status(400).json({
           message: "min_parcela_1 deve ser menor ou igual a max_parcela_1",
         });
@@ -178,8 +201,34 @@ class OperacaoController {
         atualizado_em: new Date(),
       });
 
+      // Se for operação aleatória, salvar as operações incluídas
+      if (tipo === "aleatorio") {
+        const { operacoes_incluidas } = req.body;
+        if (operacoes_incluidas && Array.isArray(operacoes_incluidas)) {
+          // Validar que todas as operações existem e não são aleatórias
+          const operacoesValidas = await Operacao.findAll({
+            where: {
+              id: operacoes_incluidas,
+              tipo: { [Op.ne]: "aleatorio" }, // Não pode incluir outras operações aleatórias
+            },
+          });
+
+          if (operacoesValidas.length !== operacoes_incluidas.length) {
+            return res.status(400).json({
+              message: "Uma ou mais operações incluídas são inválidas ou são do tipo 'aleatorio'",
+            });
+          }
+
+          // Criar relações
+          await operacao.setOperacoes_incluidas(operacoes_incluidas);
+        }
+      }
+
       const operacaoCriada = await Operacao.findByPk(operacao.id, {
-        include: [{ association: "plano" }],
+        include: [
+          { association: "plano" },
+          { association: "operacoes_incluidas" },
+        ],
       });
 
       return res.status(201).json(operacaoCriada);
@@ -252,17 +301,27 @@ class OperacaoController {
           min_parcela_3 = null;
           max_parcela_3 = null;
         }
+      } else if (tipoAtual === "aleatorio") {
+        // Aleatório não usa parcelas próprias
+        min_parcela_2 = null;
+        max_parcela_2 = null;
+        min_parcela_3 = null;
+        max_parcela_3 = null;
+        if (min_parcela_1 === undefined) min_parcela_1 = operacao.min_parcela_1;
+        if (max_parcela_1 === undefined) max_parcela_1 = operacao.max_parcela_1;
       }
 
-      // Validar min <= max
-      const min1 =
-        min_parcela_1 !== undefined ? min_parcela_1 : operacao.min_parcela_1;
-      const max1 =
-        max_parcela_1 !== undefined ? max_parcela_1 : operacao.max_parcela_1;
-      if (min1 > max1) {
-        return res.status(400).json({
-          message: "min_parcela_1 deve ser menor ou igual a max_parcela_1",
-        });
+      // Validar min <= max (exceto para tipo aleatorio)
+      if (tipoAtual !== "aleatorio") {
+        const min1 =
+          min_parcela_1 !== undefined ? min_parcela_1 : operacao.min_parcela_1;
+        const max1 =
+          max_parcela_1 !== undefined ? max_parcela_1 : operacao.max_parcela_1;
+        if (min1 > max1) {
+          return res.status(400).json({
+            message: "min_parcela_1 deve ser menor ou igual a max_parcela_1",
+          });
+        }
       }
 
       if (min_parcela_2 !== undefined && max_parcela_2 !== undefined) {
@@ -314,8 +373,39 @@ class OperacaoController {
 
       await operacao.update(dadosAtualizacao);
 
+      // Se for operação aleatória e houver operacoes_incluidas no body, atualizar relações
+      if (tipoAtual === "aleatorio" && req.body.operacoes_incluidas !== undefined) {
+        const { operacoes_incluidas } = req.body;
+        
+        if (!Array.isArray(operacoes_incluidas) || operacoes_incluidas.length === 0) {
+          return res.status(400).json({
+            message: "Operação do tipo 'aleatorio' deve ter pelo menos uma operação incluída",
+          });
+        }
+
+        // Validar que todas as operações existem e não são aleatórias
+        const operacoesValidas = await Operacao.findAll({
+          where: {
+            id: operacoes_incluidas,
+            tipo: { [Op.ne]: "aleatorio" },
+          },
+        });
+
+        if (operacoesValidas.length !== operacoes_incluidas.length) {
+          return res.status(400).json({
+            message: "Uma ou mais operações incluídas são inválidas ou são do tipo 'aleatorio'",
+          });
+        }
+
+        // Atualizar relações
+        await operacao.setOperacoes_incluidas(operacoes_incluidas);
+      }
+
       const operacaoAtualizada = await Operacao.findByPk(id, {
-        include: [{ association: "plano" }],
+        include: [
+          { association: "plano" },
+          { association: "operacoes_incluidas" },
+        ],
       });
 
       return res.json(operacaoAtualizada);

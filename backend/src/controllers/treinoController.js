@@ -47,7 +47,10 @@ class TreinoController {
 
       // Validar que operação existe e usuário tem acesso
       const operacao = await Operacao.findByPk(operacao_id, {
-        include: [{ association: "plano" }],
+        include: [
+          { association: "plano" },
+          { association: "operacoes_incluidas" },
+        ],
       });
 
       if (!operacao) {
@@ -119,6 +122,15 @@ class TreinoController {
         });
       }
 
+      // Validar que operação aleatória tem operações incluídas
+      if (operacao.tipo === "aleatorio") {
+        if (!operacao.operacoes_incluidas || operacao.operacoes_incluidas.length === 0) {
+          return res.status(400).json({
+            message: "Operação aleatória não possui operações configuradas",
+          });
+        }
+      }
+
       // Gerar buffer inicial de contas
       const contasIniciais = treinoService.gerarBufferContas(
         operacao,
@@ -142,6 +154,22 @@ class TreinoController {
           max_parcela_2: operacao.max_parcela_2,
           min_parcela_3: operacao.min_parcela_3,
           max_parcela_3: operacao.max_parcela_3,
+          // Incluir operações relacionadas se for tipo aleatorio
+          ...(operacao.tipo === "aleatorio" && operacao.operacoes_incluidas
+            ? {
+                operacoes_incluidas: operacao.operacoes_incluidas.map((op) => ({
+                  id: op.id,
+                  nome: op.nome,
+                  tipo: op.tipo,
+                  min_parcela_1: op.min_parcela_1,
+                  max_parcela_1: op.max_parcela_1,
+                  min_parcela_2: op.min_parcela_2,
+                  max_parcela_2: op.max_parcela_2,
+                  min_parcela_3: op.min_parcela_3,
+                  max_parcela_3: op.max_parcela_3,
+                })),
+              }
+            : {}),
         },
         limite: {
           id: limite.id,

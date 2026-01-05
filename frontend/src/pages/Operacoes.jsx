@@ -179,6 +179,7 @@ const Operacoes = () => {
             <option value="multiplicacao">Multiplicação</option>
             <option value="divisao">Divisão</option>
             <option value="raiz">Raiz</option>
+            <option value="aleatorio">Aleatório</option>
           </select>
         </div>
 
@@ -209,6 +210,7 @@ const Operacoes = () => {
         <ModalOperacao
           operacao={operacaoEditando}
           planos={planos}
+          operacoes={operacoesTodos}
           onFechar={handleModalFechar}
           onSalvo={handleOperacaoSalva}
         />
