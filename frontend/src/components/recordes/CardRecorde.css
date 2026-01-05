@@ -151,6 +151,21 @@
   font-family: "Courier New", monospace;
 }
 
+.card-recorde-posicao-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card-recorde-posicao-link:hover {
+  color: #1976d2;
+  text-decoration: underline;
+}
+
+.card-recorde-posicao-link:active {
+  color: #1565c0;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .card-recorde {

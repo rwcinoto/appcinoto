@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ContagemRegressiva from "../treino/ContagemRegressiva";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
@@ -213,10 +213,15 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
         </div>
       </div>
 
-      {posicaoRanking !== null && (
+      {posicaoRanking !== null && recorde.operacao && recorde.limite && recorde.sistema && (
         <div className="card-recorde-posicao-ranking">
           <span className="card-recorde-posicao-label">Posição no ranking global:</span>
-          <span className="card-recorde-posicao-valor">#{posicaoRanking}</span>
+          <Link
+            to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
+            className="card-recorde-posicao-valor card-recorde-posicao-link"
+          >
+            #{posicaoRanking}
+          </Link>
         </div>
       )}
     </div>

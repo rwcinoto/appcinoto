@@ -44,15 +44,46 @@ const ListaContas = ({
       if (ultimaPrimeiraContaRef.current !== primeiraContaId && ultimaPrimeiraContaRef.current !== null) {
         const inputRef = inputRefs.current[0];
         if (inputRef && !disabled) {
+          // Detectar se é mobile
+          const isMobile = window.innerWidth < 768;
+          
           // Limpar valor do input e remover classe de erro
           inputRef.value = "";
           inputRef.classList.remove("errado");
-          // Manter o foco no input (para evitar que o teclado suma no mobile)
-          requestAnimationFrame(() => {
-            if (inputRef && manterFocoRef.current && !disabled) {
-              inputRef.focus();
-            }
-          });
+          
+          // No mobile, manter foco de forma mais agressiva para evitar que teclado suma
+          if (isMobile) {
+            // Foco imediato
+            inputRef.focus();
+            // Múltiplas tentativas para garantir que o teclado não suma
+            requestAnimationFrame(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            });
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 10);
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 50);
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 100);
+          } else {
+            // Desktop: apenas uma tentativa
+            requestAnimationFrame(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            });
+          }
         }
       }
     }
@@ -87,22 +118,73 @@ const ListaContas = ({
     // Ativar manutenção de foco quando não estiver desabilitado
     manterFocoRef.current = !disabled;
 
+    // Detectar se é mobile
+    const isMobile = window.innerWidth < 768;
+
     // Usar setTimeout para garantir que o DOM foi atualizado após mudanças nas contas
     const timer = setTimeout(() => {
       const inputRef = inputRefs.current[contaAtualIndex];
       if (inputRef && !disabled && inputRef.offsetParent !== null) {
         // offsetParent !== null garante que o elemento está visível
-        inputRef.focus();
-        // Forçar foco novamente após um pequeno delay para garantir que o teclado apareça
-        setTimeout(() => {
-          if (inputRef && manterFocoRef.current && !disabled) {
-            inputRef.focus();
+        
+        if (isMobile) {
+          // No mobile: focar ANTES de qualquer scroll para evitar que teclado suma
+          inputRef.focus();
+          
+          // Verificar se o input está visível antes de fazer scroll
+          const rect = inputRef.getBoundingClientRect();
+          const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+          
+          if (!isVisible) {
+            // Apenas fazer scroll se realmente necessário
+            // Usar scroll suave mas restaurar foco imediatamente
+            inputRef.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+            
+            // Restaurar foco imediatamente após scroll (múltiplas tentativas)
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 50);
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 100);
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 200);
+          } else {
+            // Se já está visível, apenas manter foco (múltiplas tentativas no mobile)
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 50);
+            setTimeout(() => {
+              if (inputRef && manterFocoRef.current && !disabled) {
+                inputRef.focus();
+              }
+            }, 100);
           }
-        }, 50);
-        inputRef.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        } else {
+          // No desktop: comportamento normal com scroll
+          inputRef.focus();
+          setTimeout(() => {
+            if (inputRef && manterFocoRef.current && !disabled) {
+              inputRef.focus();
+            }
+          }, 50);
+          inputRef.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
       }
     }, 100); // Aumentar delay para garantir que o DOM foi totalmente atualizado
 
@@ -142,20 +224,26 @@ const ListaContas = ({
       }
     };
 
+    // Detectar se é mobile
+    const isMobile = window.innerWidth < 768;
+    
     // Listener para detectar quando o foco é perdido
     const handleBlur = (e) => {
       // Só restaurar se ainda estivermos no treino e o blur não foi causado por desabilitar
       if (manterFocoRef.current && !disabled && e.target === inputRef) {
-        // Pequeno delay para evitar conflito com outras ações, mas não muito longo para manter o teclado
+        // No mobile, restaurar foco mais rapidamente para evitar que teclado suma
+        const delay = isMobile ? 10 : 50;
         setTimeout(() => {
           restaurarFoco();
-        }, 50);
+        }, delay);
       }
     };
 
     inputRef.addEventListener('blur', handleBlur);
-    // Verificar periodicamente se o foco foi perdido (intervalo menor para resposta mais rápida)
-    const intervalId = setInterval(restaurarFoco, 150);
+    // Verificar periodicamente se o foco foi perdido
+    // No mobile, verificar mais frequentemente para resposta mais rápida
+    const intervalDelay = isMobile ? 100 : 150;
+    const intervalId = setInterval(restaurarFoco, intervalDelay);
     
     return () => {
       inputRef.removeEventListener('blur', handleBlur);
@@ -386,6 +474,9 @@ const ListaContas = ({
       // Manter o foco antes de limpar o input
       const inputElement = e.target;
       
+      // Detectar se é mobile
+      const isMobile = window.innerWidth < 768;
+      
       // Limpar input mas manter foco imediatamente
       inputElement.value = "";
       
@@ -395,26 +486,55 @@ const ListaContas = ({
         onAcerto(valorFiltrado);
       }
 
-      // Restaurar foco imediatamente após limpar (múltiplas tentativas para garantir)
+      // Restaurar foco imediatamente após limpar
+      // No mobile, ser mais agressivo para evitar que teclado suma
       if (inputElement && manterFocoRef.current && !disabled) {
-        // Foco imediato
-        requestAnimationFrame(() => {
-          if (inputElement && manterFocoRef.current && !disabled) {
-            inputElement.focus();
-          }
-        });
-        // Foco após pequeno delay (para garantir que o teclado não suma)
-        setTimeout(() => {
-          if (inputElement && manterFocoRef.current && !disabled) {
-            inputElement.focus();
-          }
-        }, 10);
-        // Foco após um delay um pouco maior (backup)
-        setTimeout(() => {
-          if (inputElement && manterFocoRef.current && !disabled) {
-            inputElement.focus();
-          }
-        }, 100);
+        if (isMobile) {
+          // No mobile: foco imediato e múltiplas tentativas
+          inputElement.focus();
+          requestAnimationFrame(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          });
+          setTimeout(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          }, 5);
+          setTimeout(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          }, 10);
+          setTimeout(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          }, 50);
+          setTimeout(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          }, 100);
+        } else {
+          // Desktop: menos tentativas
+          requestAnimationFrame(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          });
+          setTimeout(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          }, 10);
+          setTimeout(() => {
+            if (inputElement && manterFocoRef.current && !disabled) {
+              inputElement.focus();
+            }
+          }, 100);
+        }
       }
     }
   };
@@ -512,10 +632,30 @@ const ListaContas = ({
                       if (el) {
                         inputRefs.current[index] = el;
                         // Focar automaticamente se este é o input atual
+                        // No mobile, ser mais agressivo com o foco
                         if (index === contaAtualIndex && !disabled) {
-                          setTimeout(() => {
+                          const isMobile = window.innerWidth < 768;
+                          if (isMobile) {
+                            // No mobile: múltiplas tentativas de foco
                             el.focus();
-                          }, 50);
+                            setTimeout(() => {
+                              if (el && manterFocoRef.current && !disabled) {
+                                el.focus();
+                              }
+                            }, 10);
+                            setTimeout(() => {
+                              if (el && manterFocoRef.current && !disabled) {
+                                el.focus();
+                              }
+                            }, 50);
+                          } else {
+                            // Desktop: apenas uma tentativa
+                            setTimeout(() => {
+                              if (el && manterFocoRef.current && !disabled) {
+                                el.focus();
+                              }
+                            }, 50);
+                          }
                         }
                         // Adicionar classe errado se a conta teve erro
                         if (contaTeveErroRender) {
@@ -526,7 +666,7 @@ const ListaContas = ({
                         delete inputRefs.current[index];
                       }
                     }}
-                    autoFocus={index === contaAtualIndex && !disabled}
+                    autoFocus={false}
                     type="text"
                     inputMode={sistema === "romano" ? "text" : "numeric"}
                     pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
