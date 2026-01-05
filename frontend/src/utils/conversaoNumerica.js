@@ -85,6 +85,8 @@ export const formatarNumero = (numero, sistema) => {
       return numero;
     case "inteiro":
       return numero;
+    case "decimal":
+      return parseFloat(numero).toFixed(2);
     case "romano":
       return paraRomano(numero);
     case "binario":

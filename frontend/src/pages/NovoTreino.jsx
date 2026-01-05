@@ -140,9 +140,10 @@ const NovoTreino = () => {
   const formatarTipoSistema = (tipo) => {
     const tipos = {
       natural: "Natural",
-      romano: "Romano",
-      binario: "Binário",
       inteiro: "Inteiro",
+      decimal: "Decimal",
+      binario: "Binário",
+      romano: "Romano",
     };
     return tipos[tipo] || tipo;
   };

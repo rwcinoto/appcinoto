@@ -113,11 +113,16 @@ class ConversaoService {
   /**
    * Formatar número conforme sistema solicitado
    * @param {number} numero - Número decimal
-   * @param {string} sistema - Sistema numérico: 'natural', 'romano', 'binario' ou 'inteiro'
-   * @returns {string|number} Número formatado (string para romano/binário, number para natural/inteiro)
+   * @param {string} sistema - Sistema numérico: 'natural', 'romano', 'binario', 'inteiro' ou 'decimal'
+   * @returns {string|number} Número formatado (string para romano/binário/decimal, number para natural/inteiro)
    * @throws {Error} Se o sistema for inválido ou o número estiver fora dos limites
    */
   formatarNumero(numero, sistema) {
+    if (sistema === "decimal") {
+      // Para sistema decimal, formatar com 2 casas decimais
+      return parseFloat(numero).toFixed(2);
+    }
+
     if (!Number.isInteger(numero)) {
       throw new Error("Número deve ser um inteiro");
     }
@@ -137,7 +142,7 @@ class ConversaoService {
 
       default:
         throw new Error(
-          `Sistema inválido: ${sistema}. Use 'natural', 'romano', 'binario' ou 'inteiro'`
+          `Sistema inválido: ${sistema}. Use 'natural', 'romano', 'binario', 'inteiro' ou 'decimal'`
         );
     }
   }

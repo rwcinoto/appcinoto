@@ -28,7 +28,7 @@ class TreinoService {
     } else if (sistema === "binario") {
       return Math.min(numero, 2047);
     }
-    return numero; // natural e inteiro não têm limite (além do limite da operação)
+    return numero; // natural, inteiro e decimal não têm limite (além do limite da operação)
   }
 
   /**
@@ -42,6 +42,24 @@ class TreinoService {
     if (sistema === "inteiro" && permitirNegativo && numero > 0) {
       // 50% de chance de tornar negativo
       return Math.random() < 0.5 ? -numero : numero;
+    }
+    return numero;
+  }
+
+  /**
+   * Adicionar duas casas decimais aleatórias a um número (para sistema decimal)
+   * @param {number} numero - Número inteiro
+   * @param {string} sistema - Sistema numérico
+   * @returns {number} Número com duas casas decimais aleatórias (se sistema for "decimal")
+   */
+  adicionarCasasDecimais(numero, sistema) {
+    if (sistema === "decimal") {
+      // Gerar número aleatório entre 0 e 99 para as casas decimais
+      const casasDecimais = this.numeroAleatorio(0, 99);
+      // Dividir por 100 para obter o valor decimal (0.00 a 0.99)
+      const parteDecimal = casasDecimais / 100;
+      // Adicionar ao número inteiro e arredondar para 2 casas decimais para evitar erros de ponto flutuante
+      return Math.round((numero + parteDecimal) * 100) / 100;
     }
     return numero;
   }
@@ -70,18 +88,29 @@ class TreinoService {
       case "soma":
         parcela1 = this.numeroAleatorio(min_parcela_1, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
+        parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
         
         parcela2 = this.numeroAleatorio(min_parcela_2, max_parcela_2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
+        parcela2 = this.adicionarCasasDecimais(parcela2, sistema);
 
         // Se houver parcela 3, usar
         if (min_parcela_3 !== null && max_parcela_3 !== null) {
           parcela3 = this.numeroAleatorio(min_parcela_3, max_parcela_3);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
+          parcela3 = this.adicionarCasasDecimais(parcela3, sistema);
           resultado = parcela1 + parcela2 + parcela3;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         } else {
           parcela3 = null;
           resultado = parcela1 + parcela2;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         }
         break;
 
@@ -89,47 +118,158 @@ class TreinoService {
         // Gerar minuendo primeiro, depois subtraendo menor ou igual
         parcela1 = this.numeroAleatorio(min_parcela_1, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
+        parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
         
+        // Para sistema decimal, garantir que subtraendo <= minuendo
         // Para sistema inteiro, não precisa garantir que subtraendo <= minuendo
-        const maxParcela2 = permitirNegativos 
-          ? max_parcela_2 
-          : Math.min(max_parcela_2, Math.abs(parcela1));
+        let maxParcela2;
+        if (sistema === "decimal") {
+          // Para decimal, parcela2 pode ter parte inteira igual ou menor que parcela1
+          const parcela1Inteira = Math.floor(parcela1);
+          maxParcela2 = Math.min(max_parcela_2, parcela1Inteira);
+        } else {
+          const parcela1Inteira = Math.abs(parcela1);
+          maxParcela2 = permitirNegativos 
+            ? max_parcela_2 
+            : Math.min(max_parcela_2, parcela1Inteira);
+        }
+        
         parcela2 = this.numeroAleatorio(min_parcela_2, maxParcela2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
+        parcela2 = this.adicionarCasasDecimais(parcela2, sistema);
+        
+        // Para sistema decimal, garantir que parcela2 realmente seja <= parcela1
+        if (sistema === "decimal" && parcela2 > parcela1) {
+          const parteInteiraParcela1 = Math.floor(parcela1);
+          const parteInteiraParcela2 = Math.floor(parcela2);
+          
+          if (parteInteiraParcela2 < parteInteiraParcela1) {
+            // Se parte inteira de parcela2 é menor, não precisa ajustar (já está garantido)
+            // Mas se chegou aqui é porque após adicionar casas decimais ficou maior, o que não deveria acontecer
+            // Neste caso, mantém parcela2 como está (não deveria acontecer, mas por segurança)
+          } else if (parteInteiraParcela2 === parteInteiraParcela1) {
+            // Se parte inteira é igual, garantir que parte decimal de parcela2 <= parte decimal de parcela1
+            const parteDecimalParcela1 = parcela1 - parteInteiraParcela1;
+            // Gerar nova parte decimal que seja <= parteDecimalParcela1
+            const maxCasasDecimais = Math.floor(parteDecimalParcela1 * 100);
+            const casasDecimais = this.numeroAleatorio(0, maxCasasDecimais);
+            parcela2 = Math.round((parteInteiraParcela2 + (casasDecimais / 100)) * 100) / 100;
+          } else {
+            // Se parte inteira de parcela2 é maior (não deveria acontecer), ajustar
+            parcela2 = parcela1;
+          }
+        }
 
         if (min_parcela_3 !== null && max_parcela_3 !== null) {
           // Para subtração com 3 parcelas
-          const resultadoParcial = parcela1 - parcela2;
-          const maxParcela3 = permitirNegativos 
-            ? max_parcela_3 
-            : Math.min(max_parcela_3, Math.abs(resultadoParcial));
+          let resultadoParcial = parcela1 - parcela2;
+          // Arredondar resultadoParcial para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultadoParcial = Math.round(resultadoParcial * 100) / 100;
+          }
+          
+          // Para sistema decimal, garantir que parcela3 <= resultadoParcial
+          let maxParcela3;
+          if (sistema === "decimal") {
+            const resultadoParcialInteiro = Math.floor(resultadoParcial);
+            maxParcela3 = Math.min(max_parcela_3, resultadoParcialInteiro);
+          } else {
+            const resultadoParcialInteiro = Math.abs(resultadoParcial);
+            maxParcela3 = permitirNegativos 
+              ? max_parcela_3 
+              : Math.min(max_parcela_3, resultadoParcialInteiro);
+          }
+          
           parcela3 = this.numeroAleatorio(min_parcela_3, maxParcela3);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
+          parcela3 = this.adicionarCasasDecimais(parcela3, sistema);
+          
+          // Para sistema decimal, garantir que parcela3 realmente seja <= resultadoParcial
+          if (sistema === "decimal" && parcela3 > resultadoParcial) {
+            const parteInteiraResultado = Math.floor(resultadoParcial);
+            const parteInteiraParcela3 = Math.floor(parcela3);
+            
+            if (parteInteiraParcela3 < parteInteiraResultado) {
+              // Se parte inteira de parcela3 é menor, não precisa ajustar
+            } else if (parteInteiraParcela3 === parteInteiraResultado) {
+              // Se parte inteira é igual, garantir que parte decimal de parcela3 <= parte decimal de resultadoParcial
+              const parteDecimalResultado = resultadoParcial - parteInteiraResultado;
+              const maxCasasDecimais = Math.floor(parteDecimalResultado * 100);
+              const casasDecimais = this.numeroAleatorio(0, maxCasasDecimais);
+              parcela3 = Math.round((parteInteiraParcela3 + (casasDecimais / 100)) * 100) / 100;
+            } else {
+              // Se parte inteira de parcela3 é maior (não deveria acontecer), ajustar
+              parcela3 = resultadoParcial;
+            }
+          }
+          
           resultado = resultadoParcial - parcela3;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         } else {
           parcela3 = null;
           resultado = parcela1 - parcela2;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         }
         break;
 
       case "multiplicacao":
         parcela1 = this.numeroAleatorio(min_parcela_1, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
+        if (sistema === "decimal") {
+          // Para multiplicação: adicionar apenas 1 casa decimal (0.0 a 0.9)
+          const casaDecimal = this.numeroAleatorio(0, 9);
+          parcela1 = Math.round((parcela1 + casaDecimal / 10) * 10) / 10;
+        } else {
+          parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
+        }
         
         parcela2 = this.numeroAleatorio(min_parcela_2, max_parcela_2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
+        if (sistema === "decimal") {
+          // Para multiplicação: adicionar apenas 1 casa decimal (0.0 a 0.9)
+          const casaDecimal = this.numeroAleatorio(0, 9);
+          parcela2 = Math.round((parcela2 + casaDecimal / 10) * 10) / 10;
+        } else {
+          parcela2 = this.adicionarCasasDecimais(parcela2, sistema);
+        }
 
         if (min_parcela_3 !== null && max_parcela_3 !== null) {
           parcela3 = this.numeroAleatorio(min_parcela_3, max_parcela_3);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
+          if (sistema === "decimal") {
+            // Para multiplicação: adicionar apenas 1 casa decimal (0.0 a 0.9)
+            const casaDecimal = this.numeroAleatorio(0, 9);
+            parcela3 = Math.round((parcela3 + casaDecimal / 10) * 10) / 10;
+          } else {
+            parcela3 = this.adicionarCasasDecimais(parcela3, sistema);
+          }
           resultado = parcela1 * parcela2 * parcela3;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         } else {
           parcela3 = null;
           resultado = parcela1 * parcela2;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         }
         break;
 
       case "divisao":
+        // Ajustar limites se for sistema decimal (multiplicar por 100)
+        const ajusteDecimal = sistema === "decimal" ? 100 : 1;
+        const minParcela1Ajustado = min_parcela_1 * ajusteDecimal;
+        const maxParcela1Ajustado = max_parcela_1 * ajusteDecimal;
+
         // Gerar valores absolutos primeiro (como naturais)
         let parcela2Abs = this.numeroAleatorio(min_parcela_2, max_parcela_2);
         // Garantir que divisor não seja zero
@@ -148,8 +288,8 @@ class TreinoService {
           const divisorTotalAbs = parcela2Abs * parcela3Abs;
           
           // Calcular múltiplos possíveis considerando apenas valores absolutos
-          const multiploMin = Math.ceil(min_parcela_1 / divisorTotalAbs);
-          const multiploMax = Math.floor(max_parcela_1 / divisorTotalAbs);
+          const multiploMin = Math.ceil(minParcela1Ajustado / divisorTotalAbs);
+          const multiploMax = Math.floor(maxParcela1Ajustado / divisorTotalAbs);
 
           if (multiploMin > multiploMax) {
             throw new Error(
@@ -162,16 +302,24 @@ class TreinoService {
           
           // Aplicar sinais aleatórios depois (se sistema inteiro)
           parcela1 = this.aplicarSinalAleatorio(parcela1Abs, sistema, permitirNegativos);
+          // Para sistema decimal, dividir parcela1 por 100 para ter 2 casas decimais
+          if (sistema === "decimal") {
+            parcela1 = parcela1 / 100;
+          }
           parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
           parcela3 = this.aplicarSinalAleatorio(parcela3Abs, sistema, permitirNegativos);
           
           // O resultado já terá o sinal correto automaticamente
           resultado = parcela1 / parcela2 / parcela3;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         } else {
           // Para divisão com 2 parcelas: parcela1 / parcela2 deve ser inteiro
           // Calcular múltiplos possíveis considerando apenas valores absolutos
-          const multiploMin = Math.ceil(min_parcela_1 / parcela2Abs);
-          const multiploMax = Math.floor(max_parcela_1 / parcela2Abs);
+          const multiploMin = Math.ceil(minParcela1Ajustado / parcela2Abs);
+          const multiploMax = Math.floor(maxParcela1Ajustado / parcela2Abs);
 
           if (multiploMin > multiploMax) {
             throw new Error(
@@ -184,31 +332,59 @@ class TreinoService {
           
           // Aplicar sinais aleatórios depois (se sistema inteiro)
           parcela1 = this.aplicarSinalAleatorio(parcela1Abs, sistema, permitirNegativos);
+          // Para sistema decimal, dividir parcela1 por 100 para ter 2 casas decimais
+          if (sistema === "decimal") {
+            parcela1 = parcela1 / 100;
+          }
           parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
           
           // O resultado já terá o sinal correto automaticamente
           parcela3 = null;
           resultado = parcela1 / parcela2;
+          // Arredondar resultado para 2 casas decimais se for sistema decimal
+          if (sistema === "decimal") {
+            resultado = Math.round(resultado * 100) / 100;
+          }
         }
         break;
 
       case "raiz":
-        // Para raiz: gerar base aleatória, calcular base²
-        // O resultado será base², e base² deve estar nos limites de parcela_1
-        const baseMin = Math.ceil(Math.sqrt(min_parcela_1));
-        const baseMax = Math.floor(Math.sqrt(max_parcela_1));
+        if (sistema === "decimal") {
+          // Para sistema decimal: gerar base com 1 casa decimal, elevar ao quadrado (que terá 2 casas)
+          // Gerar base como número natural entre 1 e 100 (que dividido por 10 terá 1 casa decimal)
+          const baseMinNatural = Math.ceil(Math.sqrt(min_parcela_1) * 10);
+          const baseMaxNatural = Math.floor(Math.sqrt(max_parcela_1) * 10);
 
-        if (baseMin > baseMax) {
-          throw new Error(
-            `Impossível gerar raiz: nenhuma base² está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
-          );
+          if (baseMinNatural > baseMaxNatural) {
+            throw new Error(
+              `Impossível gerar raiz: nenhuma base² está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
+            );
+          }
+
+          const baseNatural = this.numeroAleatorio(baseMinNatural, baseMaxNatural);
+          const base = baseNatural / 10; // Base com 1 casa decimal
+          parcela1 = Math.round((base * base) * 100) / 100; // resultado da raiz (com 2 casas decimais, arredondado)
+          parcela2 = null;
+          parcela3 = null;
+          resultado = Math.round(base * 10) / 10; // a raiz quadrada (com 1 casa decimal, arredondado)
+        } else {
+          // Para raiz: gerar base aleatória, calcular base²
+          // O resultado será base², e base² deve estar nos limites de parcela_1
+          const baseMin = Math.ceil(Math.sqrt(min_parcela_1));
+          const baseMax = Math.floor(Math.sqrt(max_parcela_1));
+
+          if (baseMin > baseMax) {
+            throw new Error(
+              `Impossível gerar raiz: nenhuma base² está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
+            );
+          }
+
+          const base = this.numeroAleatorio(baseMin, baseMax);
+          parcela1 = base * base; // resultado da raiz
+          parcela2 = null;
+          parcela3 = null;
+          resultado = base; // a raiz quadrada
         }
-
-        const base = this.numeroAleatorio(baseMin, baseMax);
-        parcela1 = base * base; // resultado da raiz
-        parcela2 = null;
-        parcela3 = null;
-        resultado = base; // a raiz quadrada
         break;
 
       case "aleatorio":
@@ -235,10 +411,10 @@ class TreinoService {
     const limiteMaximo =
       sistema === "romano" ? 3999 : sistema === "binario" ? 2047 : Infinity;
 
-    if (sistema !== "inteiro" && Math.abs(resultado) > limiteMaximo) {
+    if (sistema !== "inteiro" && sistema !== "decimal" && Math.abs(resultado) > limiteMaximo) {
       // Se o resultado ultrapassar o limite do sistema, tentar gerar novamente
       // (será chamado recursivamente via gerarBufferContas)
-      // Para sistema inteiro, não há limite além dos limites da operação
+      // Para sistema inteiro e decimal, não há limite além dos limites da operação
       throw new Error(
         `Resultado ${resultado} ultrapassa o limite do sistema ${sistema} (máximo: ${limiteMaximo})`
       );
@@ -306,6 +482,11 @@ class TreinoService {
       // Formatar resultado esperado conforme sistema
       if (sistema === "natural" || sistema === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado;
+      } else if (sistema === "decimal") {
+        respostaEsperadaFormatada = conversaoService.formatarNumero(
+          resultadoEsperado,
+          "decimal"
+        );
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = conversaoService.formatarNumero(
           resultadoEsperado,
@@ -332,6 +513,18 @@ class TreinoService {
 
         if (!isNaN(respostaNumero)) {
           correto = respostaNumero === resultadoEsperado;
+        }
+      } else if (sistema === "decimal") {
+        // Para decimal, comparar números com 2 casas decimais
+        const respostaNumero =
+          typeof respostaUsuario === "string"
+            ? parseFloat(respostaUsuario.trim().replace(",", "."))
+            : respostaUsuario;
+
+        if (!isNaN(respostaNumero)) {
+          // Comparar com tolerância para erros de ponto flutuante
+          const diferenca = Math.abs(respostaNumero - resultadoEsperado);
+          correto = diferenca < 0.001; // Tolerância de 0.001
         }
       } else if (sistema === "romano") {
         // Para romano, comparar strings (normalizadas: maiúsculas e sem espaços)

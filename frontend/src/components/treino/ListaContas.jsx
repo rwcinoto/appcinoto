@@ -114,6 +114,13 @@ const ListaContas = ({
         const respostaNumero = parseInt(respostaDigitada.trim(), 10);
         if (isNaN(respostaNumero)) return false;
         return respostaNumero === resultadoEsperado;
+      } else if (sistema === "decimal") {
+        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
+        const respostaComPonto = respostaDigitada.trim().replace(",", ".");
+        const respostaNumero = parseFloat(respostaComPonto);
+        if (isNaN(respostaNumero)) return false;
+        const diferenca = Math.abs(respostaNumero - resultadoEsperado);
+        return diferenca < 0.001; // Tolerância de 0.001
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
         const respostaUpper = respostaDigitada.trim().toUpperCase();
@@ -152,6 +159,19 @@ const ListaContas = ({
       } else {
         valorFiltrado = novoValor.replace(/[^0-9]/g, "");
       }
+    } else if (sistema === "decimal") {
+      // Números decimais: permitir números, ponto ou vírgula (apenas um)
+      // Converter vírgula para ponto para facilitar validação
+      let temp = novoValor.replace(",", ".");
+      // Permitir apenas números e um ponto decimal
+      const partes = temp.split(".");
+      if (partes.length > 2) {
+        // Mais de um ponto, manter apenas o primeiro
+        temp = partes[0] + "." + partes.slice(1).join("");
+      }
+      // Remover caracteres inválidos (manter apenas números e ponto)
+      temp = temp.replace(/[^0-9.]/g, "");
+      valorFiltrado = temp;
     } else if (sistema === "romano") {
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
     } else if (sistema === "binario") {
@@ -219,6 +239,53 @@ const ListaContas = ({
           }
         } else {
           // Campo vazio ou apenas "-", manter vermelho se já teve erro
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          } else {
+            e.target.classList.remove("errado");
+          }
+        }
+      } else if (sistema === "decimal") {
+        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
+        const respostaNormalizada = valorFiltrado.trim();
+        const respostaComPonto = respostaNormalizada.replace(",", ".");
+        const respostaNumero = parseFloat(respostaComPonto);
+
+        if (!isNaN(respostaNumero) && respostaNormalizada.length > 0) {
+          // Para decimal, validar quando tiver pelo menos o tamanho mínimo esperado
+          // Comparar com tolerância para erros de ponto flutuante
+          const diferenca = Math.abs(respostaNumero - resultadoEsperado);
+          const correto = diferenca < 0.001; // Tolerância de 0.001
+          
+          // Calcular tamanho esperado (número de dígitos significativos)
+          const tamanhoEsperado = respostaEsperadaFormatada.length;
+          const tamanhoAtual = respostaNormalizada.length;
+          
+          // Se já digitou o suficiente para validar (tem pelo menos o tamanho esperado)
+          if (tamanhoAtual >= tamanhoEsperado) {
+            if (correto) {
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
+            } else {
+              detectouErro = true;
+            }
+          } else {
+            // Ainda está digitando - manter vermelho se já teve erro
+            estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+            if (contaTeveErro) {
+              e.target.classList.add("errado");
+            } else {
+              e.target.classList.remove("errado");
+            }
+          }
+        } else if (respostaNormalizada !== "" && respostaNormalizada !== "." && respostaNormalizada !== ",") {
+          // Resposta inválida (não é número), manter estado anterior
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          }
+        } else {
+          // Campo vazio ou apenas ponto/vírgula, manter vermelho se já teve erro
           if (contaTeveErro) {
             e.target.classList.add("errado");
           } else {
@@ -366,18 +433,25 @@ const ListaContas = ({
           const isAtual = index === contaAtualIndex;
           const parcela1Formatada = formatarNumero(conta.parcela1, sistema);
           // Na operação de raiz, parcela2 pode ser null
+          // Para divisão com sistema decimal, divisores (parcela2 e parcela3) devem aparecer como inteiros
+          const formatarParcelaDivisao = (valor, sistema, tipo) => {
+            if (tipo === "divisao" && sistema === "decimal" && Number.isInteger(valor)) {
+              return valor.toString();
+            }
+            return formatarNumero(valor, sistema);
+          };
           const parcela2Formatada =
             conta.parcela2 !== null && conta.parcela2 !== undefined
               ? formatarParcelaComParenteses(
                   conta.parcela2,
-                  formatarNumero(conta.parcela2, sistema)
+                  formatarParcelaDivisao(conta.parcela2, sistema, conta.tipo)
                 )
               : "";
           const parcela3Formatada =
             conta.parcela3 !== null && conta.parcela3 !== undefined
               ? formatarParcelaComParenteses(
                   conta.parcela3,
-                  formatarNumero(conta.parcela3, sistema)
+                  formatarParcelaDivisao(conta.parcela3, sistema, conta.tipo)
                 )
               : null;
           const simbolo = obterSimboloOperacao(conta.tipo);
@@ -451,7 +525,7 @@ const ListaContas = ({
                     autoFocus={index === contaAtualIndex && !disabled}
                     type="text"
                     inputMode={sistema === "romano" ? "text" : "numeric"}
-                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
+                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
                     className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
                     disabled={disabled || index !== contaAtualIndex}
                     onChange={(e) => handleChange(conta, index, e)}

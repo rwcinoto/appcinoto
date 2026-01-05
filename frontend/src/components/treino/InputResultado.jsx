@@ -49,6 +49,9 @@ const InputResultado = ({
       if (sistema === "natural" || sistema === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         tamanhoEsperado = respostaEsperadaFormatada.length;
+      } else if (sistema === "decimal") {
+        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
+        tamanhoEsperado = respostaEsperadaFormatada.length;
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
         tamanhoEsperado = respostaEsperadaFormatada.length;
@@ -95,6 +98,30 @@ const InputResultado = ({
           // Resposta inválida, não validar ainda
           setEstadoValidacao(null);
           return false;
+        }
+      } else if (sistema === "decimal") {
+        // Para decimal: validar quando o tamanho for igual (considerando ponto decimal)
+        if (respostaNormalizada.length < tamanhoEsperado) {
+          // Ainda está digitando
+          setEstadoValidacao(null);
+          return false;
+        }
+
+        // Converter vírgula para ponto
+        const respostaComPonto = respostaNormalizada.replace(",", ".");
+        const respostaNumero = parseFloat(respostaComPonto);
+        
+        if (!isNaN(respostaNumero)) {
+          // Comparar com tolerância para erros de ponto flutuante
+          const diferenca = Math.abs(respostaNumero - resultadoEsperado);
+          const correto = diferenca < 0.001; // Tolerância de 0.001
+          setEstadoValidacao(correto ? "correto" : "errado");
+          
+          if (correto) {
+            return true;
+          }
+        } else {
+          setEstadoValidacao("errado");
         }
       } else if (sistema === "romano") {
         // Para romano: validar apenas quando o tamanho for igual
@@ -161,6 +188,19 @@ const InputResultado = ({
       } else {
         valorFiltrado = novoValor.replace(/[^0-9]/g, "");
       }
+    } else if (sistema === "decimal") {
+      // Números decimais: permitir números, ponto ou vírgula (apenas um)
+      // Converter vírgula para ponto para facilitar validação
+      let temp = novoValor.replace(",", ".");
+      // Permitir apenas números e um ponto decimal
+      const partes = temp.split(".");
+      if (partes.length > 2) {
+        // Mais de um ponto, manter apenas o primeiro
+        temp = partes[0] + "." + partes.slice(1).join("");
+      }
+      // Remover caracteres inválidos (manter apenas números e ponto)
+      temp = temp.replace(/[^0-9.]/g, "");
+      valorFiltrado = temp;
     } else if (sistema === "romano") {
       // Apenas letras romanas (I, V, X, L, C, D, M)
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
@@ -202,7 +242,7 @@ const InputResultado = ({
         ref={inputRef}
         type="text"
         inputMode={sistema === "romano" ? "text" : "numeric"}
-        pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
+        pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
         value={valor}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
