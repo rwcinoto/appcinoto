@@ -150,9 +150,10 @@ const Sistemas = () => {
   const formatarTipo = (tipo) => {
     const tipos = {
       natural: "Natural",
-      romano: "Romano",
-      binario: "Binário",
       inteiro: "Inteiro",
+      decimal: "Decimal",
+      binario: "Binário",
+      romano: "Romano",
     };
     return tipos[tipo] || tipo;
   };
@@ -182,9 +183,10 @@ const Sistemas = () => {
           <select value={filtroTipo} onChange={handleFiltroTipoChange}>
             <option value="">Todos</option>
             <option value="natural">Natural</option>
-            <option value="romano">Romano</option>
-            <option value="binario">Binário</option>
             <option value="inteiro">Inteiro</option>
+            <option value="decimal">Decimal</option>
+            <option value="binario">Binário</option>
+            <option value="romano">Romano</option>
           </select>
         </div>
 

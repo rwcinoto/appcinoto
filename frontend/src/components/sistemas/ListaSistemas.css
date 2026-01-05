@@ -59,6 +59,11 @@
   color: #2e7d32;
 }
 
+.badge-decimal {
+  background: #fff9e6;
+  color: #f57c00;
+}
+
 .acoes {
   display: flex;
   gap: 8px;

@@ -66,9 +66,10 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   const formatarTipoSistema = (tipo) => {
     const tipos = {
       natural: "Natural",
-      romano: "Romano",
-      binario: "Binário",
       inteiro: "Inteiro",
+      decimal: "Decimal",
+      binario: "Binário",
+      romano: "Romano",
     };
     return tipos[tipo] || tipo;
   };
@@ -95,8 +96,21 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
     return cores[tipo] || "#666";
   };
 
+  const obterCorSistema = (tipo) => {
+    const cores = {
+      natural: { background: "#e3f2fd", color: "#1976d2" }, // Mesmas cores do badge-natural
+      romano: { background: "#f3e5f5", color: "#7b1fa2" }, // Mesmas cores do badge-romano
+      binario: { background: "#fff3e0", color: "#e65100" }, // Mesmas cores do badge-binario
+      inteiro: { background: "#e8f5e9", color: "#2e7d32" }, // Mesmas cores do badge-inteiro
+      decimal: { background: "#fff9e6", color: "#f57c00" }, // Mesmas cores do badge-decimal
+    };
+    return cores[tipo] || { background: "#f5f5f5", color: "#666" };
+  };
+
   const tipoOperacao = recorde.operacao?.tipo || "";
   const corOperacao = obterCorOperacao(tipoOperacao);
+  const tipoSistema = recorde.sistema?.tipo || "";
+  const coresSistema = obterCorSistema(tipoSistema);
 
   // Calcular tempo médio por conta
   const calcularTempoMedioPorConta = () => {
@@ -198,7 +212,16 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
 
         <div className="card-recorde-info-item">
           <span className="card-recorde-info-label">Sistema</span>
-          <span className="card-recorde-info-value">
+          <span 
+            className="card-recorde-info-value" 
+            style={{ 
+              backgroundColor: coresSistema.background, 
+              color: coresSistema.color,
+              padding: "4px 12px",
+              borderRadius: "12px",
+              display: "inline-block"
+            }}
+          >
             {recorde.sistema?.tipo
               ? formatarTipoSistema(recorde.sistema.tipo)
               : "-"}
