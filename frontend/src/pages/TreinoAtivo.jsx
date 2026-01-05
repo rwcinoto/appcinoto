@@ -291,7 +291,6 @@ const TreinoAtivo = () => {
               contaAtualIndex={contaAtualIndex}
               onAcerto={handleAcerto}
               disabled={processando || treinoFinalizado}
-              processando={processando}
             />
           </div>
 
