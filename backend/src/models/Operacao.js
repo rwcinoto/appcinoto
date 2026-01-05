@@ -13,6 +13,15 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "id_operacao",
         as: "recordes",
       });
+
+      // Relacionamento para operações aleatórias
+      // Uma operação aleatória tem muitas operações incluídas
+      Operacao.belongsToMany(models.Operacao, {
+        through: "operacoes_aleatorias",
+        foreignKey: "id_operacao_aleatoria",
+        otherKey: "id_operacao_incluida",
+        as: "operacoes_incluidas",
+      });
     }
   }
 
@@ -37,7 +46,8 @@ module.exports = (sequelize, DataTypes) => {
           "subtracao",
           "multiplicacao",
           "divisao",
-          "raiz"
+          "raiz",
+          "aleatorio"
         ),
         allowNull: false,
       },

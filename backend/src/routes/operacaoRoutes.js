@@ -15,12 +15,14 @@ const validarCriarOperacao = [
     .withMessage("Nome deve ter no mínimo 3 caracteres"),
   body("descricao").optional().trim(),
   body("tipo")
-    .isIn(["soma", "subtracao", "multiplicacao", "divisao", "raiz"])
-    .withMessage("Tipo deve ser: soma, subtracao, multiplicacao, divisao ou raiz"),
+    .isIn(["soma", "subtracao", "multiplicacao", "divisao", "raiz", "aleatorio"])
+    .withMessage("Tipo deve ser: soma, subtracao, multiplicacao, divisao, raiz ou aleatorio"),
   body("min_parcela_1")
+    .optional()
     .isInt()
     .withMessage("min_parcela_1 deve ser um número inteiro"),
   body("max_parcela_1")
+    .optional()
     .isInt()
     .withMessage("max_parcela_1 deve ser um número inteiro"),
   body("min_parcela_2")
@@ -59,8 +61,8 @@ const validarAtualizarOperacao = [
   body("descricao").optional().trim(),
   body("tipo")
     .optional()
-    .isIn(["soma", "subtracao", "multiplicacao", "divisao", "raiz"])
-    .withMessage("Tipo deve ser: soma, subtracao, multiplicacao, divisao ou raiz"),
+    .isIn(["soma", "subtracao", "multiplicacao", "divisao", "raiz", "aleatorio"])
+    .withMessage("Tipo deve ser: soma, subtracao, multiplicacao, divisao, raiz ou aleatorio"),
   body("min_parcela_1")
     .optional()
     .isInt()

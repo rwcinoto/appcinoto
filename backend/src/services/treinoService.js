@@ -130,14 +130,12 @@ class TreinoService {
         break;
 
       case "divisao":
-        // Gerar divisores primeiro (valores absolutos)
+        // Gerar valores absolutos primeiro (como naturais)
         let parcela2Abs = this.numeroAleatorio(min_parcela_2, max_parcela_2);
         // Garantir que divisor não seja zero
         if (parcela2Abs === 0) {
           parcela2Abs = 1;
         }
-        // Aplicar sinal aleatório se permitido
-        parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
 
         if (min_parcela_3 !== null && max_parcela_3 !== null) {
           // Para divisão com 3 parcelas: (parcela1 / parcela2) / parcela3 deve ser inteiro
@@ -146,130 +144,49 @@ class TreinoService {
           if (parcela3Abs === 0) {
             parcela3Abs = 1;
           }
-          parcela3 = this.aplicarSinalAleatorio(parcela3Abs, sistema, permitirNegativos);
 
-          const divisorTotal = parcela2 * parcela3;
-          const absDivisorTotal = Math.abs(divisorTotal);
+          const divisorTotalAbs = parcela2Abs * parcela3Abs;
           
-          // Calcular múltiplo do divisorTotal dentro do intervalo de parcela1
-          // Para sistema inteiro, considerar que parcela1 pode ser negativa
-          const multiploMin = permitirNegativos 
-            ? Math.ceil(-max_parcela_1 / absDivisorTotal)
-            : Math.ceil(min_parcela_1 / absDivisorTotal);
-          const multiploMax = permitirNegativos
-            ? Math.floor(max_parcela_1 / absDivisorTotal)
-            : Math.floor(max_parcela_1 / absDivisorTotal);
+          // Calcular múltiplos possíveis considerando apenas valores absolutos
+          const multiploMin = Math.ceil(min_parcela_1 / divisorTotalAbs);
+          const multiploMax = Math.floor(max_parcela_1 / divisorTotalAbs);
 
           if (multiploMin > multiploMax) {
             throw new Error(
-              `Impossível gerar divisão com 3 parcelas: nenhum múltiplo de ${divisorTotal} está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
+              `Impossível gerar divisão com 3 parcelas: nenhum múltiplo de ${divisorTotalAbs} está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
             );
           }
 
           const multiplo = this.numeroAleatorio(multiploMin, multiploMax);
-          parcela1 = multiplo * divisorTotal; // Garante que o resultado é inteiro
+          let parcela1Abs = multiplo * divisorTotalAbs; // Garante que o resultado é inteiro
           
-          // Validar que parcela1 está dentro do intervalo esperado
-          const absParcela1 = Math.abs(parcela1);
-          if (permitirNegativos) {
-            // Para sistema inteiro: valor absoluto deve estar entre min e max
-            if (absParcela1 < min_parcela_1 || absParcela1 > max_parcela_1) {
-              throw new Error(
-                `Parcela1 gerada (${parcela1}) está fora do intervalo [${min_parcela_1}, ${max_parcela_1}] ou [-${max_parcela_1}, -${min_parcela_1}]`
-              );
-            }
-          } else {
-            // Para sistema natural: parcela1 deve estar entre min e max
-            if (parcela1 < min_parcela_1 || parcela1 > max_parcela_1) {
-              throw new Error(
-                `Parcela1 gerada (${parcela1}) está fora do intervalo [${min_parcela_1}, ${max_parcela_1}]`
-              );
-            }
-          }
+          // Aplicar sinais aleatórios depois (se sistema inteiro)
+          parcela1 = this.aplicarSinalAleatorio(parcela1Abs, sistema, permitirNegativos);
+          parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
+          parcela3 = this.aplicarSinalAleatorio(parcela3Abs, sistema, permitirNegativos);
           
+          // O resultado já terá o sinal correto automaticamente
           resultado = parcela1 / parcela2 / parcela3;
         } else {
           // Para divisão com 2 parcelas: parcela1 / parcela2 deve ser inteiro
-          const absParcela2 = Math.abs(parcela2);
-          
-          // Calcular os múltiplos possíveis considerando o intervalo de parcela1
-          // Para sistema inteiro, considerar valores negativos também
-          let multiploMin, multiploMax;
-          
-          // O múltiplo é o resultado da divisão: parcela1 = multiplo * parcela2
-          // Precisamos que parcela1 esteja no intervalo [min_parcela_1, max_parcela_1]
-          // (ou [-max_parcela_1, -min_parcela_1] para sistema inteiro)
-          
-          if (permitirNegativos) {
-            // Para sistema inteiro: |parcela1| deve estar entre min_parcela_1 e max_parcela_1
-            // Calcular múltiplos que geram parcela1 positivo
-            const multiploMinPos = Math.ceil(min_parcela_1 / absParcela2);
-            const multiploMaxPos = Math.floor(max_parcela_1 / absParcela2);
-            
-            // Calcular múltiplos que geram parcela1 negativo
-            // Se parcela2 > 0: multiplo negativo gera parcela1 negativo
-            // Se parcela2 < 0: multiplo positivo gera parcela1 negativo
-            const multiploMinNeg = Math.ceil(min_parcela_1 / absParcela2);
-            const multiploMaxNeg = Math.floor(max_parcela_1 / absParcela2);
-            
-            if (parcela2 < 0) {
-              // Se parcela2 é negativo:
-              // - multiplo positivo gera parcela1 negativo (ex: 2 * (-8) = -16)
-              // - multiplo negativo gera parcela1 positivo (ex: -2 * (-8) = 16)
-              multiploMin = -multiploMaxPos; // Para gerar parcela1 positivo
-              multiploMax = multiploMaxNeg;  // Para gerar parcela1 negativo
-            } else {
-              // Se parcela2 é positivo:
-              // - multiplo positivo gera parcela1 positivo (ex: 2 * 8 = 16)
-              // - multiplo negativo gera parcela1 negativo (ex: -2 * 8 = -16)
-              multiploMin = -multiploMaxNeg; // Para gerar parcela1 negativo
-              multiploMax = multiploMaxPos;  // Para gerar parcela1 positivo
-            }
-          } else {
-            // Para sistema natural: apenas valores positivos
-            if (parcela2 < 0) {
-              // Para gerar parcela1 positivo com divisor negativo, precisamos de múltiplo negativo
-              // parcela1 = multiplo * (-absParcela2) >= min_parcela_1
-              // multiplo * (-absParcela2) >= min_parcela_1
-              // multiplo <= -min_parcela_1 / absParcela2
-              multiploMax = Math.floor(-min_parcela_1 / absParcela2);
-              // parcela1 = multiplo * (-absParcela2) <= max_parcela_1
-              // multiplo * (-absParcela2) <= max_parcela_1
-              // multiplo >= -max_parcela_1 / absParcela2
-              multiploMin = Math.ceil(-max_parcela_1 / absParcela2);
-            } else {
-              multiploMin = Math.ceil(min_parcela_1 / absParcela2);
-              multiploMax = Math.floor(max_parcela_1 / absParcela2);
-            }
-          }
+          // Calcular múltiplos possíveis considerando apenas valores absolutos
+          const multiploMin = Math.ceil(min_parcela_1 / parcela2Abs);
+          const multiploMax = Math.floor(max_parcela_1 / parcela2Abs);
 
           if (multiploMin > multiploMax) {
             throw new Error(
-              `Impossível gerar divisão: nenhum múltiplo de ${parcela2} está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
+              `Impossível gerar divisão: nenhum múltiplo de ${parcela2Abs} está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
             );
           }
 
           const multiplo = this.numeroAleatorio(multiploMin, multiploMax);
-          parcela1 = multiplo * parcela2; // Garante que parcela1 % parcela2 == 0
+          let parcela1Abs = multiplo * parcela2Abs; // Garante que parcela1 % parcela2 == 0
           
-          // Validar que parcela1 está dentro do intervalo esperado
-          const absParcela1 = Math.abs(parcela1);
-          if (permitirNegativos) {
-            // Para sistema inteiro: valor absoluto deve estar entre min e max
-            if (absParcela1 < min_parcela_1 || absParcela1 > max_parcela_1) {
-              throw new Error(
-                `Parcela1 gerada (${parcela1}) está fora do intervalo [${min_parcela_1}, ${max_parcela_1}] ou [-${max_parcela_1}, -${min_parcela_1}]`
-              );
-            }
-          } else {
-            // Para sistema natural: parcela1 deve estar entre min e max
-            if (parcela1 < min_parcela_1 || parcela1 > max_parcela_1) {
-              throw new Error(
-                `Parcela1 gerada (${parcela1}) está fora do intervalo [${min_parcela_1}, ${max_parcela_1}]`
-              );
-            }
-          }
+          // Aplicar sinais aleatórios depois (se sistema inteiro)
+          parcela1 = this.aplicarSinalAleatorio(parcela1Abs, sistema, permitirNegativos);
+          parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
           
+          // O resultado já terá o sinal correto automaticamente
           parcela3 = null;
           resultado = parcela1 / parcela2;
         }
@@ -293,6 +210,21 @@ class TreinoService {
         parcela3 = null;
         resultado = base; // a raiz quadrada
         break;
+
+      case "aleatorio":
+        // Para aleatório: selecionar uma das operações incluídas aleatoriamente
+        if (!operacao.operacoes_incluidas || operacao.operacoes_incluidas.length === 0) {
+          throw new Error("Operação aleatória não possui operações configuradas");
+        }
+
+        // Selecionar uma operação aleatória das incluídas
+        const indiceAleatorio = Math.floor(
+          Math.random() * operacao.operacoes_incluidas.length
+        );
+        const operacaoSelecionada = operacao.operacoes_incluidas[indiceAleatorio];
+
+        // Gerar conta usando a operação selecionada (recursão)
+        return this.gerarConta(operacaoSelecionada, sistema);
 
       default:
         throw new Error(`Tipo de operação inválido: ${tipo}`);
