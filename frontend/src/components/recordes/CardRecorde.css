@@ -129,6 +129,9 @@
   font-weight: 500;
 }
 
+/* Nota: Os badges de sistema usam estilos inline (style={{...}}) no CardRecorde.jsx */
+/* Estilos inline têm prioridade máxima sobre CSS, então não há risco de interferência de CSS global */
+
 .card-recorde-posicao-ranking {
   margin-top: 16px;
   padding-top: 16px;

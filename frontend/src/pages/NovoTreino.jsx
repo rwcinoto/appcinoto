@@ -122,6 +122,7 @@ const NovoTreino = () => {
       multiplicacao: "Multiplicação",
       divisao: "Divisão",
       raiz: "Raiz quadrada",
+      aleatorio: "Aleatório",
     };
     return tipos[tipo] || tipo;
   };
@@ -141,9 +142,10 @@ const NovoTreino = () => {
     const tipos = {
       natural: "Natural",
       inteiro: "Inteiro",
+      romano: "Romano",
       decimal: "Decimal",
       binario: "Binário",
-      romano: "Romano",
+      hexadecimal: "Hexadecimal",
     };
     return tipos[tipo] || tipo;
   };

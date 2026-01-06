@@ -88,9 +88,10 @@ const FormSistema = ({
         >
           <option value="natural">Natural</option>
           <option value="inteiro">Inteiro</option>
+          <option value="romano">Romano</option>
           <option value="decimal">Decimal</option>
           <option value="binario">Binário</option>
-          <option value="romano">Romano</option>
+          <option value="hexadecimal">Hexadecimal</option>
         </select>
         <small>Sistema numérico usado nos cálculos</small>
       </div>

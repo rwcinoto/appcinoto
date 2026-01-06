@@ -151,9 +151,10 @@ const Sistemas = () => {
     const tipos = {
       natural: "Natural",
       inteiro: "Inteiro",
+      romano: "Romano",
       decimal: "Decimal",
       binario: "Binário",
-      romano: "Romano",
+      hexadecimal: "Hexadecimal",
     };
     return tipos[tipo] || tipo;
   };
@@ -184,9 +185,10 @@ const Sistemas = () => {
             <option value="">Todos</option>
             <option value="natural">Natural</option>
             <option value="inteiro">Inteiro</option>
+            <option value="romano">Romano</option>
             <option value="decimal">Decimal</option>
             <option value="binario">Binário</option>
-            <option value="romano">Romano</option>
+            <option value="hexadecimal">Hexadecimal</option>
           </select>
         </div>
 

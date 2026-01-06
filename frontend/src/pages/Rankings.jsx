@@ -165,6 +165,7 @@ const Rankings = () => {
       multiplicacao: "Multiplicação",
       divisao: "Divisão",
       raiz: "Raiz quadrada",
+      aleatorio: "Aleatório",
     };
     return tipos[tipo] || tipo;
   };
@@ -173,9 +174,10 @@ const Rankings = () => {
     const tipos = {
       natural: "Natural",
       inteiro: "Inteiro",
+      romano: "Romano",
       decimal: "Decimal",
       binario: "Binário",
-      romano: "Romano",
+      hexadecimal: "Hexadecimal",
     };
     return tipos[tipo] || tipo;
   };

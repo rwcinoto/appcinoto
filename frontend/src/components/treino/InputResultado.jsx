@@ -61,6 +61,12 @@ const InputResultado = ({
           "binario"
         );
         tamanhoEsperado = respostaEsperadaFormatada.length;
+      } else if (sistema === "hexadecimal") {
+        respostaEsperadaFormatada = formatarNumero(
+          resultadoEsperado,
+          "hexadecimal"
+        );
+        tamanhoEsperado = respostaEsperadaFormatada.length;
       } else {
         setEstadoValidacao(null);
         return false;
@@ -160,6 +166,27 @@ const InputResultado = ({
         if (correto) {
           return true;
         }
+      } else if (sistema === "hexadecimal") {
+        // Para hexadecimal: validar apenas quando o tamanho for igual
+        if (respostaNormalizada.length < tamanhoEsperado) {
+          // Ainda está digitando
+          setEstadoValidacao(null);
+          return false;
+        }
+
+        // Validar formato hexadecimal (0-9 e A-F, case insensitive)
+        const respostaUpper = respostaNormalizada.toUpperCase();
+        if (!/^[0-9A-F]+$/.test(respostaUpper)) {
+          setEstadoValidacao("errado");
+          return false;
+        }
+
+        const correto = respostaUpper === respostaEsperadaFormatada.toUpperCase();
+        setEstadoValidacao(correto ? "correto" : "errado");
+
+        if (correto) {
+          return true;
+        }
       }
     } catch (error) {
       console.error("Erro ao validar resposta:", error);
@@ -207,6 +234,9 @@ const InputResultado = ({
     } else if (sistema === "binario") {
       // Apenas 0s e 1s
       valorFiltrado = novoValor.replace(/[^01]/g, "");
+    } else if (sistema === "hexadecimal") {
+      // Apenas dígitos 0-9 e letras A-F (case insensitive)
+      valorFiltrado = novoValor.toUpperCase().replace(/[^0-9A-F]/g, "");
     }
 
     setValor(valorFiltrado);
@@ -241,8 +271,8 @@ const InputResultado = ({
       <input
         ref={inputRef}
         type="text"
-        inputMode={sistema === "romano" ? "text" : "numeric"}
-        pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
+        inputMode={sistema === "romano" || sistema === "hexadecimal" ? "text" : "numeric"}
+        pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : sistema === "hexadecimal" ? "[0-9A-Fa-f]*" : undefined}
         value={valor}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
