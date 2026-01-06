@@ -12,9 +12,22 @@ const ListaOperacoes = ({ operacoes, onEditar, onExcluir }) => {
       subtracao: "Subtração",
       multiplicacao: "Multiplicação",
       divisao: "Divisão",
-      raiz: "Raiz",
+      raiz: "Raiz quadrada",
+      aleatorio: "Aleatório",
     };
     return tipos[tipo] || tipo;
+  };
+
+  const obterCorOperacao = (tipo) => {
+    const cores = {
+      soma: "#2196F3", // Azul
+      subtracao: "#4CAF50", // Verde
+      multiplicacao: "#FF9800", // Laranja
+      divisao: "#FFD700", // Amarelo
+      raiz: "#F44336", // Vermelho
+      aleatorio: "#000000", // Preto
+    };
+    return cores[tipo] || "#E0E0E0";
   };
 
   return (
@@ -34,7 +47,12 @@ const ListaOperacoes = ({ operacoes, onEditar, onExcluir }) => {
             <tr key={operacao.id}>
               <td>{operacao.nome}</td>
               <td>
-                <span className="badge-tipo">
+                <span 
+                  className="badge-tipo badge-tipo-operacao"
+                  style={{
+                    color: obterCorOperacao(operacao.tipo),
+                  }}
+                >
                   {getTipoLabel(operacao.tipo)}
                 </span>
               </td>

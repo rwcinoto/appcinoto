@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Service para conversão entre sistemas numéricos (natural, romano, binário)
+ * Service para conversão entre sistemas numéricos (natural, romano, binário, hexadecimal)
  */
 class ConversaoService {
   /**
@@ -111,10 +111,82 @@ class ConversaoService {
   }
 
   /**
+   * Converter número decimal para hexadecimal
+   * @param {number} numero - Número decimal (inteiro não negativo)
+   * @returns {string} Número em hexadecimal (maiúsculas)
+   * @throws {Error} Se o número for inválido
+   */
+  paraHexadecimal(numero) {
+    if (!Number.isInteger(numero) || numero < 0) {
+      throw new Error(
+        "Número deve ser um inteiro não negativo para conversão para hexadecimal"
+      );
+    }
+
+    if (numero === 0) {
+      return "0";
+    }
+
+    let resultado = "";
+    let valorRestante = numero;
+
+    while (valorRestante > 0) {
+      const resto = valorRestante % 16;
+      // Converter resto para dígito hexadecimal (0-9 ou A-F)
+      const digito = resto < 10 ? resto.toString() : String.fromCharCode(65 + resto - 10); // A=65, B=66, etc.
+      resultado = digito + resultado;
+      valorRestante = Math.floor(valorRestante / 16);
+    }
+
+    return resultado;
+  }
+
+  /**
+   * Converter número hexadecimal para decimal
+   * @param {string} hexadecimal - Número em hexadecimal (string)
+   * @returns {number} Número decimal
+   * @throws {Error} Se o formato hexadecimal for inválido
+   */
+  deHexadecimal(hexadecimal) {
+    if (typeof hexadecimal !== "string") {
+      throw new Error("Hexadecimal deve ser uma string");
+    }
+
+    // Validar formato hexadecimal (apenas 0-9 e A-F, case insensitive)
+    if (!/^[0-9A-Fa-f]+$/.test(hexadecimal)) {
+      throw new Error("Formato hexadecimal inválido. Deve conter apenas dígitos 0-9 e letras A-F");
+    }
+
+    // Converter para maiúsculas para facilitar processamento
+    const hexUpper = hexadecimal.toUpperCase();
+    let resultado = 0;
+    const tamanho = hexUpper.length;
+
+    for (let i = 0; i < tamanho; i++) {
+      const char = hexUpper[i];
+      let digito;
+      
+      // Converter caractere para valor decimal
+      if (char >= "0" && char <= "9") {
+        digito = parseInt(char);
+      } else if (char >= "A" && char <= "F") {
+        digito = char.charCodeAt(0) - 55; // A=10, B=11, ..., F=15
+      } else {
+        throw new Error(`Caractere hexadecimal inválido: ${char}`);
+      }
+
+      const potencia = tamanho - 1 - i;
+      resultado += digito * Math.pow(16, potencia);
+    }
+
+    return resultado;
+  }
+
+  /**
    * Formatar número conforme sistema solicitado
    * @param {number} numero - Número decimal
-   * @param {string} sistema - Sistema numérico: 'natural', 'romano', 'binario', 'inteiro' ou 'decimal'
-   * @returns {string|number} Número formatado (string para romano/binário/decimal, number para natural/inteiro)
+   * @param {string} sistema - Sistema numérico: 'natural', 'romano', 'binario', 'inteiro', 'decimal' ou 'hexadecimal'
+   * @returns {string|number} Número formatado (string para romano/binário/hexadecimal/decimal, number para natural/inteiro)
    * @throws {Error} Se o sistema for inválido ou o número estiver fora dos limites
    */
   formatarNumero(numero, sistema) {
@@ -140,9 +212,12 @@ class ConversaoService {
       case "binario":
         return this.paraBinario(numero);
 
+      case "hexadecimal":
+        return this.paraHexadecimal(numero);
+
       default:
         throw new Error(
-          `Sistema inválido: ${sistema}. Use 'natural', 'romano', 'binario', 'inteiro' ou 'decimal'`
+          `Sistema inválido: ${sistema}. Use 'natural', 'romano', 'binario', 'inteiro', 'decimal' ou 'hexadecimal'`
         );
     }
   }

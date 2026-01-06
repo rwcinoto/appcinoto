@@ -71,6 +71,7 @@ const FiltrosRanking = ({
       multiplicacao: "Multiplicação",
       divisao: "Divisão",
       raiz: "Raiz quadrada",
+      aleatorio: "Aleatório",
     };
     return tipos[tipo] || tipo;
   };

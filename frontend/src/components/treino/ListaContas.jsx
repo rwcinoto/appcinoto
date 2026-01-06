@@ -133,6 +133,14 @@ const ListaContas = ({
         );
         if (!/^[01]+$/.test(respostaDigitada.trim())) return false;
         return respostaDigitada.trim() === respostaEsperadaFormatada;
+      } else if (sistema === "hexadecimal") {
+        respostaEsperadaFormatada = formatarNumero(
+          resultadoEsperado,
+          "hexadecimal"
+        );
+        const respostaUpper = respostaDigitada.trim().toUpperCase();
+        if (!/^[0-9A-F]+$/.test(respostaUpper)) return false;
+        return respostaUpper === respostaEsperadaFormatada.toUpperCase();
       }
     } catch (error) {
       console.error("Erro ao validar resposta:", error);
@@ -176,6 +184,9 @@ const ListaContas = ({
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
     } else if (sistema === "binario") {
       valorFiltrado = novoValor.replace(/[^01]/g, "");
+    } else if (sistema === "hexadecimal") {
+      // Apenas dígitos 0-9 e letras A-F (case insensitive)
+      valorFiltrado = novoValor.toUpperCase().replace(/[^0-9A-F]/g, "");
     }
 
     // Atualizar valor do input
@@ -326,6 +337,35 @@ const ListaContas = ({
         if (respostaNormalizada.length === tamanhoEsperado) {
           if (/^[01]+$/.test(respostaNormalizada)) {
             const correto = respostaNormalizada === respostaEsperadaFormatada;
+            if (!correto) {
+              detectouErro = true;
+            } else {
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
+            }
+          } else {
+            detectouErro = true;
+          }
+        } else if (respostaNormalizada.length < tamanhoEsperado) {
+          estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          } else {
+            e.target.classList.remove("errado");
+          }
+        }
+      } else if (sistema === "hexadecimal") {
+        respostaEsperadaFormatada = formatarNumero(
+          resultadoEsperado,
+          "hexadecimal"
+        );
+        const tamanhoEsperado = respostaEsperadaFormatada.length;
+        const respostaNormalizada = valorFiltrado.trim().toUpperCase();
+
+        if (respostaNormalizada.length === tamanhoEsperado) {
+          if (/^[0-9A-F]+$/.test(respostaNormalizada)) {
+            const correto = respostaNormalizada === respostaEsperadaFormatada.toUpperCase();
             if (!correto) {
               detectouErro = true;
             } else {
@@ -524,8 +564,8 @@ const ListaContas = ({
                     }}
                     autoFocus={index === contaAtualIndex && !disabled}
                     type="text"
-                    inputMode={sistema === "romano" ? "text" : "numeric"}
-                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : undefined}
+                    inputMode={sistema === "romano" || sistema === "hexadecimal" ? "text" : "numeric"}
+                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : sistema === "hexadecimal" ? "[0-9A-Fa-f]*" : undefined}
                     className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
                     disabled={disabled || index !== contaAtualIndex}
                     onChange={(e) => handleChange(conta, index, e)}

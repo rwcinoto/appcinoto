@@ -135,6 +135,13 @@ class ConjuntoController {
             model: Usuario,
             as: "usuario",
             attributes: ["id", "nome", "email"],
+            include: [
+              {
+                model: Plano,
+                as: "plano",
+                attributes: ["id", "nome"],
+              },
+            ],
           },
         ],
         order: [
@@ -154,7 +161,10 @@ class ConjuntoController {
       const elementosFormatados = elementos.map((e) => ({
         id: e.usuario.id,
         nome: e.usuario.nome,
-        email: e.usuario.email,
+        plano: e.usuario.plano ? {
+          id: e.usuario.plano.id,
+          nome: e.usuario.plano.nome,
+        } : null,
         tipo: e.tipo,
         status: e.status,
       }));

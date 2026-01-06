@@ -64,9 +64,26 @@ export const paraBinario = (numero) => {
 };
 
 /**
+ * Converter número decimal para hexadecimal
+ * @param {number} numero - Número inteiro não negativo
+ * @returns {string} Número em notação hexadecimal (maiúsculas)
+ */
+export const paraHexadecimal = (numero) => {
+  // Se for null ou undefined, retornar string vazia
+  if (numero === null || numero === undefined) {
+    return "";
+  }
+
+  if (!Number.isInteger(numero) || numero < 0) {
+    return numero.toString(); // Retornar como string se não puder converter
+  }
+  return numero.toString(16).toUpperCase();
+};
+
+/**
  * Formatar número conforme sistema numérico
  * @param {number|null} numero - Número decimal (pode ser null)
- * @param {string} sistema - 'natural', 'romano', 'binario' ou 'inteiro'
+ * @param {string} sistema - 'natural', 'romano', 'binario', 'inteiro', 'decimal' ou 'hexadecimal'
  * @returns {string|number} Número formatado
  */
 export const formatarNumero = (numero, sistema) => {
@@ -91,6 +108,8 @@ export const formatarNumero = (numero, sistema) => {
       return paraRomano(numero);
     case "binario":
       return paraBinario(numero);
+    case "hexadecimal":
+      return paraHexadecimal(numero);
     default:
       return numero.toString();
   }

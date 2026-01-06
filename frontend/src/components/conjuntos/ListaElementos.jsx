@@ -35,7 +35,7 @@ const ListaElementos = ({
           <thead>
             <tr>
               <th>Nome</th>
-              <th>Email</th>
+              <th>Plano</th>
               <th>Tipo</th>
               {mostrarStatus && <th>Status</th>}
               {podeGerenciar && <th>Ações</th>}
@@ -63,7 +63,7 @@ const ListaElementos = ({
                     </Link>
                   )}
                 </td>
-                <td>{elemento.email}</td>
+                <td>{elemento.plano?.nome || "-"}</td>
                 <td>
                   {elemento.tipo === "dono" && (
                     <span className="badge badge-dono">Dono</span>
@@ -182,7 +182,7 @@ const ListaElementos = ({
                 </div>
               </div>
               <div className="card-elemento-email-mobile">
-                {elemento.email}
+                {elemento.plano?.nome || "-"}
               </div>
               {podeGerenciar && (
                 <div className="card-elemento-acoes-mobile">

@@ -31,13 +31,18 @@
   background: #f9f9f9;
 }
 
-.badge-tipo {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+/* Badge de tipo de operação - usando alta especificidade para evitar interferência de CSS global */
+.lista-operacoes .badge-tipo.badge-tipo-operacao {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 500;
-  background: #e3f2fd;
-  color: #1976d2;
+  display: inline-block;
+  /* As cores são aplicadas via inline styles no componente */
+  /* Usando !important para garantir que não haja interferência de CSS global */
+  background: transparent !important;
+  background-color: transparent !important;
+  /* A cor do texto é definida via inline style no componente */
 }
 
 .acoes {

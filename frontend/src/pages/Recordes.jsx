@@ -136,9 +136,10 @@ const Recordes = () => {
     const tipos = {
       natural: "Natural",
       inteiro: "Inteiro",
+      romano: "Romano",
       decimal: "Decimal",
       binario: "Binário",
-      romano: "Romano",
+      hexadecimal: "Hexadecimal",
     };
     return tipos[tipo] || tipo;
   };

@@ -31,7 +31,8 @@
   background: #f9f9f9;
 }
 
-.badge-tipo {
+/* Badges de tipo de sistema - usando alta especificidade para evitar interferência de CSS global */
+.lista-sistemas .badge-tipo {
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 13px;
@@ -39,29 +40,34 @@
   display: inline-block;
 }
 
-.badge-natural {
-  background: #e3f2fd;
-  color: #1976d2;
+.lista-sistemas .badge-tipo.badge-natural {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
 }
 
-.badge-romano {
-  background: #f3e5f5;
-  color: #7b1fa2;
+.lista-sistemas .badge-tipo.badge-inteiro {
+  background: #e0f2f1 !important;
+  color: #00695c !important;
 }
 
-.badge-binario {
-  background: #fff3e0;
-  color: #e65100;
+.lista-sistemas .badge-tipo.badge-romano {
+  background: #f3e5f5 !important;
+  color: #7b1fa2 !important;
+}  
+
+.lista-sistemas .badge-tipo.badge-decimal {
+  background: #ffebee !important;
+  color: #c62828 !important;
 }
 
-.badge-inteiro {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
+.lista-sistemas .badge-tipo.badge-binario {
+  background: #fff3e0 !important;
+  color: #e65100 !important;
+}  
 
-.badge-decimal {
-  background: #fff9e6;
-  color: #f57c00;
+.lista-sistemas .badge-tipo.badge-hexadecimal {
+  background: #F5F5F5 !important;
+  color: #000000 !important;
 }
 
 .acoes {

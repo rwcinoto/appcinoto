@@ -59,6 +59,7 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       multiplicacao: "Multiplicação",
       divisao: "Divisão",
       raiz: "Raiz quadrada",
+      aleatorio: "Aleatório",
     };
     return tipos[tipo] || tipo;
   };
@@ -67,9 +68,10 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
     const tipos = {
       natural: "Natural",
       inteiro: "Inteiro",
+      romano: "Romano",
       decimal: "Decimal",
       binario: "Binário",
-      romano: "Romano",
+      hexadecimal: "Hexadecimal",
     };
     return tipos[tipo] || tipo;
   };
@@ -99,10 +101,11 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   const obterCorSistema = (tipo) => {
     const cores = {
       natural: { background: "#e3f2fd", color: "#1976d2" }, // Mesmas cores do badge-natural
+      inteiro: { background: "#e0f2f1", color: "#00695c" }, // Mesmas cores do badge-inteiro
       romano: { background: "#f3e5f5", color: "#7b1fa2" }, // Mesmas cores do badge-romano
+      decimal: { background: "#ffebee", color: "#c62828" }, // Mesmas cores do badge-decimal
       binario: { background: "#fff3e0", color: "#e65100" }, // Mesmas cores do badge-binario
-      inteiro: { background: "#e8f5e9", color: "#2e7d32" }, // Mesmas cores do badge-inteiro
-      decimal: { background: "#fff9e6", color: "#f57c00" }, // Mesmas cores do badge-decimal
+      hexadecimal: { background: "#F5F5F5", color: "#000000" }, // Cores para hexadecimal
     };
     return cores[tipo] || { background: "#f5f5f5", color: "#666" };
   };
