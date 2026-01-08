@@ -151,6 +151,11 @@ const ListaContas = ({
 
   // Handler de mudança no input
   const handleChange = (conta, index, e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
+
     const novoValor = e.target.value;
 
     // Filtrar entrada conforme o sistema
@@ -450,6 +455,11 @@ const ListaContas = ({
 
   // Handler de tecla pressionada
   const handleKeyDown = (e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
+
     if (e.key === "Enter") {
       e.preventDefault();
     }

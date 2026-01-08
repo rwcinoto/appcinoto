@@ -197,6 +197,11 @@ const InputResultado = ({
   };
 
   const handleChange = (e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
+
     const novoValor = e.target.value;
 
     // Filtrar entrada conforme o sistema
@@ -258,6 +263,11 @@ const InputResultado = ({
   };
 
   const handleKeyDown = (e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
+
     // Prevenir Enter de submeter o formulário (se estiver dentro de um form)
     if (e.key === "Enter") {
       e.preventDefault();
