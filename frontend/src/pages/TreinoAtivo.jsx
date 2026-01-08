@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ContadorPontos from "../components/treino/ContadorPontos";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
+import ModalEscolhaFormatoResposta from "../components/treino/ModalEscolhaFormatoResposta";
 import ListaContas from "../components/treino/ListaContas";
 import ResultadoTreino from "../components/treino/ResultadoTreino";
 import Timer from "../components/treino/Timer";
@@ -24,6 +25,9 @@ const TreinoAtivo = () => {
   const [treinoData, setTreinoData] = useState(
     () => location.state?.treinoData
   );
+  const [formatoResposta, setFormatoResposta] = useState(
+    () => location.state?.formatoResposta || "sistema"
+  );
   const inicializadoRef = useRef(false); // Ref para controlar se já foi inicializado
   const finalizadoRef = useRef(false); // Ref para controlar se o treino já foi finalizado
 
@@ -42,6 +46,7 @@ const TreinoAtivo = () => {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [mostrarContagem, setMostrarContagem] = useState(false);
+  const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
 
   // Função para iniciar treino (reutilizável)
@@ -99,6 +104,11 @@ const TreinoAtivo = () => {
 
     // Salvar treinoData no estado local
     setTreinoData(location.state.treinoData);
+    
+    // Salvar formatoResposta se fornecido
+    if (location.state?.formatoResposta) {
+      setFormatoResposta(location.state.formatoResposta);
+    }
 
     // Marcar como inicializado e iniciar treino
     inicializadoRef.current = true;
@@ -119,6 +129,7 @@ const TreinoAtivo = () => {
       const response = await api.post("/treinos/validar-resposta", {
         treino_id: treinoId,
         resposta: resposta,
+        formato_resposta: formatoResposta || "sistema",
       });
 
       const { correto, proximaConta, tempoEsgotado } = response.data;
@@ -215,14 +226,74 @@ const TreinoAtivo = () => {
     setResultado(null);
     setErro(""); // Limpar erros anteriores
 
-    // Mostrar contagem regressiva antes de reiniciar
+    // Verificar se o sistema é romano ou hexadecimal para mostrar modal de escolha
+    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal") {
+      // Mostrar modal de escolha de formato
+      setMostrarModalFormato(true);
+    } else {
+      // Sistema não requer escolha, ir direto para contagem
+      setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+      setMostrarContagem(true);
+    }
+  };
+
+  const handleEscolherFormato = (formato) => {
+    setFormatoResposta(formato);
+    setMostrarModalFormato(false);
+    // Após escolher formato, mostrar contagem regressiva
     setMostrarContagem(true);
+  };
+
+  const handleCancelarFormato = () => {
+    setMostrarModalFormato(false);
+    // Se estava mostrando resultado, voltar para ele
+    // Caso contrário, apenas fechar o modal e continuar o treino atual
+    if (resultado) {
+      setMostrarResultado(true);
+    }
   };
 
   const handleContagemTerminar = async () => {
     setMostrarContagem(false);
     // Reiniciar treino com os mesmos dados usando a função compartilhada
     await iniciarTreino(treinoData);
+  };
+
+  const handleRecomecarDuranteTreino = async () => {
+    // Finalizar o treino atual sem mostrar resultado
+    if (treinoId && !finalizadoRef.current) {
+      finalizadoRef.current = true;
+      setTreinoFinalizado(true);
+      setProcessando(true);
+
+      try {
+        // Aguardar um pouco para garantir que qualquer resposta pendente seja processada
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Finalizar treino atual (silenciosamente)
+        await api.post("/treinos/finalizar", {
+          treino_id: treinoId,
+          total: totalAcertosRef.current,
+        });
+      } catch (error) {
+        logError("TreinoAtivo - handleRecomecarDuranteTreino", error);
+        // Continuar mesmo se houver erro ao finalizar
+      }
+    }
+
+    // Limpar estados
+    setErro("");
+    setProcessando(false);
+
+    // Verificar se o sistema é romano ou hexadecimal para mostrar modal de escolha
+    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal") {
+      // Mostrar modal de escolha de formato
+      setMostrarModalFormato(true);
+    } else {
+      // Sistema não requer escolha, ir direto para contagem
+      setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+      setMostrarContagem(true);
+    }
   };
 
   const handleNovoTreino = () => {
@@ -271,6 +342,13 @@ const TreinoAtivo = () => {
 
   return (
     <>
+      {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal") && (
+        <ModalEscolhaFormatoResposta
+          sistemaTipo={sistemaTipo}
+          onEscolher={handleEscolherFormato}
+          onCancelar={handleCancelarFormato}
+        />
+      )}
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}
@@ -288,10 +366,21 @@ const TreinoAtivo = () => {
             <ListaContas
               contas={contas}
               sistema={sistemaTipo}
+              formatoResposta={formatoResposta}
               contaAtualIndex={contaAtualIndex}
               onAcerto={handleAcerto}
               disabled={processando || treinoFinalizado}
             />
+
+            {/* Botão Recomeçar - Mobile: abaixo da lista de contas */}
+            {!mostrarResultado && !treinoFinalizado && (
+              <button
+                className="btn-recomecar-durante-treino btn-recomecar-mobile"
+                onClick={handleRecomecarDuranteTreino}
+              >
+                Recomeçar
+              </button>
+            )}
           </div>
 
           {/* Coluna direita: Timer, Contador (topo no mobile) */}
@@ -304,6 +393,16 @@ const TreinoAtivo = () => {
             />
 
             <ContadorPontos totalAcertos={totalAcertos} />
+
+            {/* Botão Recomeçar - Desktop: abaixo do contador */}
+            {!mostrarResultado && !treinoFinalizado && (
+              <button
+                className="btn-recomecar-durante-treino"
+                onClick={handleRecomecarDuranteTreino}
+              >
+                Recomeçar
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
+import ModalEscolhaFormatoResposta from "../components/treino/ModalEscolhaFormatoResposta";
 import Loading from "../components/common/Loading";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
@@ -21,7 +22,9 @@ const NovoTreino = () => {
   const [erro, setErro] = useState("");
   const [iniciando, setIniciando] = useState(false);
   const [mostrarContagem, setMostrarContagem] = useState(false);
+  const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
   const [dadosTreino, setDadosTreino] = useState(null);
+  const [formatoResposta, setFormatoResposta] = useState(null);
 
   const carregarDados = useCallback(async () => {
     setLoading(true);
@@ -181,9 +184,22 @@ const NovoTreino = () => {
         sistema_id: parseInt(sistemaSelecionado),
       });
 
-      // Salvar dados do treino e mostrar contagem regressiva
+      // Salvar dados do treino
       setDadosTreino(response.data);
-      setMostrarContagem(true);
+
+      // Verificar se o sistema é romano ou hexadecimal para mostrar modal de escolha
+      const sistemaAtual = sistemas.find(
+        (s) => s.id.toString() === sistemaSelecionado
+      );
+      
+      if (sistemaAtual && (sistemaAtual.tipo === "romano" || sistemaAtual.tipo === "hexadecimal")) {
+        // Mostrar modal de escolha de formato
+        setMostrarModalFormato(true);
+      } else {
+        // Sistema não requer escolha, ir direto para contagem
+        setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+        setMostrarContagem(true);
+      }
     } catch (error) {
       logError("NovoTreino - handleIniciarTreino", error);
       setErro(getErrorMessage(error));
@@ -191,11 +207,34 @@ const NovoTreino = () => {
     }
   };
 
+  const handleEscolherFormato = (formato) => {
+    setFormatoResposta(formato);
+    setMostrarModalFormato(false);
+    // Após escolher formato, mostrar contagem regressiva
+    setMostrarContagem(true);
+  };
+
+  const handleCancelarFormato = () => {
+    setMostrarModalFormato(false);
+    setIniciando(false);
+    setDadosTreino(null);
+    setFormatoResposta(null);
+  };
+
   const handleContagemTerminar = () => {
     setMostrarContagem(false);
     setIniciando(false);
-    // Navegar para tela de treino ativo com dados do treino
-    navigate("/treino-ativo", { state: { treinoData: dadosTreino } });
+    // Navegar para tela de treino ativo com dados do treino e formato escolhido
+    const sistemaAtual = sistemas.find(
+      (s) => s.id.toString() === sistemaSelecionado
+    );
+    navigate("/treino-ativo", { 
+      state: { 
+        treinoData: dadosTreino,
+        formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
+        sistemaTipo: sistemaAtual?.tipo || "natural"
+      } 
+    });
   };
 
   const podeIniciar =
@@ -217,8 +256,20 @@ const NovoTreino = () => {
     );
   }
 
+  // Obter tipo do sistema atual para o modal
+  const sistemaAtual = sistemas.find(
+    (s) => s.id.toString() === sistemaSelecionado
+  );
+
   return (
     <>
+      {mostrarModalFormato && sistemaAtual && (
+        <ModalEscolhaFormatoResposta
+          sistemaTipo={sistemaAtual.tipo}
+          onEscolher={handleEscolherFormato}
+          onCancelar={handleCancelarFormato}
+        />
+      )}
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}
