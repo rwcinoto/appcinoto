@@ -8,10 +8,13 @@ import "./ListaContas.css";
 const ListaContas = ({
   contas,
   sistema,
+  formatoResposta = "sistema",
   contaAtualIndex = 0,
   onAcerto,
   disabled = false,
 }) => {
+  // Determinar sistema de entrada baseado no formato escolhido
+  const sistemaEntrada = formatoResposta === "natural" ? "natural" : sistema;
   // Função para formatar parcela com parênteses se for negativa (para parcelas 2 e 3)
   const formatarParcelaComParenteses = (valorNumerico, valorFormatado) => {
     if (valorNumerico === null || valorNumerico === undefined) {
@@ -108,32 +111,32 @@ const ListaContas = ({
     let respostaEsperadaFormatada;
 
     try {
-      // Formatar resultado esperado conforme sistema
-      if (sistema === "natural" || sistema === "inteiro") {
+      // Usar sistemaEntrada para validação (pode ser "natural" mesmo se sistema for romano/hex)
+      if (sistemaEntrada === "natural" || sistemaEntrada === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         const respostaNumero = parseInt(respostaDigitada.trim(), 10);
         if (isNaN(respostaNumero)) return false;
         return respostaNumero === resultadoEsperado;
-      } else if (sistema === "decimal") {
+      } else if (sistemaEntrada === "decimal") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
         const respostaComPonto = respostaDigitada.trim().replace(",", ".");
         const respostaNumero = parseFloat(respostaComPonto);
         if (isNaN(respostaNumero)) return false;
         const diferenca = Math.abs(respostaNumero - resultadoEsperado);
         return diferenca < 0.001; // Tolerância de 0.001
-      } else if (sistema === "romano") {
+      } else if (sistemaEntrada === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
         const respostaUpper = respostaDigitada.trim().toUpperCase();
         const esperadoUpper = respostaEsperadaFormatada.toUpperCase();
         return respostaUpper === esperadoUpper;
-      } else if (sistema === "binario") {
+      } else if (sistemaEntrada === "binario") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
           "binario"
         );
         if (!/^[01]+$/.test(respostaDigitada.trim())) return false;
         return respostaDigitada.trim() === respostaEsperadaFormatada;
-      } else if (sistema === "hexadecimal") {
+      } else if (sistemaEntrada === "hexadecimal") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
           "hexadecimal"
@@ -153,12 +156,12 @@ const ListaContas = ({
   const handleChange = (conta, index, e) => {
     const novoValor = e.target.value;
 
-    // Filtrar entrada conforme o sistema
+    // Filtrar entrada conforme o sistema de entrada (pode ser natural mesmo se sistema for romano/hex)
     let valorFiltrado = novoValor;
 
-    if (sistema === "natural") {
+    if (sistemaEntrada === "natural") {
       valorFiltrado = novoValor.replace(/[^0-9]/g, "");
-    } else if (sistema === "inteiro") {
+    } else if (sistemaEntrada === "inteiro") {
       // Números com sinal de menos permitido (apenas no início)
       if (novoValor === "-") {
         valorFiltrado = "-";
@@ -167,7 +170,7 @@ const ListaContas = ({
       } else {
         valorFiltrado = novoValor.replace(/[^0-9]/g, "");
       }
-    } else if (sistema === "decimal") {
+    } else if (sistemaEntrada === "decimal") {
       // Números decimais: permitir números, ponto ou vírgula (apenas um)
       // Converter vírgula para ponto para facilitar validação
       let temp = novoValor.replace(",", ".");
@@ -180,11 +183,11 @@ const ListaContas = ({
       // Remover caracteres inválidos (manter apenas números e ponto)
       temp = temp.replace(/[^0-9.]/g, "");
       valorFiltrado = temp;
-    } else if (sistema === "romano") {
+    } else if (sistemaEntrada === "romano") {
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
-    } else if (sistema === "binario") {
+    } else if (sistemaEntrada === "binario") {
       valorFiltrado = novoValor.replace(/[^01]/g, "");
-    } else if (sistema === "hexadecimal") {
+    } else if (sistemaEntrada === "hexadecimal") {
       // Apenas dígitos 0-9 e letras A-F (case insensitive)
       valorFiltrado = novoValor.toUpperCase().replace(/[^0-9A-F]/g, "");
     }
@@ -210,7 +213,7 @@ const ListaContas = ({
     let detectouErro = false;
 
     try {
-      if (sistema === "natural" || sistema === "inteiro") {
+      if (sistemaEntrada === "natural" || sistemaEntrada === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         const respostaNormalizada = valorFiltrado.trim();
         const respostaNumero = parseInt(respostaNormalizada, 10);
@@ -256,7 +259,7 @@ const ListaContas = ({
             e.target.classList.remove("errado");
           }
         }
-      } else if (sistema === "decimal") {
+      } else if (sistemaEntrada === "decimal") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
         const respostaNormalizada = valorFiltrado.trim();
         const respostaComPonto = respostaNormalizada.replace(",", ".");
@@ -303,7 +306,7 @@ const ListaContas = ({
             e.target.classList.remove("errado");
           }
         }
-      } else if (sistema === "romano") {
+      } else if (sistemaEntrada === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
         const tamanhoEsperado = respostaEsperadaFormatada.length;
         const respostaNormalizada = valorFiltrado.trim().toUpperCase();
@@ -326,7 +329,7 @@ const ListaContas = ({
             e.target.classList.remove("errado");
           }
         }
-      } else if (sistema === "binario") {
+      } else if (sistemaEntrada === "binario") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
           "binario"
@@ -355,7 +358,7 @@ const ListaContas = ({
             e.target.classList.remove("errado");
           }
         }
-      } else if (sistema === "hexadecimal") {
+      } else if (sistemaEntrada === "hexadecimal") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
           "hexadecimal"
@@ -564,8 +567,8 @@ const ListaContas = ({
                     }}
                     autoFocus={index === contaAtualIndex && !disabled}
                     type="text"
-                    inputMode={sistema === "romano" || sistema === "hexadecimal" ? "text" : "numeric"}
-                    pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : sistema === "hexadecimal" ? "[0-9A-Fa-f]*" : undefined}
+                    inputMode={sistemaEntrada === "romano" || sistemaEntrada === "hexadecimal" ? "text" : "numeric"}
+                    pattern={sistemaEntrada === "natural" ? "[0-9]*" : sistemaEntrada === "inteiro" ? "-?[0-9]*" : sistemaEntrada === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistemaEntrada === "binario" ? "[01]*" : sistemaEntrada === "hexadecimal" ? "[0-9A-Fa-f]*" : undefined}
                     className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
                     disabled={disabled || index !== contaAtualIndex}
                     onChange={(e) => handleChange(conta, index, e)}

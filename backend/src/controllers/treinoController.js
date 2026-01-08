@@ -131,10 +131,13 @@ class TreinoController {
         }
       }
 
-      // Gerar buffer inicial de contas
-      const contasIniciais = treinoService.gerarBufferContas(
+      // Gerar todas as contas antes do treino começar
+      // 150 contas por minuto de treino, garantindo que não haja repetições seguidas
+      // O campo tempo está em segundos, então: (tempo_em_segundos / 60) * 150
+      const quantidadeContas = Math.ceil((limite.tempo / 60) * 150);
+      const contasIniciais = treinoService.gerarContasSemRepeticoes(
         operacao,
-        10,
+        quantidadeContas,
         sistema.tipo
       );
 
@@ -182,7 +185,6 @@ class TreinoController {
           tipo: sistema.tipo,
         },
         contas: contasIniciais,
-        ultimaContaGerada: null, // Armazenar última conta gerada para evitar repetições
         inicio: Date.now(),
         totalAcertos: 0,
         totalRespondido: 0,
@@ -210,7 +212,7 @@ class TreinoController {
           id: sistema.id,
           tipo: sistema.tipo,
         },
-        contas_iniciais: contasIniciais.slice(0, 10), // Retornar apenas as primeiras 10
+        contas_iniciais: contasIniciais.slice(0, 2), // Retornar apenas as primeiras 2 (atual e próxima)
       });
     } catch (error) {
       console.error("Erro ao iniciar treino:", error);
@@ -261,32 +263,42 @@ class TreinoController {
         });
       }
 
-      // Verificar se ainda há contas (gerar se necessário)
+      // Verificar se ainda há contas
       if (treino.contas.length === 0) {
-        // Tentar gerar contas se o buffer estiver vazio
-        try {
-          const novasContas = treinoService.gerarBufferContas(
-            treino.operacao,
-            10,
-            treino.sistema.tipo
-          );
-          treino.contas = novasContas;
-        } catch (error) {
-          console.error("Erro ao regenerar buffer de contas:", error);
-          return res.status(500).json({
-            message: "Erro ao gerar contas para o treino",
-          });
-        }
+        // Se não houver mais contas, retornar erro
+        // Isso não deveria acontecer, pois geramos 150 contas por minuto
+        console.error("Erro: Buffer de contas vazio!");
+        return res.status(500).json({
+          message: "Não há mais contas disponíveis para o treino",
+        });
       }
 
-      // Pegar primeira conta
+      // Pegar primeira conta (a conta atual que o usuário está respondendo)
       const contaAtual = treino.contas[0];
+      
+      // Pegar a próxima conta que será adicionada no final do array do frontend
+      // O frontend remove a primeira e adiciona esta no final
+      // Precisamos retornar a conta que está na posição 2 (antes do shift)
+      // porque a conta na posição 1 já está no frontend e virá a primeira após o shift
+      // Se não houver conta na posição 2, retornar null (frontend já tem a próxima)
+      const proximaConta = treino.contas.length > 2 ? treino.contas[2] : null;
+
+      // Obter formato de resposta (pode ser "sistema" ou "natural")
+      // Se não fornecido, usar "sistema" como padrão
+      const formatoResposta = req.body.formato_resposta || "sistema";
+      
+      // Determinar sistema de validação baseado no formato escolhido
+      // Se formato_resposta for "natural", validar como natural
+      // Caso contrário, usar o sistema do treino
+      const sistemaValidacao = formatoResposta === "natural" 
+        ? "natural" 
+        : treino.sistema.tipo;
 
       // Validar resposta usando treinoService
       const validacao = treinoService.validarResposta(
         contaAtual,
         resposta,
-        treino.sistema.tipo
+        sistemaValidacao
       );
 
       // Atualizar estatísticas
@@ -297,94 +309,6 @@ class TreinoController {
 
       // Remover conta atual da lista (sempre remover)
       treino.contas.shift();
-
-      // Função auxiliar para verificar se duas contas são iguais
-      const contasIguais = (conta1, conta2) => {
-        if (!conta1 || !conta2) return false;
-        return (
-          conta1.tipo === conta2.tipo &&
-          conta1.parcela1 === conta2.parcela1 &&
-          conta1.parcela2 === conta2.parcela2 &&
-          (conta1.parcela3 || null) === (conta2.parcela3 || null) &&
-          conta1.resultado === conta2.resultado
-        );
-      };
-
-      // Sempre gerar uma nova conta e adicionar ao buffer
-      // Garantir que não seja igual à última conta gerada (evitar repetições seguidas)
-      let novaContaGerada = null;
-      let tentativas = 0;
-      const maxTentativas = 100; // Limite de tentativas para evitar loop infinito
-
-      try {
-        while (tentativas < maxTentativas) {
-          novaContaGerada = treinoService.gerarConta(
-            treino.operacao,
-            treino.sistema.tipo
-          );
-
-          // Se a nova conta for diferente da última gerada, aceitar
-          if (!contasIguais(novaContaGerada, treino.ultimaContaGerada)) {
-            break;
-          }
-
-          // Se for igual, tentar gerar outra
-          tentativas++;
-        }
-
-        // Se conseguiu gerar uma conta diferente, adicionar ao buffer
-        if (novaContaGerada) {
-          treino.contas.push(novaContaGerada);
-          treino.ultimaContaGerada = novaContaGerada; // Atualizar última conta gerada
-        }
-      } catch (error) {
-        console.error("Erro ao gerar nova conta:", error);
-      }
-
-      // Manter buffer mínimo de contas (caso o usuário erre muito ou haja erro na geração)
-      // Garantir que sempre haja pelo menos 5 contas disponíveis no buffer
-      // Evitar que as contas do buffer sejam iguais à última gerada
-      while (treino.contas.length < 5) {
-        try {
-          let contaBuffer = null;
-          let tentativasBuffer = 0;
-          const maxTentativasBuffer = 100;
-
-          while (tentativasBuffer < maxTentativasBuffer) {
-            contaBuffer = treinoService.gerarConta(
-              treino.operacao,
-              treino.sistema.tipo
-            );
-
-            // Se a conta do buffer for diferente da última gerada, aceitar
-            if (!contasIguais(contaBuffer, treino.ultimaContaGerada)) {
-              break;
-            }
-
-            tentativasBuffer++;
-          }
-
-          if (contaBuffer) {
-            treino.contas.push(contaBuffer);
-            // Atualizar última conta gerada apenas se for diferente
-            if (!contasIguais(contaBuffer, treino.ultimaContaGerada)) {
-              treino.ultimaContaGerada = contaBuffer;
-            }
-          }
-        } catch (error) {
-          console.error("Erro ao gerar conta para buffer:", error);
-          // Se não conseguir gerar, parar de tentar
-          break;
-        }
-      }
-
-      // Retornar a NOVA conta gerada (não a próxima do buffer)
-      // O frontend vai adicionar esta conta no final do seu array
-      const proximaConta = novaContaGerada;
-
-      if (!proximaConta) {
-        console.error("Erro: Buffer de contas vazio após geração!");
-      }
 
       return res.json({
         correto: validacao.correto,

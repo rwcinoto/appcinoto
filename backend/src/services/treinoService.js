@@ -502,6 +502,30 @@ class TreinoService {
   }
 
   /**
+   * Verificar se duas contas são exatamente iguais
+   * @param {object} conta1 - Primeira conta
+   * @param {object} conta2 - Segunda conta
+   * @returns {boolean} true se as contas forem iguais
+   */
+  contasIguais(conta1, conta2) {
+    if (!conta1 || !conta2) return false;
+    
+    // Normalizar null/undefined para null
+    const parcela3_1 = conta1.parcela3 ?? null;
+    const parcela3_2 = conta2.parcela3 ?? null;
+    const parcela2_1 = conta1.parcela2 ?? null;
+    const parcela2_2 = conta2.parcela2 ?? null;
+    
+    return (
+      conta1.tipo === conta2.tipo &&
+      conta1.parcela1 === conta2.parcela1 &&
+      parcela2_1 === parcela2_2 &&
+      parcela3_1 === parcela3_2 &&
+      conta1.resultado === conta2.resultado
+    );
+  }
+
+  /**
    * Gerar múltiplas contas antecipadamente
    * @param {object} operacao - Objeto com tipo e limites de parcelas
    * @param {number} quantidade - Número de contas a gerar (padrão: 10)
@@ -533,6 +557,65 @@ class TreinoService {
     if (contas.length < quantidade) {
       throw new Error(
         `Apenas ${contas.length} de ${quantidade} contas foram geradas após ${tentativas} tentativas`
+      );
+    }
+
+    return contas;
+  }
+
+  /**
+   * Gerar múltiplas contas sem repetições seguidas
+   * Garante que nenhuma conta seja igual à anterior
+   * @param {object} operacao - Objeto com tipo e limites de parcelas
+   * @param {number} quantidade - Número de contas a gerar
+   * @param {string} sistema - Sistema numérico
+   * @returns {array} Array de contas sem repetições seguidas
+   */
+  gerarContasSemRepeticoes(operacao, quantidade, sistema = "natural") {
+    const contas = [];
+    const maxTentativasPorConta = 200; // Limite de tentativas por conta para evitar loop infinito
+    let tentativasTotais = 0;
+    const maxTentativasTotais = quantidade * 200; // Limite total de tentativas
+
+    while (contas.length < quantidade && tentativasTotais < maxTentativasTotais) {
+      let contaGerada = null;
+      let tentativasConta = 0;
+
+      while (tentativasConta < maxTentativasPorConta && tentativasTotais < maxTentativasTotais) {
+        try {
+          contaGerada = this.gerarConta(operacao, sistema);
+          
+          // Verificar se é diferente da conta anterior (se houver)
+          if (contas.length === 0 || !this.contasIguais(contaGerada, contas[contas.length - 1])) {
+            contas.push(contaGerada);
+            break; // Conta aceita, sair do loop interno
+          }
+          
+          // Se for igual, tentar gerar outra
+          tentativasConta++;
+          tentativasTotais++;
+        } catch (error) {
+          // Se houver erro ao gerar conta, continuar tentando
+          tentativasConta++;
+          tentativasTotais++;
+        }
+      }
+
+      // Se não conseguiu gerar uma conta diferente após muitas tentativas
+      if (!contaGerada || (contas.length > 0 && this.contasIguais(contaGerada, contas[contas.length - 1]))) {
+        tentativasTotais++;
+        // Continuar tentando (pode ser que os limites sejam muito restritivos)
+        if (tentativasTotais >= maxTentativasTotais) {
+          throw new Error(
+            `Não foi possível gerar ${quantidade} contas sem repetições após ${maxTentativasTotais} tentativas. Geradas: ${contas.length}`
+          );
+        }
+      }
+    }
+
+    if (contas.length < quantidade) {
+      throw new Error(
+        `Apenas ${contas.length} de ${quantidade} contas foram geradas sem repetições após ${tentativasTotais} tentativas`
       );
     }
 
