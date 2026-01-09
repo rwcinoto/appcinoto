@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ContagemRegressiva from "../treino/ContagemRegressiva";
+import ModalEscolhaFormatoResposta from "../treino/ModalEscolhaFormatoResposta";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
@@ -13,7 +14,9 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   const [posicaoRanking, setPosicaoRanking] = useState(null);
   const [iniciandoTreino, setIniciandoTreino] = useState(false);
   const [mostrarContagem, setMostrarContagem] = useState(false);
+  const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
   const [dadosTreino, setDadosTreino] = useState(null);
+  const [formatoResposta, setFormatoResposta] = useState(null);
 
   // Determinar qual usuário usar para buscar a posição
   const usuarioIdParaPosicao = usuarioIdVisualizado || (usuario?.id || null);
@@ -60,6 +63,7 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       divisao: "Divisão",
       raiz: "Raiz quadrada",
       aleatorio: "Aleatório",
+      conversao: "Conversão",
     };
     return tipos[tipo] || tipo;
   };
@@ -94,6 +98,7 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       multiplicacao: "#ff9800", // Laranja
       divisao: "#ffeb3b", // Amarelo
       raiz: "#f44336", // Vermelho
+      conversao: "#BA68C8", // Roxo claro
     };
     return cores[tipo] || "#666";
   };
@@ -148,9 +153,18 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
         sistema_id: recorde.sistema.id,
       });
 
-      // Salvar dados do treino e mostrar contagem regressiva
+      // Salvar dados do treino
       setDadosTreino(response.data);
-      setMostrarContagem(true);
+
+      // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
+      if (tipoSistema === "romano" || tipoSistema === "hexadecimal" || tipoSistema === "binario") {
+        // Mostrar modal de escolha de formato
+        setMostrarModalFormato(true);
+      } else {
+        // Sistema não requer escolha, ir direto para contagem
+        setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+        setMostrarContagem(true);
+      }
     } catch (error) {
       logError("CardRecorde - handleIniciarTreino", error);
       alert(getErrorMessage(error));
@@ -158,15 +172,42 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
     }
   };
 
+  const handleEscolherFormato = (formato) => {
+    setFormatoResposta(formato);
+    setMostrarModalFormato(false);
+    // Após escolher formato, mostrar contagem regressiva
+    setMostrarContagem(true);
+  };
+
+  const handleCancelarFormato = () => {
+    setMostrarModalFormato(false);
+    setIniciandoTreino(false);
+    setDadosTreino(null);
+    setFormatoResposta(null);
+  };
+
   const handleContagemTerminar = () => {
     setMostrarContagem(false);
     setIniciandoTreino(false);
-    // Navegar para tela de treino ativo com dados do treino
-    navigate("/treino-ativo", { state: { treinoData: dadosTreino } });
+    // Navegar para tela de treino ativo com dados do treino e formato escolhido
+    navigate("/treino-ativo", { 
+      state: { 
+        treinoData: dadosTreino,
+        formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
+        sistemaTipo: tipoSistema || "natural"
+      } 
+    });
   };
 
   return (
     <>
+      {mostrarModalFormato && (tipoSistema === "romano" || tipoSistema === "hexadecimal" || tipoSistema === "binario") && (
+        <ModalEscolhaFormatoResposta
+          sistemaTipo={tipoSistema}
+          onEscolher={handleEscolherFormato}
+          onCancelar={handleCancelarFormato}
+        />
+      )}
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}

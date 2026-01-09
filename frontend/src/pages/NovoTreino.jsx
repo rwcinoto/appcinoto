@@ -94,10 +94,17 @@ const NovoTreino = () => {
     }
   }, [operacoes, operacaoSelecionada]);
 
-  // Filtrar sistemas disponíveis: se operação for raiz, remover sistema "inteiro"
+  // Filtrar sistemas disponíveis: 
+  // - Se operação for raiz, remover sistema "inteiro"
+  // - Se operação for conversão, permitir apenas romano, binário ou hexadecimal
   const sistemasDisponiveis = useMemo(() => {
     if (operacaoSelecionada?.tipo === "raiz") {
       return sistemas.filter((sistema) => sistema.tipo !== "inteiro");
+    }
+    if (operacaoSelecionada?.tipo === "conversao") {
+      return sistemas.filter((sistema) => 
+        sistema.tipo === "romano" || sistema.tipo === "binario" || sistema.tipo === "hexadecimal"
+      );
     }
     return sistemas;
   }, [sistemas, operacaoSelecionada]);
@@ -126,6 +133,7 @@ const NovoTreino = () => {
       divisao: "Divisão",
       raiz: "Raiz quadrada",
       aleatorio: "Aleatório",
+      conversao: "Conversão",
     };
     return tipos[tipo] || tipo;
   };
@@ -137,6 +145,7 @@ const NovoTreino = () => {
       multiplicacao: "#FF9800", // Laranja
       divisao: "#FFD700", // Amarelo
       raiz: "#F44336", // Vermelho
+      conversao: "#BA68C8", // Roxo claro
     };
     return cores[tipo] || "#E0E0E0";
   };
@@ -166,6 +175,17 @@ const NovoTreino = () => {
         setSistemaSelecionado("");
       }
     }
+    
+    // Se a operação for conversão e o sistema selecionado não for válido,
+    // limpar a seleção do sistema
+    if (operacao.tipo === "conversao" && sistemaSelecionado) {
+      const sistemaAtual = sistemas.find(
+        (s) => s.id.toString() === sistemaSelecionado
+      );
+      if (sistemaAtual && (sistemaAtual.tipo !== "romano" && sistemaAtual.tipo !== "binario" && sistemaAtual.tipo !== "hexadecimal")) {
+        setSistemaSelecionado("");
+      }
+    }
   };
 
   const handleIniciarTreino = async () => {
@@ -187,12 +207,12 @@ const NovoTreino = () => {
       // Salvar dados do treino
       setDadosTreino(response.data);
 
-      // Verificar se o sistema é romano ou hexadecimal para mostrar modal de escolha
+      // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
       const sistemaAtual = sistemas.find(
         (s) => s.id.toString() === sistemaSelecionado
       );
       
-      if (sistemaAtual && (sistemaAtual.tipo === "romano" || sistemaAtual.tipo === "hexadecimal")) {
+      if (sistemaAtual && (sistemaAtual.tipo === "romano" || sistemaAtual.tipo === "hexadecimal" || sistemaAtual.tipo === "binario")) {
         // Mostrar modal de escolha de formato
         setMostrarModalFormato(true);
       } else {

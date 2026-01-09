@@ -127,6 +127,7 @@ export const obterSimboloOperacao = (tipo) => {
     multiplicacao: "×",
     divisao: "÷",
     raiz: "√",
+    conversao: "→",
   };
   return simbolos[tipo] || "?";
 };

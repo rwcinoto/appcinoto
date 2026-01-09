@@ -122,6 +122,16 @@ class TreinoController {
         });
       }
 
+      // Validar que operação de conversão só pode usar sistemas romano, binário ou hexadecimal
+      if (operacao.tipo === "conversao") {
+        const sistemasValidosConversao = ["romano", "binario", "hexadecimal"];
+        if (!sistemasValidosConversao.includes(sistema.tipo)) {
+          return res.status(400).json({
+            message: "Operação 'Conversão' só pode ser usada com sistemas romano, binário ou hexadecimal",
+          });
+        }
+      }
+
       // Validar que operação aleatória tem operações incluídas
       if (operacao.tipo === "aleatorio") {
         if (!operacao.operacoes_incluidas || operacao.operacoes_incluidas.length === 0) {
@@ -287,12 +297,27 @@ class TreinoController {
       // Se não fornecido, usar "sistema" como padrão
       const formatoResposta = req.body.formato_resposta || "sistema";
       
-      // Determinar sistema de validação baseado no formato escolhido
-      // Se formato_resposta for "natural", validar como natural
-      // Caso contrário, usar o sistema do treino
-      const sistemaValidacao = formatoResposta === "natural" 
-        ? "natural" 
-        : treino.sistema.tipo;
+      // Determinar sistema de validação baseado no formato escolhido e tipo de operação
+      let sistemaValidacao;
+      
+      // Se for operação de conversão, inverter a direção da conversão baseado no formato_resposta
+      if (treino.operacao.tipo === "conversao") {
+        // Para conversão:
+        // - Se formato_resposta = "natural": mostrar número no sistema, usuário responde em natural
+        //   -> Validar como natural (resultado esperado = parcela1 em natural)
+        // - Se formato_resposta = "sistema": mostrar número em natural, usuário responde no sistema
+        //   -> Validar no sistema escolhido (resultado esperado = parcela1 convertido para o sistema)
+        sistemaValidacao = formatoResposta === "natural" 
+          ? "natural" 
+          : treino.sistema.tipo;
+      } else {
+        // Para outras operações, comportamento normal
+        // Se formato_resposta for "natural", validar como natural
+        // Caso contrário, usar o sistema do treino
+        sistemaValidacao = formatoResposta === "natural" 
+          ? "natural" 
+          : treino.sistema.tipo;
+      }
 
       // Validar resposta usando treinoService
       const validacao = treinoService.validarResposta(

@@ -474,7 +474,23 @@ const ListaContas = ({
       <div className="lista-contas">
         {contasParaExibir.map((conta, index) => {
           const isAtual = index === contaAtualIndex;
-          const parcela1Formatada = formatarNumero(conta.parcela1, sistema);
+          
+          // Para conversão, ajustar formato de parcela1 baseado em formatoResposta
+          // Se formato_resposta = "natural": mostrar número no sistema escolhido
+          // Se formato_resposta = "sistema": mostrar número em natural
+          let parcela1Formatada;
+          if (conta.tipo === "conversao") {
+            if (formatoResposta === "natural") {
+              // Mostrar número no sistema escolhido, usuário responde em natural
+              parcela1Formatada = formatarNumero(conta.parcela1, sistema);
+            } else {
+              // Mostrar número em natural, usuário responde no sistema escolhido
+              parcela1Formatada = formatarNumero(conta.parcela1, "natural");
+            }
+          } else {
+            parcela1Formatada = formatarNumero(conta.parcela1, sistema);
+          }
+          
           // Na operação de raiz, parcela2 pode ser null
           // Para divisão com sistema decimal, divisores (parcela2 e parcela3) devem aparecer como inteiros
           const formatarParcelaDivisao = (valor, sistema, tipo) => {
@@ -531,6 +547,9 @@ const ListaContas = ({
                       <span className="simbolo-raiz">{simbolo}</span>
                       <span className="numero-raiz">{parcela1Formatada}</span>
                     </span>
+                  ) : conta.tipo === "conversao" ? (
+                    // Para conversão, mostrar apenas parcela1 (número a converter)
+                    <span className="parcela">{parcela1Formatada}</span>
                   ) : (
                     <>
                       <span className="parcela">{parcela1Formatada}</span>

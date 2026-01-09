@@ -30,6 +30,7 @@ const FormOperacao = ({
     if (operacao) {
       const isRaiz = operacao.tipo === "raiz";
       const isAleatorio = operacao.tipo === "aleatorio";
+      const isConversao = operacao.tipo === "conversao";
       
       // Extrair IDs das operações incluídas se houver
       const operacoesIncluidas = operacao.operacoes_incluidas 
@@ -50,9 +51,9 @@ const FormOperacao = ({
           operacao.max_parcela_1 !== undefined
             ? operacao.max_parcela_1
             : 9,
-        // Se não for raiz/aleatorio e vier null, inicializar com 0 (obrigatório)
-        // Se for raiz/aleatorio e vier null, deixar como string vazia
-        min_parcela_2: isRaiz || isAleatorio
+        // Se não for raiz/aleatorio/conversao e vier null, inicializar com 0 (obrigatório)
+        // Se for raiz/aleatorio/conversao e vier null, deixar como string vazia
+        min_parcela_2: isRaiz || isAleatorio || isConversao
           ? operacao.min_parcela_2 !== null
             ? operacao.min_parcela_2
             : ""
@@ -60,7 +61,7 @@ const FormOperacao = ({
             operacao.min_parcela_2 !== undefined
           ? operacao.min_parcela_2
           : 0,
-        max_parcela_2: isRaiz || isAleatorio
+        max_parcela_2: isRaiz || isAleatorio || isConversao
           ? operacao.max_parcela_2 !== null
             ? operacao.max_parcela_2
             : ""
@@ -125,8 +126,8 @@ const FormOperacao = ({
         [name]: processedValue,
       };
 
-      // Se tipo mudou para "raiz" ou "aleatorio", limpar parcelas 2 e 3
-      if (name === "tipo" && (value === "raiz" || value === "aleatorio")) {
+      // Se tipo mudou para "raiz", "aleatorio" ou "conversao", limpar parcelas 2 e 3
+      if (name === "tipo" && (value === "raiz" || value === "aleatorio" || value === "conversao")) {
         newData.min_parcela_2 = "";
         newData.max_parcela_2 = "";
         newData.min_parcela_3 = "";
@@ -135,8 +136,8 @@ const FormOperacao = ({
           newData.operacoes_incluidas = [];
         }
       }
-      // Se tipo mudou de "raiz" ou "aleatorio" para outro, preencher parcela 2 com valores padrão
-      if (name === "tipo" && value !== "raiz" && value !== "aleatorio" && (formData.tipo === "raiz" || formData.tipo === "aleatorio")) {
+      // Se tipo mudou de "raiz", "aleatorio" ou "conversao" para outro, preencher parcela 2 com valores padrão
+      if (name === "tipo" && value !== "raiz" && value !== "aleatorio" && value !== "conversao" && (formData.tipo === "raiz" || formData.tipo === "aleatorio" || formData.tipo === "conversao")) {
         newData.min_parcela_2 = 0;
         newData.max_parcela_2 = 9;
         newData.operacoes_incluidas = [];
@@ -158,20 +159,20 @@ const FormOperacao = ({
       return false;
     }
 
-    // Validar parcela 1 (exceto para tipo aleatorio)
+    // Validar parcela 1 (exceto para tipo aleatorio, que não usa parcelas)
     if (formData.tipo !== "aleatorio" && formData.min_parcela_1 > formData.max_parcela_1) {
       setErro("min_parcela_1 deve ser menor ou igual a max_parcela_1");
       return false;
     }
 
-    // Se tipo é raiz, validar que parcelas 2 e 3 estão vazias
-    if (formData.tipo === "raiz") {
+    // Se tipo é raiz ou conversao, validar que parcelas 2 e 3 estão vazias
+    if (formData.tipo === "raiz" || formData.tipo === "conversao") {
       if (formData.min_parcela_2 !== "" || formData.max_parcela_2 !== "") {
-        setErro("Operação do tipo 'raiz' só utiliza parcela_1");
+        setErro(`Operação do tipo '${formData.tipo}' só utiliza parcela_1`);
         return false;
       }
       if (formData.min_parcela_3 !== "" || formData.max_parcela_3 !== "") {
-        setErro("Operação do tipo 'raiz' só utiliza parcela_1");
+        setErro(`Operação do tipo '${formData.tipo}' só utiliza parcela_1`);
         return false;
       }
     } else if (formData.tipo === "aleatorio") {
@@ -251,7 +252,8 @@ const FormOperacao = ({
       id_plano: parseInt(formData.id_plano),
     };
 
-    // Para tipo aleatorio, não enviar parcelas (ou enviar como 0)
+    // Para tipo aleatorio, não enviar parcelas (enviar como 0)
+    // Conversão usa parcela 1 normalmente
     if (formData.tipo !== "aleatorio") {
       dados.min_parcela_1 =
         typeof formData.min_parcela_1 === "number"
@@ -272,8 +274,8 @@ const FormOperacao = ({
       dados.ordem = parseInt(formData.ordem);
     }
 
-    // Se não for raiz nem aleatorio, parcela 2 é obrigatória
-    if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio") {
+    // Se não for raiz, aleatorio nem conversao, parcela 2 é obrigatória
+    if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio" && formData.tipo !== "conversao") {
       dados.min_parcela_2 =
         typeof formData.min_parcela_2 === "number"
           ? formData.min_parcela_2
@@ -283,12 +285,12 @@ const FormOperacao = ({
           ? formData.max_parcela_2
           : parseInt(formData.max_parcela_2);
     } else {
-      // Para raiz e aleatorio, garantir que min_parcela_2, max_parcela_2, min_parcela_3 e max_parcela_3 não sejam enviados
+      // Para raiz, aleatorio e conversao, garantir que min_parcela_2, max_parcela_2, min_parcela_3 e max_parcela_3 não sejam enviados
       // Não incluir esses campos no objeto dados
     }
 
-    // Parcela 3 é sempre opcional (apenas se não for raiz nem aleatorio)
-    if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio") {
+    // Parcela 3 é sempre opcional (apenas se não for raiz, aleatorio nem conversao)
+    if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio" && formData.tipo !== "conversao") {
       if (formData.min_parcela_3 !== "") {
         dados.min_parcela_3 = parseInt(formData.min_parcela_3);
       }
@@ -307,6 +309,7 @@ const FormOperacao = ({
 
   const isRaiz = formData.tipo === "raiz";
   const isAleatorio = formData.tipo === "aleatorio";
+  const isConversao = formData.tipo === "conversao";
 
   // Filtrar operações disponíveis para incluir em aleatório
   // Excluir operações aleatórias e a própria operação sendo editada
@@ -360,6 +363,7 @@ const FormOperacao = ({
           <option value="divisao">Divisão</option>
           <option value="raiz">Raiz</option>
           <option value="aleatorio">Aleatório</option>
+          <option value="conversao">Conversão</option>
         </select>
       </div>
 
@@ -445,7 +449,7 @@ const FormOperacao = ({
             </div>
           </div>
 
-        {!isRaiz && !isAleatorio && (
+        {!isRaiz && !isAleatorio && !isConversao && (
           <>
             <div className="parcela-group">
               <h4>Parcela 2</h4>
@@ -458,7 +462,7 @@ const FormOperacao = ({
                     name="min_parcela_2"
                     value={formData.min_parcela_2}
                     onChange={handleChange}
-                    required={!isRaiz}
+                    required={!isRaiz && !isConversao}
                     disabled={disabled}
                   />
                 </div>
@@ -470,7 +474,7 @@ const FormOperacao = ({
                     name="max_parcela_2"
                     value={formData.max_parcela_2}
                     onChange={handleChange}
-                    required={!isRaiz}
+                    required={!isRaiz && !isConversao}
                     disabled={disabled}
                   />
                 </div>
@@ -510,6 +514,11 @@ const FormOperacao = ({
         {isRaiz && (
           <div className="info-raiz">
             <small>ⓘ Operação do tipo "Raiz" utiliza apenas a parcela 1.</small>
+          </div>
+        )}
+        {isConversao && (
+          <div className="info-raiz">
+            <small>ⓘ Operação do tipo "Conversão" utiliza apenas a parcela 1.</small>
           </div>
         )}
         </div>

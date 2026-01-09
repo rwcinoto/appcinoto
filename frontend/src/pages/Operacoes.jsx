@@ -180,6 +180,7 @@ const Operacoes = () => {
             <option value="divisao">Divisão</option>
             <option value="raiz">Raiz</option>
             <option value="aleatorio">Aleatório</option>
+            <option value="conversao">Conversão</option>
           </select>
         </div>
 

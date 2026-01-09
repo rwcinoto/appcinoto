@@ -20,6 +20,7 @@ const ModalEscolhaFormatoResposta = ({ sistemaTipo, onEscolher, onCancelar }) =>
     const nomes = {
       romano: "romano",
       hexadecimal: "hexadecimal",
+      binario: "binário",
     };
     return nomes[sistemaTipo] || sistemaTipo;
   };

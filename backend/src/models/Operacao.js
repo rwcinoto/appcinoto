@@ -47,7 +47,8 @@ module.exports = (sequelize, DataTypes) => {
           "multiplicacao",
           "divisao",
           "raiz",
-          "aleatorio"
+          "aleatorio",
+          "conversao"
         ),
         allowNull: false,
       },
