@@ -14,6 +14,7 @@ const ListaOperacoes = ({ operacoes, onEditar, onExcluir }) => {
       divisao: "Divisão",
       raiz: "Raiz quadrada",
       aleatorio: "Aleatório",
+      conversao: "Conversão",
     };
     return tipos[tipo] || tipo;
   };
@@ -26,6 +27,7 @@ const ListaOperacoes = ({ operacoes, onEditar, onExcluir }) => {
       divisao: "#FFD700", // Amarelo
       raiz: "#F44336", // Vermelho
       aleatorio: "#000000", // Preto
+      conversao: "#BA68C8", // Roxo claro
     };
     return cores[tipo] || "#E0E0E0";
   };

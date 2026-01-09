@@ -456,6 +456,29 @@ class TreinoService {
         // Gerar conta usando a operação selecionada (recursão)
         return this.gerarConta(operacaoSelecionada, sistema);
 
+      case "conversao":
+        // Para conversão: gerar apenas primeira parcela (número em natural)
+        // O resultado será o mesmo número (será convertido no momento de exibir/validar conforme formato_resposta)
+        // Para sistema romano, garantir que não seja zero
+        const minParcela1Conv = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
+        
+        // Aplicar limites do sistema ao número gerado
+        const limiteMaxSistema = sistema === "romano" ? 3999 : sistema === "binario" ? 2047 : Infinity;
+        const maxParcela1AjustadoConv = Math.min(max_parcela_1, limiteMaxSistema);
+        
+        if (minParcela1Conv > maxParcela1AjustadoConv) {
+          throw new Error(
+            `Impossível gerar conversão: limite mínimo ${minParcela1Conv} é maior que limite máximo ajustado ${maxParcela1AjustadoConv} para sistema ${sistema}`
+          );
+        }
+        
+        parcela1 = this.numeroAleatorio(minParcela1Conv, maxParcela1AjustadoConv);
+        parcela2 = null;
+        parcela3 = null;
+        // O resultado será o mesmo número (parcela1) - será convertido no momento de exibir/validar
+        resultado = parcela1;
+        break;
+
       default:
         throw new Error(`Tipo de operação inválido: ${tipo}`);
     }

@@ -166,6 +166,7 @@ const Rankings = () => {
       divisao: "Divisão",
       raiz: "Raiz quadrada",
       aleatorio: "Aleatório",
+      conversao: "Conversão",
     };
     return tipos[tipo] || tipo;
   };

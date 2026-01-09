@@ -226,8 +226,8 @@ const TreinoAtivo = () => {
     setResultado(null);
     setErro(""); // Limpar erros anteriores
 
-    // Verificar se o sistema é romano ou hexadecimal para mostrar modal de escolha
-    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal") {
+    // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
+    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") {
       // Mostrar modal de escolha de formato
       setMostrarModalFormato(true);
     } else {
@@ -285,8 +285,8 @@ const TreinoAtivo = () => {
     setErro("");
     setProcessando(false);
 
-    // Verificar se o sistema é romano ou hexadecimal para mostrar modal de escolha
-    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal") {
+    // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
+    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") {
       // Mostrar modal de escolha de formato
       setMostrarModalFormato(true);
     } else {
@@ -342,7 +342,7 @@ const TreinoAtivo = () => {
 
   return (
     <>
-      {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal") && (
+      {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") && (
         <ModalEscolhaFormatoResposta
           sistemaTipo={sistemaTipo}
           onEscolher={handleEscolherFormato}

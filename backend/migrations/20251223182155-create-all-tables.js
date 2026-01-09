@@ -149,7 +149,9 @@ module.exports = {
           "subtracao",
           "multiplicacao",
           "divisao",
-          "raiz"
+          "raiz",
+          "aleatorio",
+          "conversao"
         ),
         allowNull: false,
       },
