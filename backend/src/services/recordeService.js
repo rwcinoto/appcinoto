@@ -12,7 +12,93 @@ const { Op, Sequelize } = require("sequelize");
 
 class RecordeService {
   /**
+   * Incrementa a quantidade de treinos realizados (ou cria registro se não existir)
+   * Deve ser chamado quando o treino é iniciado (antes da contagem regressiva)
+   * @param {number} usuarioId - ID do usuário
+   * @param {number} operacaoId - ID da operação
+   * @param {number} limiteId - ID do limite
+   * @param {number} sistemaId - ID do sistema
+   * @returns {Promise<void>}
+   */
+  async incrementarQuantidadeTreino(
+    usuarioId,
+    operacaoId,
+    limiteId,
+    sistemaId
+  ) {
+    // Garantir que os IDs são números
+    const usuarioIdNum = parseInt(usuarioId);
+    const operacaoIdNum = parseInt(operacaoId);
+    const limiteIdNum = parseInt(limiteId);
+    const sistemaIdNum = parseInt(sistemaId);
+
+    // Data atual no horário do Brasil (UTC-3)
+    const dataAtual = new Date();
+
+    // Buscar recorde existente
+    const recordeExistente = await Recorde.findOne({
+      where: {
+        id_usuario: usuarioIdNum,
+        id_operacao: operacaoIdNum,
+        id_limite: limiteIdNum,
+        id_sistema: sistemaIdNum,
+      },
+    });
+
+    if (!recordeExistente) {
+      // Se não existe, criar registro com quantidade=1 e total=0
+      // Tentar criar, se falhar por constraint única (race condition), incrementar o existente
+      try {
+        await Recorde.create({
+          id_usuario: usuarioIdNum,
+          id_operacao: operacaoIdNum,
+          id_limite: limiteIdNum,
+          id_sistema: sistemaIdNum,
+          total: 0, // Total inicial é zero (ainda não finalizou o treino)
+          quantidade: 1, // Primeiro treino
+          criado_em: dataAtual,
+          criado_por: usuarioIdNum,
+          atualizado_em: dataAtual,
+          atualizado_por: usuarioIdNum,
+        });
+      } catch (error) {
+        // Se o erro for de constraint única, significa que o recorde foi criado entre a busca e a criação
+        // (race condition) - buscar novamente e incrementar
+        if (
+          error.name === "SequelizeUniqueConstraintError" ||
+          error.parent?.code === "ER_DUP_ENTRY"
+        ) {
+          const recordeCriado = await Recorde.findOne({
+            where: {
+              id_usuario: usuarioIdNum,
+              id_operacao: operacaoIdNum,
+              id_limite: limiteIdNum,
+              id_sistema: sistemaIdNum,
+            },
+          });
+
+          if (recordeCriado) {
+            // Incrementar quantidade
+            await recordeCriado.increment("quantidade", { by: 1 });
+          } else {
+            // Se não encontrou, relançar o erro original
+            throw error;
+          }
+        } else {
+          // Se for outro tipo de erro, relançar
+          throw error;
+        }
+      }
+    } else {
+      // Se existe, incrementar quantidade
+      await recordeExistente.increment("quantidade", { by: 1 });
+    }
+  }
+
+  /**
    * Verifica se existe recorde e salva/atualiza conforme necessário
+   * ATENÇÃO: Este método assume que o registro já existe (criado por incrementarQuantidadeTreino)
+   * Se não existir, será criado (para compatibilidade), mas o ideal é que já exista
    * @param {number} usuarioId - ID do usuário
    * @param {number} operacaoId - ID da operação
    * @param {number} limiteId - ID do limite
@@ -87,6 +173,7 @@ class RecordeService {
 
     // Buscar recorde existente para esta combinação
     // Usar índice único composto (idx_recordes_unique) para busca rápida
+    // NOTA: O registro deve já existir (criado por incrementarQuantidadeTreino ao iniciar o treino)
     const recordeExistente = await Recorde.findOne({
       where: {
         id_usuario: usuarioIdNum, // Índice: idx_recordes_unique
@@ -94,7 +181,7 @@ class RecordeService {
         id_limite: limiteIdNum, // Índice: idx_recordes_unique
         id_sistema: sistemaIdNum, // Índice: idx_recordes_unique
       },
-      attributes: ["id", "total", "atualizado_em"], // Selecionar apenas campos necessários
+      attributes: ["id", "total", "quantidade", "atualizado_em"], // Selecionar apenas campos necessários
     });
 
     // Data atual no horário do Brasil (UTC-3)
@@ -107,8 +194,8 @@ class RecordeService {
     let recordeAnterior = null;
 
     if (!recordeExistente) {
-      // Tentar criar novo recorde
-      // Se falhar por constraint única (race condition), buscar e atualizar
+      // Se não existe, criar (para compatibilidade - idealmente já deveria existir)
+      // Isso pode acontecer se o incrementarQuantidadeTreino não foi chamado (treinos antigos, etc)
       try {
         await Recorde.create({
           id_usuario: usuarioIdNum,
@@ -116,9 +203,10 @@ class RecordeService {
           id_limite: limiteIdNum,
           id_sistema: sistemaIdNum,
           total: total,
+          quantidade: 1, // Se foi criado aqui, é o primeiro treino
           criado_em: dataAtual,
           criado_por: usuarioIdNum,
-          atualizado_em: dataAtual, // Preencher atualizado_em mesmo na criação
+          atualizado_em: dataAtual,
           atualizado_por: usuarioIdNum,
         });
 
@@ -140,7 +228,7 @@ class RecordeService {
               id_limite: limiteIdNum,
               id_sistema: sistemaIdNum,
             },
-            attributes: ["id", "total", "atualizado_em"],
+            attributes: ["id", "total", "quantidade", "atualizado_em"],
           });
 
           if (recordeCriado) {
@@ -261,6 +349,7 @@ class RecordeService {
         "id_limite",
         "id_sistema",
         "total",
+        "quantidade",
         "criado_em",
         "atualizado_em",
         "criado_por",
@@ -313,6 +402,7 @@ class RecordeService {
         "id_limite",
         "id_sistema",
         "total",
+        "quantidade",
         "criado_em",
         "atualizado_em",
         "criado_por",

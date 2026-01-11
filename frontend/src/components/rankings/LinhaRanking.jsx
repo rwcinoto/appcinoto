@@ -11,7 +11,7 @@ const LinhaRanking = ({ item, tempoLimite }) => {
     return null;
   }
 
-  const { posicao, nome, total, data_recorde, id_usuario } = item;
+  const { posicao, nome, total, quantidade, data_recorde, id_usuario } = item;
 
   // Calcular tempo médio por conta
   const calcularTempoMedioPorConta = () => {
@@ -130,6 +130,14 @@ const LinhaRanking = ({ item, tempoLimite }) => {
           style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
         >
           {formatarData(data_recorde)}
+        </span>
+      </td>
+      <td className="coluna-tentativas">
+        <span 
+          className="tentativas-valor"
+          style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
+        >
+          {quantidade || 0}
         </span>
       </td>
     </tr>

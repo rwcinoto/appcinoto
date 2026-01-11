@@ -80,6 +80,7 @@ class RecordeController {
         id_limite: recorde.id_limite,
         id_sistema: recorde.id_sistema,
         total: recorde.total,
+        quantidade: recorde.quantidade,
         criado_em: recorde.criado_em,
         atualizado_em: recorde.atualizado_em,
         operacao: recorde.operacao
@@ -143,6 +144,7 @@ class RecordeController {
         id_limite: recorde.id_limite,
         id_sistema: recorde.id_sistema,
         total: recorde.total,
+        quantidade: recorde.quantidade,
         criado_em: recorde.criado_em,
         atualizado_em: recorde.atualizado_em,
         criado_por: recorde.criado_por,

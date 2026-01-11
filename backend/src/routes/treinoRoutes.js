@@ -41,12 +41,27 @@ const validarFinalizarTreino = [
     .withMessage("Total deve ser um número inteiro não negativo"),
 ];
 
+// Validações para confirmar início
+const validarConfirmarInicio = [
+  body("treino_id")
+    .notEmpty()
+    .withMessage("ID do treino é obrigatório")
+    .trim(),
+];
+
 // Rotas
 router.post(
   "/iniciar",
   authMiddleware,
   validarIniciarTreino,
   treinoController.iniciar.bind(treinoController)
+);
+
+router.post(
+  "/confirmar-inicio",
+  authMiddleware,
+  validarConfirmarInicio,
+  treinoController.confirmarInicio.bind(treinoController)
 );
 
 router.post(
