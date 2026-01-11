@@ -2,12 +2,12 @@
 
 const { validationResult } = require("express-validator");
 const recordeService = require("../services/recordeService");
-const { Limite, Sistema } = require("../models");
+const { Limite, Sistema, Operacao, Plano } = require("../models");
 
 class RecordeController {
   /**
    * Lista recordes do usuário logado
-   * Aceita filtros opcionais: limite_id, sistema_id
+   * Aceita filtros opcionais: operacao_id, tipo_operacao, limite_id, sistema_id, plano_id
    */
   async listar(req, res) {
     try {
@@ -18,6 +18,35 @@ class RecordeController {
 
       // Obter filtros opcionais da query string
       const filtros = {};
+
+      if (req.query.operacao_id) {
+        const operacaoId = parseInt(req.query.operacao_id);
+        if (isNaN(operacaoId)) {
+          return res.status(400).json({
+            message: "operacao_id deve ser um número válido",
+          });
+        }
+
+        // Validar que a operação existe
+        const operacao = await Operacao.findByPk(operacaoId);
+        if (!operacao) {
+          return res.status(404).json({ message: "Operação não encontrada" });
+        }
+
+        filtros.operacao_id = operacaoId;
+      }
+
+      if (req.query.tipo_operacao) {
+        // Validar tipos de operação válidos
+        const tiposValidos = ["soma", "subtracao", "multiplicacao", "divisao", "raiz", "aleatorio", "conversao"];
+        if (!tiposValidos.includes(req.query.tipo_operacao)) {
+          return res.status(400).json({
+            message: "tipo_operacao inválido",
+          });
+        }
+
+        filtros.tipo_operacao = req.query.tipo_operacao;
+      }
 
       if (req.query.limite_id) {
         const limiteId = parseInt(req.query.limite_id);
@@ -51,6 +80,23 @@ class RecordeController {
         }
 
         filtros.sistema_id = sistemaId;
+      }
+
+      if (req.query.plano_id) {
+        const planoId = parseInt(req.query.plano_id);
+        if (isNaN(planoId)) {
+          return res.status(400).json({
+            message: "plano_id deve ser um número válido",
+          });
+        }
+
+        // Validar que o plano existe
+        const plano = await Plano.findByPk(planoId);
+        if (!plano) {
+          return res.status(404).json({ message: "Plano não encontrado" });
+        }
+
+        filtros.plano_id = planoId;
       }
 
       // Determinar qual usuário buscar recordes (padrão: usuário logado)

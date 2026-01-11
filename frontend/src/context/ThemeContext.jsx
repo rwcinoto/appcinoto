@@ -9,8 +9,8 @@ export const ThemeProvider = ({ children }) => {
     if (savedTheme) {
       return savedTheme === "dark";
     }
-    // Se não houver preferência salva, verificar preferência do sistema
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    // Se não houver preferência salva, usar tema escuro como padrão
+    return true;
   });
 
   useEffect(() => {

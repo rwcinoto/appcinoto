@@ -302,7 +302,7 @@ class RecordeService {
   /**
    * Lista recordes do usuário com filtros opcionais
    * @param {number} usuarioId - ID do usuário
-   * @param {Object} filtros - Filtros opcionais (limite_id, sistema_id)
+   * @param {Object} filtros - Filtros opcionais (operacao_id, tipo_operacao, limite_id, sistema_id, plano_id)
    * @returns {Promise<Array>} Array de recordes
    */
   async listarRecordes(usuarioId, filtros = {}) {
@@ -321,11 +321,10 @@ class RecordeService {
     };
 
     // Aplicar filtros opcionais (usando índices)
-    // NOTA: Os filtros de limite_id e sistema_id já garantem que apenas recordes
-    // de recursos acessíveis no plano atual serão retornados, pois o frontend
-    // só permite selecionar limites/sistemas do plano atual. Se o usuário mudou
-    // de plano, seus recordes antigos ainda são válidos e serão exibidos quando
-    // ele filtrar por limites/sistemas que tem acesso.
+    if (filtros.operacao_id) {
+      where.id_operacao = filtros.operacao_id;
+    }
+
     if (filtros.limite_id) {
       where.id_limite = filtros.limite_id; // Índice: idx_recordes_id_limite
     }
@@ -334,12 +333,48 @@ class RecordeService {
       where.id_sistema = filtros.sistema_id; // Índice: idx_recordes_id_sistema
     }
 
+    // Construir includes com filtros opcionais nos relacionamentos
+    const includes = [];
+
+    // Include de operação (sempre necessário)
+    const operacaoInclude = {
+      association: "operacao",
+      required: true,
+      attributes: ["id", "nome", "descricao", "tipo", "ordem", "id_plano"],
+    };
+
+    // Filtrar por tipo de operação se fornecido
+    if (filtros.tipo_operacao) {
+      operacaoInclude.where = {
+        tipo: filtros.tipo_operacao,
+      };
+    }
+
+    // Filtrar por plano se fornecido (aplicado na operação)
+    if (filtros.plano_id) {
+      if (!operacaoInclude.where) {
+        operacaoInclude.where = {};
+      }
+      operacaoInclude.where.id_plano = filtros.plano_id;
+    }
+
+    includes.push(operacaoInclude);
+
+    // Include de limite (sempre necessário)
+    includes.push({
+      association: "limite",
+      required: true,
+      attributes: ["id", "descricao", "tempo", "id_plano"],
+    });
+
+    // Include de sistema (sempre necessário)
+    includes.push({
+      association: "sistema",
+      required: true,
+      attributes: ["id", "descricao", "tipo", "id_plano"],
+    });
+
     // Buscar recordes com relacionamentos (evitando N+1 queries)
-    // Selecionar apenas campos necessários para otimizar
-    // NOTA: Não filtramos por plano aqui porque:
-    // - Se o usuário mudou de plano, seus recordes antigos ainda são válidos
-    // - Os filtros de limite/sistema já garantem que só aparecerão recordes de recursos acessíveis
-    // - A operação pode ser de qualquer plano (o recorde já foi criado quando tinha acesso)
     const recordes = await Recorde.findAll({
       where,
       attributes: [
@@ -355,30 +390,13 @@ class RecordeService {
         "criado_por",
         "atualizado_por",
       ],
-      include: [
-        {
-          association: "operacao",
-          required: true,
-          attributes: ["id", "nome", "descricao", "tipo", "id_plano"],
-        },
-        {
-          association: "limite",
-          required: true,
-          attributes: ["id", "descricao", "tempo", "id_plano"],
-        },
-        {
-          association: "sistema",
-          required: true,
-          attributes: ["id", "descricao", "tipo", "id_plano"],
-        },
-      ],
-      // Ordenar por operação (ordem), limite, sistema (usando índices)
-      // Usar Sequelize.literal para especificar explicitamente a tabela do sistema
-      // Isso evita ambiguidade com o campo 'tipo' da operação
+      include: includes,
+      // Ordenar por: ordem da operação, id do sistema, tempo limite
+      // Usar Sequelize.literal para evitar ambiguidade em JOINs
       order: [
-        [{ association: "operacao" }, "ordem", "ASC"],
-        [{ association: "limite" }, "tempo", "ASC"],
-        [Sequelize.literal("`sistema`.`tipo`"), "ASC"],
+        [Sequelize.literal("`operacao`.`ordem`"), "ASC"],
+        [Sequelize.literal("`sistema`.`id`"), "ASC"],
+        [Sequelize.literal("`limite`.`tempo`"), "ASC"],
       ],
     });
 
