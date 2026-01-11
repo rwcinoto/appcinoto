@@ -15,36 +15,35 @@ const Recordes = () => {
   const [usuarioVisualizado, setUsuarioVisualizado] = useState(null);
   const [recordes, setRecordes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [operacoes, setOperacoes] = useState([]);
   const [limites, setLimites] = useState([]);
   const [sistemas, setSistemas] = useState([]);
+  const [planos, setPlanos] = useState([]);
+  
+  // Filtros opcionais
+  const [operacaoSelecionada, setOperacaoSelecionada] = useState("");
+  const [tipoOperacaoSelecionado, setTipoOperacaoSelecionado] = useState("");
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
   const [sistemaSelecionado, setSistemaSelecionado] = useState("");
+  const [planoSelecionado, setPlanoSelecionado] = useState("");
+  
   const [erro, setErro] = useState("");
 
   const carregarDados = useCallback(async () => {
     setErro("");
 
     try {
-      const [limitesRes, sistemasRes] = await Promise.all([
+      const [operacoesRes, limitesRes, sistemasRes, planosRes] = await Promise.all([
+        api.get("/operacoes"),
         api.get("/limites"),
         api.get("/sistemas"),
+        api.get("/planos"),
       ]);
 
+      setOperacoes(operacoesRes.data);
       setLimites(limitesRes.data);
       setSistemas(sistemasRes.data);
-
-      // Definir valores padrão para limite e sistema automaticamente
-      const limitePadrao =
-        limitesRes.data.find((l) => l.id === 1) || limitesRes.data[0];
-      const sistemaPadrao =
-        sistemasRes.data.find((s) => s.id === 1) || sistemasRes.data[0];
-
-      if (limitePadrao) {
-        setLimiteSelecionado(String(limitePadrao.id));
-      }
-      if (sistemaPadrao) {
-        setSistemaSelecionado(String(sistemaPadrao.id));
-      }
+      setPlanos(planosRes.data);
     } catch (error) {
       logError("Recordes - carregarDados", error);
       setErro(getErrorMessage(error));
@@ -78,18 +77,32 @@ const Recordes = () => {
   }, [usuarioIdParam, usuario]);
 
   const carregarRecordes = useCallback(async () => {
-    if (!limiteSelecionado || !sistemaSelecionado) {
-      return;
-    }
-
     setLoading(true);
     setErro("");
 
     try {
-      // Construir query string com filtros
+      // Construir query string com filtros opcionais
       const params = new URLSearchParams();
-      params.append("limite_id", limiteSelecionado);
-      params.append("sistema_id", sistemaSelecionado);
+      
+      if (operacaoSelecionada) {
+        params.append("operacao_id", operacaoSelecionada);
+      }
+      
+      if (tipoOperacaoSelecionado) {
+        params.append("tipo_operacao", tipoOperacaoSelecionado);
+      }
+      
+      if (limiteSelecionado) {
+        params.append("limite_id", limiteSelecionado);
+      }
+      
+      if (sistemaSelecionado) {
+        params.append("sistema_id", sistemaSelecionado);
+      }
+      
+      if (planoSelecionado) {
+        params.append("plano_id", planoSelecionado);
+      }
       
       // Adicionar usuario_id se estiver visualizando outro usuário
       if (usuarioIdParam) {
@@ -100,7 +113,7 @@ const Recordes = () => {
       }
 
       const queryString = params.toString();
-      const url = `/recordes?${queryString}`;
+      const url = `/recordes${queryString ? `?${queryString}` : ""}`;
 
       const response = await api.get(url);
       setRecordes(response.data);
@@ -110,7 +123,7 @@ const Recordes = () => {
     } finally {
       setLoading(false);
     }
-  }, [limiteSelecionado, sistemaSelecionado, usuarioIdParam, usuario]);
+  }, [operacaoSelecionada, tipoOperacaoSelecionado, limiteSelecionado, sistemaSelecionado, planoSelecionado, usuarioIdParam, usuario]);
 
   useEffect(() => {
     if (usuario) {
@@ -118,11 +131,12 @@ const Recordes = () => {
     }
   }, [usuario, carregarDados]);
 
+  // Carregar recordes sempre (sem filtros obrigatórios)
   useEffect(() => {
-    if (limiteSelecionado && sistemaSelecionado) {
+    if (usuario) {
       carregarRecordes();
     }
-  }, [limiteSelecionado, sistemaSelecionado, carregarRecordes]);
+  }, [usuario, carregarRecordes]);
 
   if (!usuario) {
     return (
@@ -144,6 +158,19 @@ const Recordes = () => {
     return tipos[tipo] || tipo;
   };
 
+  const formatarTipoOperacao = (tipo) => {
+    const tipos = {
+      soma: "Soma",
+      subtracao: "Subtração",
+      multiplicacao: "Multiplicação",
+      divisao: "Divisão",
+      raiz: "Raiz quadrada",
+      aleatorio: "Aleatório",
+      conversao: "Conversão",
+    };
+    return tipos[tipo] || tipo;
+  };
+
   const obterDescricaoSistema = (sistema) => {
     if (sistema.descricao) {
       return sistema.descricao;
@@ -155,58 +182,100 @@ const Recordes = () => {
     ? `Recordes de ${usuarioVisualizado.nome}` 
     : "Meus recordes";
 
+  // Obter tipos únicos de operação para o filtro
+  const tiposOperacao = Array.from(
+    new Set(operacoes.map((op) => op.tipo))
+  ).sort();
+
   return (
     <div className="recordes-container">
       <div className="recordes-header">
         <h1>{titulo}</h1>
         <div className="filtros-header">
+          {/* Tipo de operação */}
+          <div className="select-group-filtro">
+            <span className="filtro-label">Tipo:</span>
+            <select
+              value={tipoOperacaoSelecionado}
+              onChange={(e) => setTipoOperacaoSelecionado(e.target.value)}
+              className="select-filtro"
+            >
+              <option value="">Todos</option>
+              {tiposOperacao.map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {formatarTipoOperacao(tipo)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Nome da operação */}
+          <div className="select-group-filtro">
+            <span className="filtro-label">Operação:</span>
+            <select
+              value={operacaoSelecionada}
+              onChange={(e) => setOperacaoSelecionada(e.target.value)}
+              className="select-filtro"
+            >
+              <option value="">Todas</option>
+              {operacoes.map((operacao) => (
+                <option key={operacao.id} value={operacao.id}>
+                  {operacao.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Limite de tempo */}
-          {limites.length > 1 ? (
-            <div className="select-group-filtro">
-              <span className="filtro-label">Limite:</span>
-              <select
-                value={limiteSelecionado}
-                onChange={(e) => setLimiteSelecionado(e.target.value)}
-                className="select-limite"
-              >
-                {limites.map((limite) => (
-                  <option key={limite.id} value={limite.id}>
-                    {limite.descricao}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : limites.length === 1 ? (
-            <div className="filtro-valor-unico">
-              <span className="filtro-label">Limite:</span>
-              <span className="filtro-valor">{limites[0].descricao}</span>
-            </div>
-          ) : null}
+          <div className="select-group-filtro">
+            <span className="filtro-label">Limite:</span>
+            <select
+              value={limiteSelecionado}
+              onChange={(e) => setLimiteSelecionado(e.target.value)}
+              className="select-filtro"
+            >
+              <option value="">Todos</option>
+              {limites.map((limite) => (
+                <option key={limite.id} value={limite.id}>
+                  {limite.descricao}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Sistema numérico */}
-          {sistemas.length > 1 ? (
-            <div className="select-group-filtro">
-              <span className="filtro-label">Sistema:</span>
-              <select
-                value={sistemaSelecionado}
-                onChange={(e) => setSistemaSelecionado(e.target.value)}
-                className="select-sistema"
-              >
-                {sistemas.map((sistema) => (
-                  <option key={sistema.id} value={sistema.id}>
-                    {obterDescricaoSistema(sistema)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : sistemas.length === 1 ? (
-            <div className="filtro-valor-unico">
-              <span className="filtro-label">Sistema:</span>
-              <span className="filtro-valor">
-                {obterDescricaoSistema(sistemas[0])}
-              </span>
-            </div>
-          ) : null}
+          <div className="select-group-filtro">
+            <span className="filtro-label">Sistema:</span>
+            <select
+              value={sistemaSelecionado}
+              onChange={(e) => setSistemaSelecionado(e.target.value)}
+              className="select-filtro"
+            >
+              <option value="">Todos</option>
+              {sistemas.map((sistema) => (
+                <option key={sistema.id} value={sistema.id}>
+                  {obterDescricaoSistema(sistema)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Plano (nível) */}
+          <div className="select-group-filtro">
+            <span className="filtro-label">Nível:</span>
+            <select
+              value={planoSelecionado}
+              onChange={(e) => setPlanoSelecionado(e.target.value)}
+              className="select-filtro"
+            >
+              <option value="">Todos</option>
+              {planos.map((plano) => (
+                <option key={plano.id} value={plano.id}>
+                  {plano.nome}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

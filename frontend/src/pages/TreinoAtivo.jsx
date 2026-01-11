@@ -20,16 +20,36 @@ const TreinoAtivo = () => {
   const location = useLocation();
   const { showSuccess } = useToast();
 
+  // Chave para sessionStorage
+  const STORAGE_KEY = "treinoAtivoData";
+
   // Dados do treino vindos da seleção
   // Salvar em estado local para manter disponível mesmo após recomeçar
-  const [treinoData, setTreinoData] = useState(
-    () => location.state?.treinoData
-  );
-  const [formatoResposta, setFormatoResposta] = useState(
-    () => location.state?.formatoResposta || "sistema"
-  );
+  const [treinoData, setTreinoData] = useState(() => {
+    // Primeiro tenta do location.state, depois do sessionStorage
+    return location.state?.treinoData || (() => {
+      try {
+        const stored = sessionStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored)?.treinoData : null;
+      } catch {
+        return null;
+      }
+    })();
+  });
+  const [formatoResposta, setFormatoResposta] = useState(() => {
+    // Primeiro tenta do location.state, depois do sessionStorage
+    const fromState = location.state?.formatoResposta;
+    if (fromState) return fromState;
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored)?.formatoResposta || "sistema" : "sistema";
+    } catch {
+      return "sistema";
+    }
+  });
   const inicializadoRef = useRef(false); // Ref para controlar se já foi inicializado
   const finalizadoRef = useRef(false); // Ref para controlar se o treino já foi finalizado
+  const isRefreshRef = useRef(false); // Ref para identificar se é um refresh
 
   // Estado do treino
   const [treinoId, setTreinoId] = useState(null);
@@ -49,11 +69,37 @@ const TreinoAtivo = () => {
   const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
 
+  // Função para salvar dados do treino no sessionStorage
+  const salvarTreinoNoStorage = (dadosTreino, formato) => {
+    try {
+      const formatoParaSalvar = formato !== undefined ? formato : formatoResposta;
+      const dadosParaSalvar = {
+        treinoData: dadosTreino,
+        formatoResposta: formatoParaSalvar || "sistema",
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dadosParaSalvar));
+      console.log("Dados salvos no sessionStorage:", dadosParaSalvar);
+    } catch (error) {
+      logError("TreinoAtivo - salvarTreinoNoStorage", error);
+    }
+  };
+
+  // Função para limpar dados do treino do sessionStorage
+  const limparTreinoDoStorage = () => {
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      logError("TreinoAtivo - limparTreinoDoStorage", error);
+    }
+  };
+
   // Função para iniciar treino (reutilizável)
-  const iniciarTreino = async (dadosTreino) => {
+  const iniciarTreino = async (dadosTreino, isRefresh = false) => {
     const dados = dadosTreino || treinoData;
 
     if (!dados) {
+      limparTreinoDoStorage();
       navigate("/novo-treino");
       return null;
     }
@@ -82,6 +128,21 @@ const TreinoAtivo = () => {
       finalizadoRef.current = false; // Resetar flag de finalizado
       setTreinoFinalizado(false); // Resetar flag de treino finalizado
 
+      // Se for refresh, incrementar contagem de tentativas imediatamente
+      if (isRefresh) {
+        try {
+          await api.post("/treinos/confirmar-inicio", {
+            treino_id: treino_id,
+          });
+        } catch (error) {
+          // Não bloquear se houver erro
+          logError("TreinoAtivo - iniciarTreino refresh confirmarInicio", error);
+        }
+      }
+
+      // Salvar no sessionStorage
+      salvarTreinoNoStorage(dados, formatoResposta);
+
       // Retornar treino_id para usar na confirmação
       return treino_id;
     } catch (error) {
@@ -100,23 +161,112 @@ const TreinoAtivo = () => {
       return;
     }
 
-    // Se não tiver dados do location.state, redirecionar
-    if (!location.state?.treinoData) {
+    // Detectar se a página foi recarregada usando Performance Navigation API
+    const navigationEntry = performance.getEntriesByType("navigation")[0];
+    const navigationType = navigationEntry?.type;
+    const isPageReload = navigationType === "reload";
+    
+    console.log("Navigation type:", navigationType, "isPageReload:", isPageReload);
+
+    // Verificar se é um refresh
+    // Um refresh acontece quando:
+    // 1. A página foi recarregada (F5/Ctrl+R) OU
+    // 2. Não há location.state mas tem dados no sessionStorage
+    let dadosTreinoParaUsar = location.state?.treinoData;
+    let formatoParaUsar = location.state?.formatoResposta;
+    let isRefresh = false;
+
+    // Sempre tentar buscar do sessionStorage para verificar se há dados salvos
+    let dadosDoStorage = null;
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.treinoData) {
+          dadosDoStorage = parsed;
+        }
+      }
+    } catch (error) {
+      logError("TreinoAtivo - useEffect ler sessionStorage", error);
+    }
+
+    // Se a página foi recarregada E há dados no storage, é refresh
+    if (isPageReload && dadosDoStorage) {
+      dadosTreinoParaUsar = dadosDoStorage.treinoData;
+      formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
+      isRefresh = true;
+      console.log("Refresh detectado via performance.navigation - usando dados do sessionStorage");
+    }
+    // Se não tem location.state mas tem dados no storage, também é refresh
+    else if (!dadosTreinoParaUsar && dadosDoStorage) {
+      dadosTreinoParaUsar = dadosDoStorage.treinoData;
+      formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
+      isRefresh = true;
+      console.log("Refresh detectado - dados recuperados do sessionStorage (sem location.state)");
+    } else if (dadosTreinoParaUsar) {
+      // Tem location.state e não é reload, não é refresh
+      console.log("Treino iniciado normalmente - dados do location.state");
+    }
+
+    // Atualizar ref de refresh
+    isRefreshRef.current = isRefresh;
+
+    // Se não tiver dados em lugar nenhum, redirecionar
+    if (!dadosTreinoParaUsar) {
+      limparTreinoDoStorage();
       navigate("/novo-treino");
       return;
     }
 
     // Salvar treinoData no estado local
-    setTreinoData(location.state.treinoData);
+    setTreinoData(dadosTreinoParaUsar);
     
     // Salvar formatoResposta se fornecido
-    if (location.state?.formatoResposta) {
-      setFormatoResposta(location.state.formatoResposta);
+    if (formatoParaUsar) {
+      setFormatoResposta(formatoParaUsar);
     }
 
-    // Marcar como inicializado e iniciar treino
+    // IMPORTANTE: Salvar dados no sessionStorage imediatamente para persistir em caso de refresh
+    // Isso garante que mesmo se o usuário apertar F5 antes do treino ser iniciado, os dados estarão salvos
+    // Também salvar quando for refresh para garantir que os dados estão atualizados
+    try {
+      salvarTreinoNoStorage(dadosTreinoParaUsar, formatoParaUsar || "sistema");
+      console.log("Dados salvos no sessionStorage:", {
+        operacao: dadosTreinoParaUsar?.operacao?.id,
+        limite: dadosTreinoParaUsar?.limite?.id,
+        sistema: dadosTreinoParaUsar?.sistema?.id,
+        isRefresh: isRefresh
+      });
+    } catch (error) {
+      logError("TreinoAtivo - useEffect salvarTreinoNoStorage", error);
+    }
+
+    // Marcar como inicializado
     inicializadoRef.current = true;
-    iniciarTreino(location.state.treinoData);
+
+    // Se for refresh, mostrar contagem regressiva sem criar treino ainda
+    if (isRefresh) {
+      console.log("Mostrando contagem regressiva após refresh");
+      setLoading(false);
+      // Definir sistemaTipo no estado para usar depois
+      const sistemaTipoDetectado = dadosTreinoParaUsar?.sistema?.tipo || dadosTreinoParaUsar?.sistemaTipo || "natural";
+      setSistemaTipo(sistemaTipoDetectado);
+      // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
+      if (sistemaTipoDetectado === "romano" || sistemaTipoDetectado === "hexadecimal" || sistemaTipoDetectado === "binario") {
+        // Mostrar modal de escolha de formato
+        console.log("Mostrando modal de escolha de formato (refresh)");
+        setMostrarModalFormato(true);
+      } else {
+        // Sistema não requer escolha, ir direto para contagem
+        setFormatoResposta(formatoParaUsar || "sistema");
+        console.log("Mostrando contagem regressiva diretamente (refresh)");
+        setMostrarContagem(true);
+      }
+    } else {
+      // Se não for refresh, iniciar treino normalmente
+      console.log("Iniciando treino normalmente (não é refresh)");
+      iniciarTreino(dadosTreinoParaUsar, false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Executar apenas uma vez na montagem
 
@@ -207,6 +357,9 @@ const TreinoAtivo = () => {
       // Atualizar o estado visual com o valor correto do backend
       setTotalAcertos(response.data.total);
       
+      // Limpar sessionStorage ao finalizar
+      limparTreinoDoStorage();
+      
       // Toast será mostrado se houver recorde
       if (response.data.bateuRecorde) {
         showSuccess("Parabéns! Você bateu um novo recorde!");
@@ -261,9 +414,13 @@ const TreinoAtivo = () => {
   const handleEscolherFormato = async (formato) => {
     setFormatoResposta(formato);
     setMostrarModalFormato(false);
-    // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
-    // Buscar treino_id do treino atual ou do estado
-    if (treinoId) {
+    // Se for refresh, salvar formato no sessionStorage
+    if (isRefreshRef.current && treinoData) {
+      salvarTreinoNoStorage(treinoData, formato);
+    }
+    // Se não for refresh, confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+    // Se for refresh, a confirmação será feita quando a contagem terminar
+    if (treinoId && !isRefreshRef.current) {
       await confirmarInicioTreino(treinoId);
     }
     // Após escolher formato, mostrar contagem regressiva
@@ -281,19 +438,29 @@ const TreinoAtivo = () => {
 
   const handleContagemTerminar = async () => {
     setMostrarContagem(false);
-    // Reiniciar treino com os mesmos dados usando a função compartilhada
-    const novoTreinoId = await iniciarTreino(treinoData);
+    const isRefresh = isRefreshRef.current;
+    console.log("Contagem terminou - isRefresh:", isRefresh);
+    // Se for refresh, criar treino e incrementar quantidade
+    // Se não for refresh, criar treino normalmente e confirmar depois
+    const novoTreinoId = await iniciarTreino(treinoData, isRefresh);
+    console.log("Treino criado após contagem - treinoId:", novoTreinoId, "isRefresh:", isRefresh);
     // Confirmar início do treino (incrementar quantidade) após criar novo treino
-    if (novoTreinoId) {
+    // Só confirmar se não foi refresh (refresh já confirmou dentro de iniciarTreino)
+    if (novoTreinoId && !isRefresh) {
       try {
         await api.post("/treinos/confirmar-inicio", {
           treino_id: novoTreinoId,
         });
+        console.log("Quantidade incrementada (não refresh)");
       } catch (error) {
         // Não bloquear se houver erro
         logError("TreinoAtivo - handleContagemTerminar confirmarInicio", error);
       }
+    } else if (isRefresh) {
+      console.log("Quantidade incrementada durante refresh (dentro de iniciarTreino)");
     }
+    // Resetar flag de refresh após processar
+    isRefreshRef.current = false;
   };
 
   const handleRecomecarDuranteTreino = async () => {
@@ -336,6 +503,7 @@ const TreinoAtivo = () => {
   };
 
   const handleNovoTreino = () => {
+    limparTreinoDoStorage();
     navigate("/novo-treino");
   };
 

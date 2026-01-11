@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Login.css";
 
@@ -12,7 +11,6 @@ const Login = () => {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const { login } = useAuth();
-  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {

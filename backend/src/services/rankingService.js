@@ -148,6 +148,7 @@ class RankingService {
       // O índice (id_operacao, id_limite, id_sistema, total DESC) será usado parcialmente
       order: [
         ["total", "DESC"],
+        ["quantidade", "ASC"], // Menos treinos em caso de empate
         ["atualizado_em", "ASC"], // Mais antiga em caso de empate
       ],
       limit: 100, // Limitar no banco ao invés de slice no JavaScript
