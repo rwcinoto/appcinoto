@@ -1,9 +1,9 @@
 .card-recorde {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 20px;
-  transition: all 0.3s;
+  transition: all 0.3s, background-color 0.3s ease, border-color 0.3s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -33,12 +33,12 @@
 
 .card-recorde-botao-treino {
   background: transparent;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 20px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s, border-color 0.3s ease;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -49,7 +49,7 @@
 
 .card-recorde-botao-treino:hover {
   border-color: var(--cor-operacao, #2196f3);
-  background: #f5f5f5;
+  background: var(--color-background-dark);
   transform: scale(1.05);
 }
 
@@ -65,7 +65,7 @@
 
 .card-recorde-titulo-linha h3 {
   margin: 0;
-  color: #333;
+  color: var(--color-text);
   font-size: 18px;
   font-weight: 600;
   flex: 1;
@@ -85,7 +85,7 @@
 
 .card-recorde-acertos-texto {
   font-size: 16px;
-  color: #333;
+  color: var(--color-text);
 }
 
 .card-recorde-acertos-texto strong {
@@ -111,7 +111,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-border);
+  transition: border-color 0.3s ease;
 }
 
 .card-recorde-info-item {
@@ -122,7 +123,7 @@
 
 .card-recorde-info-label {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--color-text-light);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -130,8 +131,12 @@
 
 .card-recorde-info-value {
   font-size: 0.9rem;
-  color: #333;
+  color: var(--color-text-dark);
   font-weight: 500;
+}
+
+.dark .card-recorde-info-value {
+  color: #C0C0C0;
 }
 
 /* Nota: Os badges de sistema usam estilos inline (style={{...}}) no CardRecorde.jsx */
@@ -140,15 +145,16 @@
 .card-recorde-posicao-ranking {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: border-color 0.3s ease;
 }
 
 .card-recorde-posicao-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--color-text-light);
   font-weight: 500;
 }
 

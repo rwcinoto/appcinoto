@@ -12,17 +12,18 @@
 
 .btn-voltar {
   padding: 8px 16px;
-  background: #f5f5f5;
-  color: #333;
-  border: none;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .btn-voltar:hover {
-  background: #e0e0e0;
+  background: var(--color-background-light);
+  border-color: var(--color-border-dark);
 }
 
 .detalhes-info {
@@ -31,8 +32,9 @@
 
 .detalhes-info h1 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: var(--color-text);
   font-size: 28px;
+  transition: color 0.3s ease;
 }
 
 .detalhes-meta {
@@ -48,6 +50,12 @@
   padding: 6px 14px;
   border-radius: 12px;
   font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-elementos {
+  background: rgba(33, 150, 243, 0.25);
+  color: #64B5F6;
 }
 
 .badge-dono {
@@ -57,6 +65,12 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-dono {
+  background: rgba(255, 152, 0, 0.25);
+  color: #FFB74D;
 }
 
 .badge-admin {
@@ -66,6 +80,12 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-admin {
+  background: rgba(156, 39, 176, 0.25);
+  color: #BA68C8;
 }
 
 .btn-adicionar {
@@ -87,13 +107,15 @@
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-text-light);
+  transition: color 0.3s ease;
 }
 
 .erro-container {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--color-text-light);
+  transition: color 0.3s ease;
 }
 
 .erro-container h2 {

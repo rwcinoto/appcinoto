@@ -2,16 +2,21 @@
   padding: 20px 30px;
   max-width: 1400px;
   margin: 0 auto;
-  background: white;
+  background: var(--color-background);
   min-height: 100vh;
+  transition: background-color 0.3s ease;
 }
 
 .mensagem-erro {
-  background: #ffebee;
-  color: #c62828;
+  background: rgba(244, 67, 54, 0.1);
+  color: var(--color-error);
   padding: 12px;
   border-radius: 4px;
   margin-bottom: 20px;
+}
+
+.dark .mensagem-erro {
+  background: rgba(244, 67, 54, 0.2);
 }
 
 .elementos-section {
@@ -20,32 +25,32 @@
 
 .elementos-section h2 {
   margin: 0 0 20px 0;
-  color: #333;
+  color: var(--color-text);
   font-size: 24px;
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .erro-container {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .erro-container h2 {
-  color: #c62828;
+  color: var(--color-error);
   margin-bottom: 10px;
 }
 
 .erro-container button {
   margin-top: 20px;
   padding: 12px 24px;
-  background: #2196f3;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 4px;
   font-size: 16px;
@@ -53,6 +58,6 @@
 }
 
 .erro-container button:hover {
-  background: #1976d2;
+  background: var(--color-primary-dark);
 }
 

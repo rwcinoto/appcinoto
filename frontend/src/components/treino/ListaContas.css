@@ -3,9 +3,10 @@
   max-height: 600px;
   overflow-y: auto;
   padding: 20px;
-  background: #f9f9f9;
+  background: var(--color-background-light);
   border-radius: 8px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
 }
 
 .lista-contas {
@@ -25,21 +26,22 @@
 .divisor-texto {
   font-size: 16px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-light);
   text-transform: uppercase;
   letter-spacing: 1px;
   position: relative;
   padding: 0 16px;
-  background: #f5f5f5;
+  background: var(--color-background-dark);
   border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .conta-item {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 20px 24px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   opacity: 0.6;
   transform: translateY(0);
 }
@@ -52,11 +54,15 @@
 
 .conta-item.atual {
   opacity: 1;
-  border-color: #2196f3;
-  background: #e3f2fd;
+  border-color: var(--color-primary);
+  background: rgba(33, 150, 243, 0.1);
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
   transform: scale(1.02);
   z-index: 10;
+}
+
+.dark .conta-item.atual {
+  background: rgba(33, 150, 243, 0.2);
 }
 
 @keyframes slideUp {
@@ -102,20 +108,24 @@
   font-size: 28px;
   font-weight: 600;
   padding: 4px 12px;
-  background: #f5f5f5;
+  background: var(--color-background-dark);
   border-radius: 4px;
   min-width: 60px;
   text-align: center;
   font-family: "Courier New", monospace;
   display: inline-block;
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .parcela {
   padding: 4px 12px;
-  background: #f5f5f5;
+  background: var(--color-background-dark);
   border-radius: 4px;
   min-width: 60px;
   text-align: center;
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-family: "Courier New", monospace;
 }
 
@@ -146,10 +156,10 @@
 }
 
 .conta-item.atual .resultado-placeholder {
-  background: #fff;
-  border-color: #2196f3;
+  background: var(--color-background);
+  border-color: var(--color-primary);
   border-style: solid;
-  color: #1976d2;
+  color: var(--color-primary-dark);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -166,17 +176,23 @@
 .conta-input-resultado {
   font-size: 28px;
   font-weight: 600;
-  color: #212121;
+  color: var(--color-text);
   font-family: "Roboto Mono", monospace;
-  border: 2px solid #E0E0E0;
+  border: 2px solid var(--color-border);
   border-radius: 4px;
   padding: 4px 12px;
   text-align: center;
   min-width: 80px;
   max-width: 150px;
   outline: none;
-  transition: all 0.2s ease-in-out;
-  background-color: #FFFFFF;
+  transition: all 0.2s ease-in-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  background-color: var(--color-background);
+  caret-color: var(--color-text);
+}
+
+.dark .conta-input-resultado {
+  color: var(--color-text-dark);
+  caret-color: var(--color-text-dark);
 }
 
 .conta-input-resultado:focus {
@@ -185,11 +201,15 @@
   background-color: rgba(33, 150, 243, 0.1);
 }
 
+.dark .conta-input-resultado:focus {
+  background-color: rgba(33, 150, 243, 0.15);
+}
+
 .conta-input-resultado:disabled {
-  background-color: #F5F5F5;
+  background-color: var(--color-background-dark);
   cursor: not-allowed;
   opacity: 0.6;
-  border-color: #BDBDBD;
+  border-color: var(--color-border-dark);
 }
 
 /* Estado de erro (vermelho) - tema do cubo mágico */
@@ -219,6 +239,10 @@
   background-color: rgba(33, 150, 243, 0.1);
 }
 
+.dark .conta-item.atual .conta-input-resultado {
+  background-color: rgba(33, 150, 243, 0.15);
+}
+
 .conta-item.atual .conta-input-resultado.errado {
   border-color: #F44336 !important;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
@@ -227,8 +251,14 @@
 }
 
 .conta-input-resultado::placeholder {
-  color: #bbb;
+  color: var(--color-text-light);
   font-size: 20px;
+  opacity: 0.5;
+}
+
+.dark .conta-input-resultado::placeholder {
+  color: var(--color-text-light);
+  opacity: 0.4;
 }
 
 .sem-contas {

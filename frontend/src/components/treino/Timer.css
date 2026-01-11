@@ -4,10 +4,10 @@
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: white;
+  background: var(--color-card);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease, background-color 0.3s ease;
 }
 
 .timer-display {
@@ -21,17 +21,18 @@
   font-size: 48px;
   font-weight: bold;
   font-family: "Courier New", monospace;
-  color: #333;
+  color: var(--color-text);
   letter-spacing: 2px;
   transition: color 0.3s ease;
 }
 
 .timer-pausado {
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-light);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 
 /* Estado normal (verde) */
@@ -89,10 +90,11 @@
   width: 100%;
   max-width: 300px;
   height: 8px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 4px;
   overflow: hidden;
   position: relative;
+  transition: background-color 0.3s ease;
 }
 
 .timer-barra-preenchimento {
@@ -118,6 +120,15 @@
     transparent
   );
   animation: shimmer 2s ease-in-out infinite;
+}
+
+.dark .timer-barra-preenchimento::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
 }
 
 @keyframes shimmer {

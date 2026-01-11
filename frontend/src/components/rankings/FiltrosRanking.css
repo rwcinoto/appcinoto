@@ -1,15 +1,16 @@
 .filtros-ranking {
-  background: white;
+  background: var(--color-card);
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   margin-bottom: 20px;
+  transition: background-color 0.3s ease;
 }
 
 .filtros-ranking.loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .filtros-campos {
@@ -26,37 +27,38 @@
 
 .campo-filtro label {
   margin-bottom: 8px;
-  color: #333;
+  color: var(--color-text);
   font-weight: 500;
   font-size: 0.9rem;
 }
 
 .obrigatorio {
-  color: #f44336;
+  color: var(--color-error);
 }
 
 .campo-filtro select {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 1rem;
-  background: white;
+  background: var(--color-background);
+  color: var(--color-text);
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
 }
 
 .campo-filtro select:hover {
-  border-color: #2196f3;
+  border-color: var(--color-primary);
 }
 
 .campo-filtro select:focus {
   outline: none;
-  border-color: #2196f3;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
 .campo-filtro select:required:invalid {
-  border-color: #f44336;
+  border-color: var(--color-error);
 }
 
 @media (max-width: 768px) {

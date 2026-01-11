@@ -2,8 +2,9 @@
   padding: 20px 30px;
   max-width: 1400px;
   margin: 0 auto;
-  background: white;
+  background: var(--color-background);
   min-height: 100vh;
+  transition: background-color 0.3s ease;
 }
 
 .operacoes-header {
@@ -15,7 +16,7 @@
 
 .operacoes-header h1 {
   margin: 0;
-  color: #333;
+  color: var(--color-text);
 }
 
 .btn-criar {
@@ -27,8 +28,12 @@
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, color 0.3s ease;
   box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+}
+
+.dark .btn-criar {
+  color: #FFFFFF;
 }
 
 .btn-criar:hover:not(:disabled) {
@@ -67,20 +72,23 @@
 .filtro-group label {
   margin-bottom: 5px;
   font-weight: 500;
-  color: #555;
+  color: var(--color-text-light);
   font-size: 14px;
 }
 
 .filtro-group input,
 .filtro-group select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 14px;
+  background: var(--color-background);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-text-light);
 }

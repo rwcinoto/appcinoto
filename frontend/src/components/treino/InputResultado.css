@@ -12,22 +12,23 @@
   font-size: 32px;
   font-weight: 600;
   text-align: center;
-  border: 3px solid #E0E0E0;
+  border: 3px solid var(--color-border);
   border-radius: 8px;
-  background: #FFFFFF;
+  background: var(--color-background);
+  color: var(--color-text);
   font-family: "Courier New", monospace;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   outline: none;
   letter-spacing: 2px;
 }
 
 .input-resultado:focus {
-  border-color: #2196F3;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
 }
 
 .input-resultado:disabled {
-  background: #F5F5F5;
+  background: var(--color-background-dark);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -76,9 +77,10 @@
 }
 
 .input-resultado::placeholder {
-  color: #bbb;
+  color: var(--color-text-light);
   font-size: 24px;
   letter-spacing: 0;
+  opacity: 0.6;
 }
 
 /* Responsividade */

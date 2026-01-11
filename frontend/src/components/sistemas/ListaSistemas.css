@@ -1,8 +1,9 @@
 .lista-sistemas {
-  background: white;
+  background: var(--color-card);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.3s ease;
 }
 
 .lista-sistemas table {
@@ -11,24 +12,29 @@
 }
 
 .lista-sistemas thead {
-  background: #f5f5f5;
+  background: var(--color-background-dark);
+  transition: background-color 0.3s ease;
 }
 
 .lista-sistemas th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: #555;
-  border-bottom: 2px solid #ddd;
+  color: var(--color-text-light);
+  border-bottom: 2px solid var(--color-border);
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
 .lista-sistemas td {
   padding: 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
 .lista-sistemas tr:hover {
-  background: #f9f9f9;
+  background: var(--color-background-light);
+  transition: background-color 0.3s ease;
 }
 
 /* Badges de tipo de sistema - usando alta especificidade para evitar interferência de CSS global */
@@ -43,31 +49,62 @@
 .lista-sistemas .badge-tipo.badge-natural {
   background: #e3f2fd !important;
   color: #1976d2 !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+
+.dark .lista-sistemas .badge-tipo.badge-natural {
+  background: rgba(33, 150, 243, 0.25) !important;
+  color: #64B5F6 !important;
 }
 
 .lista-sistemas .badge-tipo.badge-inteiro {
   background: #e0f2f1 !important;
   color: #00695c !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+
+.dark .lista-sistemas .badge-tipo.badge-inteiro {
+  background: rgba(0, 105, 92, 0.25) !important;
+  color: #4DB6AC !important;
 }
 
 .lista-sistemas .badge-tipo.badge-romano {
   background: #f3e5f5 !important;
   color: #7b1fa2 !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
 }  
+
+.dark .lista-sistemas .badge-tipo.badge-romano {
+  background: rgba(156, 39, 176, 0.25) !important;
+  color: #BA68C8 !important;
+}
 
 .lista-sistemas .badge-tipo.badge-decimal {
   background: #ffebee !important;
   color: #c62828 !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+
+.dark .lista-sistemas .badge-tipo.badge-decimal {
+  background: rgba(198, 40, 40, 0.25) !important;
+  color: #EF5350 !important;
 }
 
 .lista-sistemas .badge-tipo.badge-binario {
   background: #fff3e0 !important;
   color: #e65100 !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
 }  
 
+.dark .lista-sistemas .badge-tipo.badge-binario {
+  background: rgba(230, 81, 0, 0.25) !important;
+  color: #FFB74D !important;
+}
+
 .lista-sistemas .badge-tipo.badge-hexadecimal {
-  background: #F5F5F5 !important;
-  color: #000000 !important;
+  background: var(--color-background-dark) !important;
+  color: var(--color-text) !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
 }
 
 .acoes {
@@ -142,8 +179,9 @@
 .sem-sistemas {
   text-align: center;
   padding: 40px;
-  color: #999;
-  background: white;
+  color: var(--color-text-light);
+  background: var(--color-card);
   border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 

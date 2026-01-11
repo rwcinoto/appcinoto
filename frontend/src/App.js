@@ -4,18 +4,21 @@ import "./App.css";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { ToastProvider } from "./context/ToastContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AppRoutes from "./routes";
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <NotificationProvider>
-          <ToastProvider>
-            <AppRoutes />
-          </ToastProvider>
-        </NotificationProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
