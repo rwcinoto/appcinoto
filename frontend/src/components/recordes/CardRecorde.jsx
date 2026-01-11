@@ -4,12 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import ContagemRegressiva from "../treino/ContagemRegressiva";
 import ModalEscolhaFormatoResposta from "../treino/ModalEscolhaFormatoResposta";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import api from "../../services/api";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
 import "./CardRecorde.css";
 
 const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   const { usuario } = useAuth();
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const [posicaoRanking, setPosicaoRanking] = useState(null);
   const [iniciandoTreino, setIniciandoTreino] = useState(false);
@@ -104,13 +106,25 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   };
 
   const obterCorSistema = (tipo) => {
+    if (isDarkMode) {
+      const coresDark = {
+        natural: { background: "rgba(33, 150, 243, 0.25)", color: "#64B5F6" },
+        inteiro: { background: "rgba(0, 105, 92, 0.25)", color: "#4DB6AC" },
+        romano: { background: "rgba(156, 39, 176, 0.25)", color: "#BA68C8" },
+        decimal: { background: "rgba(198, 40, 40, 0.25)", color: "#EF5350" },
+        binario: { background: "rgba(230, 81, 0, 0.25)", color: "#FFB74D" },
+        hexadecimal: { background: "rgba(158, 158, 158, 0.25)", color: "#B0B0B0" },
+      };
+      return coresDark[tipo] || { background: "rgba(158, 158, 158, 0.25)", color: "#B0B0B0" };
+    }
+    
     const cores = {
-      natural: { background: "#e3f2fd", color: "#1976d2" }, // Mesmas cores do badge-natural
-      inteiro: { background: "#e0f2f1", color: "#00695c" }, // Mesmas cores do badge-inteiro
-      romano: { background: "#f3e5f5", color: "#7b1fa2" }, // Mesmas cores do badge-romano
-      decimal: { background: "#ffebee", color: "#c62828" }, // Mesmas cores do badge-decimal
-      binario: { background: "#fff3e0", color: "#e65100" }, // Mesmas cores do badge-binario
-      hexadecimal: { background: "#F5F5F5", color: "#000000" }, // Cores para hexadecimal
+      natural: { background: "#e3f2fd", color: "#1976d2" },
+      inteiro: { background: "#e0f2f1", color: "#00695c" },
+      romano: { background: "#f3e5f5", color: "#7b1fa2" },
+      decimal: { background: "#ffebee", color: "#c62828" },
+      binario: { background: "#fff3e0", color: "#e65100" },
+      hexadecimal: { background: "#F5F5F5", color: "#000000" },
     };
     return cores[tipo] || { background: "#f5f5f5", color: "#666" };
   };

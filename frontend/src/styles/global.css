@@ -178,6 +178,45 @@ html {
 }
 
 /* ============================================
+   DARK MODE - Variáveis CSS
+   ============================================ */
+.dark {
+  /* Cores de fundo */
+  --color-background: #121212;
+  --color-background-light: #1E1E1E;
+  --color-background-dark: #0D0D0D;
+  
+  --color-card: #1E1E1E;
+  --color-card-hover: #2A2A2A;
+  --color-card-border: #333333;
+  
+  /* Cores de texto */
+  --color-text: #E0E0E0;
+  --color-text-light: #B0B0B0;
+  --color-text-dark: #FFFFFF;
+  --color-text-inverse: #121212;
+  
+  /* Cores de borda */
+  --color-border: #333333;
+  --color-border-light: #2A2A2A;
+  --color-border-dark: #404040;
+  
+  /* Estados */
+  --state-hover-light: rgba(255, 255, 255, 0.05);
+  --state-hover-dark: rgba(255, 255, 255, 0.1);
+  --state-active-light: rgba(255, 255, 255, 0.1);
+  --state-active-dark: rgba(255, 255, 255, 0.15);
+  --state-disabled-bg: #1E1E1E;
+  --state-disabled-text: #666666;
+  
+  /* Sombras ajustadas para dark mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
    ESTILOS BASE
    ============================================ */
 html {
@@ -193,6 +232,7 @@ body {
   background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Tipografia base */

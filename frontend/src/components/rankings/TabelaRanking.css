@@ -1,8 +1,9 @@
 .tabela-ranking {
-  background: white;
+  background: var(--color-card);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.3s ease;
 }
 
 .tabela-ranking-container {
@@ -23,21 +24,23 @@
 }
 
 .tabela-ranking-table thead {
-  background: #f5f5f5;
+  background: var(--color-background-dark);
   position: sticky;
   top: 0;
   z-index: 10;
+  transition: background-color 0.3s ease;
 }
 
 .tabela-ranking-table th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: #555;
-  border-bottom: 2px solid #ddd;
+  color: var(--color-text-light);
+  border-bottom: 2px solid var(--color-border);
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
 .coluna-posicao-header {
@@ -62,7 +65,7 @@
 .tabela-ranking.sem-dados {
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--color-text-light);
 }
 
 .tabela-ranking.sem-dados p {
@@ -73,7 +76,8 @@
 .subtitulo-vazio {
   margin-top: 8px !important;
   font-size: 0.9rem !important;
-  color: #bbb !important;
+  color: var(--color-text-light) !important;
+  opacity: 0.7;
 }
 
 /* Versão mobile (cards) - oculta por padrão */
@@ -82,24 +86,24 @@
 }
 
 .card-ranking-mobile {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
-  transition: all 0.2s;
+  transition: all 0.2s, background-color 0.3s ease, border-color 0.3s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 .card-ranking-mobile:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
 .card-ranking-mobile:active {
   transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-ranking-header-mobile {
@@ -108,7 +112,8 @@
   align-items: center;
   margin-bottom: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
+  transition: border-color 0.3s ease;
 }
 
 .card-ranking-posicao-mobile {
@@ -126,7 +131,7 @@
 
 .numero-posicao-mobile {
   font-family: "Courier New", monospace;
-  color: #333;
+  color: var(--color-text);
 }
 
 .card-ranking-pontuacao-mobile {
@@ -141,7 +146,7 @@
 
 .card-ranking-tempo-medio-mobile {
   font-size: 1rem;
-  color: #666;
+  color: var(--color-text-light);
   font-weight: 400;
 }
 
@@ -155,7 +160,7 @@
 
 .card-ranking-nome-mobile {
   font-weight: 500;
-  color: #333;
+  color: var(--color-text);
   font-size: 1rem;
   display: flex;
   align-items: center;
@@ -187,11 +192,17 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-usuario-logado-mobile {
+  background: rgba(33, 150, 243, 0.3);
+  color: #64B5F6;
 }
 
 .card-ranking-data-mobile {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-light);
   font-family: "Courier New", monospace;
   white-space: nowrap;
   flex-shrink: 0;

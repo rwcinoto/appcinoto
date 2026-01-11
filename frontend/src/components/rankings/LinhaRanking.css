@@ -1,9 +1,18 @@
 .linha-ranking {
-  transition: all 0.2s;
+  transition: all 0.2s, background-color 0.3s ease;
 }
 
 .linha-ranking:hover {
   background: #f5f5f5;
+}
+
+.dark .linha-ranking:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark .linha-ranking.top-3:hover {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .linha-ranking.top-3 {
@@ -25,6 +34,15 @@
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
+.dark .linha-ranking.top-1 {
+  background: rgba(255, 215, 0, 0.03);
+}
+
+.dark .linha-ranking.top-1:hover {
+  background: rgba(255, 215, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
 /* Top 2 - Prateado/Cinza */
 .linha-ranking.top-2 {
   background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, transparent 100%);
@@ -33,6 +51,15 @@
 
 .linha-ranking.top-2:hover {
   background: linear-gradient(90deg, rgba(192, 192, 192, 0.15) 0%, transparent 100%);
+  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.2);
+}
+
+.dark .linha-ranking.top-2 {
+  background: rgba(192, 192, 192, 0.03);
+}
+
+.dark .linha-ranking.top-2:hover {
+  background: rgba(192, 192, 192, 0.1);
   box-shadow: 0 2px 8px rgba(192, 192, 192, 0.2);
 }
 
@@ -47,6 +74,15 @@
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
 }
 
+.dark .linha-ranking.top-3-pos {
+  background: rgba(255, 152, 0, 0.03);
+}
+
+.dark .linha-ranking.top-3-pos:hover {
+  background: rgba(255, 152, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
 .linha-ranking.usuario-logado {
   background: linear-gradient(90deg, rgba(33, 150, 243, 0.08) 0%, transparent 100%);
   border-right: 3px solid #2196F3;
@@ -55,6 +91,14 @@
 
 .linha-ranking.usuario-logado:hover {
   background: linear-gradient(90deg, rgba(33, 150, 243, 0.12) 0%, transparent 100%);
+}
+
+.dark .linha-ranking.usuario-logado {
+  background: rgba(33, 150, 243, 0.05);
+}
+
+.dark .linha-ranking.usuario-logado:hover {
+  background: rgba(33, 150, 243, 0.08);
 }
 
 /* Usuário logado no top 3 - combina cores */
@@ -68,6 +112,10 @@
   border-right: 3px solid #2196F3;
 }
 
+.dark .linha-ranking.top-1.usuario-logado {
+  background: rgba(255, 215, 0, 0.03);
+}
+
 .linha-ranking.top-2.usuario-logado {
   background: linear-gradient(
     90deg,
@@ -78,6 +126,10 @@
   border-right: 3px solid #2196F3;
 }
 
+.dark .linha-ranking.top-2.usuario-logado {
+  background: rgba(192, 192, 192, 0.03);
+}
+
 .linha-ranking.top-3-pos.usuario-logado {
   background: linear-gradient(
     90deg,
@@ -86,6 +138,10 @@
     transparent 100%
   );
   border-right: 3px solid #1976D2;
+}
+
+.dark .linha-ranking.top-3-pos.usuario-logado {
+  background: rgba(255, 152, 0, 0.03);
 }
 
 .coluna-posicao {
@@ -123,7 +179,7 @@
 
 .nome-usuario {
   font-weight: 500;
-  color: #333;
+  color: var(--color-text);
 }
 
 .nome-usuario-link {
@@ -147,6 +203,12 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-usuario-logado {
+  background: rgba(33, 150, 243, 0.3);
+  color: #64B5F6;
 }
 
 .coluna-pontuacao {
@@ -165,14 +227,14 @@
 
 .pontuacao-tempo-medio {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--color-text-light);
   font-weight: 400;
 }
 
 .coluna-data {
   padding: 12px;
   text-align: center;
-  color: #666;
+  color: var(--color-text-light);
   font-size: 0.9rem;
 }
 

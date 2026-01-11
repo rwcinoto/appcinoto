@@ -1,8 +1,9 @@
 .lista-usuarios {
-  background: white;
+  background: var(--color-card);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.3s ease;
 }
 
 .lista-usuarios table {
@@ -11,24 +12,29 @@
 }
 
 .lista-usuarios thead {
-  background: #f5f5f5;
+  background: var(--color-background-dark);
+  transition: background-color 0.3s ease;
 }
 
 .lista-usuarios th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: #555;
-  border-bottom: 2px solid #ddd;
+  color: var(--color-text-light);
+  border-bottom: 2px solid var(--color-border);
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
 .lista-usuarios td {
   padding: 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
 .lista-usuarios tr:hover {
-  background: #f9f9f9;
+  background: var(--color-background-light);
+  transition: background-color 0.3s ease;
 }
 
 .badge {
@@ -41,11 +47,23 @@
 .badge-admin {
   background: #ff9800;
   color: white;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-admin {
+  background: rgba(255, 152, 0, 0.3);
+  color: #FFB74D;
 }
 
 .badge-comum {
-  background: #e0e0e0;
-  color: #333;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-comum {
+  background: var(--color-background-light);
+  color: var(--color-text-light);
 }
 
 .status {

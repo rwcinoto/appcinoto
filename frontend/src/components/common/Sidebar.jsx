@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useNotifications } from "../../context/NotificationContext";
+import { useTheme } from "../../context/ThemeContext";
 import "./Sidebar.css";
 
 const Sidebar = ({ aberto = true, onFechar }) => {
   const { usuario, logout } = useAuth();
   const { quantidadeConvitesPendentes } = useNotifications();
+  const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [cadastrosAberto, setCadastrosAberto] = useState(false);
@@ -103,10 +105,14 @@ const Sidebar = ({ aberto = true, onFechar }) => {
   return (
     <aside className={`sidebar ${aberto ? "aberto" : "fechado"}`} aria-label="Menu de navegação principal">
       <div className="sidebar-header">
-        <img src="/logoLargo.png" alt="numix" className="sidebar-logo" />
+        <img 
+          src="/logo-numix.svg" 
+          alt="numix" 
+          className="sidebar-logo" 
+        />
       </div>
       <nav className="sidebar-nav" role="navigation" aria-label="Navegação principal">
-        <ul>
+        <ul className="sidebar-menu-main">
           {filteredMenuItems.map((item) => (
             <li key={item.path}>
               <Link
@@ -163,6 +169,20 @@ const Sidebar = ({ aberto = true, onFechar }) => {
               )}
             </li>
           )}
+        </ul>
+        <ul className="sidebar-menu-theme">
+          <li>
+            <label className="theme-toggle-switch" aria-label={isDarkMode ? "Ativar modo claro" : "Ativar modo escuro"}>
+              <input
+                type="checkbox"
+                checked={isDarkMode}
+                onChange={toggleTheme}
+                className="theme-toggle-input"
+                aria-label={isDarkMode ? "Ativar modo claro" : "Ativar modo escuro"}
+              />
+              <span className="theme-toggle-slider"></span>
+            </label>
+          </li>
         </ul>
       </nav>
       <div className="sidebar-footer">

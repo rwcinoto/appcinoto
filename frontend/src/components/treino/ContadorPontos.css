@@ -4,17 +4,19 @@
   align-items: center;
   gap: 8px;
   padding: 20px;
-  background: white;
+  background: var(--color-card);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.3s ease;
 }
 
 .contador-pontos-label {
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-light);
   text-transform: uppercase;
   letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 
 .contador-pontos-valor {

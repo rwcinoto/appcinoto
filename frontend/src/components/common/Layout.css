@@ -2,14 +2,16 @@
   display: flex;
   min-height: 100vh;
   position: relative;
+  background: var(--color-background);
+  transition: background-color 0.3s ease;
 }
 
 .layout-main {
   flex: 1;
   margin-left: 250px;
   min-height: 100vh;
-  background: #F5F5F5;
-  transition: margin-left 0.3s ease-in-out;
+  background: var(--color-background-dark);
+  transition: margin-left 0.3s ease-in-out, background-color 0.3s ease;
 }
 
 /* Menu hamburger */
@@ -19,8 +21,8 @@
   top: 15px;
   right: 15px;
   z-index: 1001;
-  background: #FFFFFF;
-  border: 1px solid #E0E0E0;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   width: 44px;
   height: 44px;
@@ -29,16 +31,16 @@
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
 .hamburger-menu:hover {
-  background: #F5F5F5;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: var(--color-background-dark);
+  box-shadow: var(--shadow-lg);
 }
 
 .hamburger-menu:active {
@@ -50,13 +52,13 @@
   display: block;
   width: 24px;
   height: 3px;
-  background: #2196F3;
+  background: var(--color-primary);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
 
 .hamburger-menu:hover span {
-  background: #1976D2;
+  background: var(--color-primary-dark);
 }
 
 /* Overlay para mobile */
@@ -70,6 +72,10 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
   animation: fadeIn 0.3s ease;
+}
+
+.dark .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.7);
 }
 
 @keyframes fadeIn {

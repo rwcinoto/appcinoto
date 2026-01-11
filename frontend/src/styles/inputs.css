@@ -41,6 +41,7 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
+
 /* Mobile: aumentar tamanho para facilitar toque */
 @media (max-width: 768px) {
   input[type="text"],

@@ -81,15 +81,15 @@ button.btn-secondary {
 .btn-cancel,
 button.btn-cancel,
 [type="button"].btn-cancel {
-  background: #F5F5F5;
-  color: #212121;
-  border: 1px solid #E0E0E0;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 10px 20px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   min-height: 44px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -97,12 +97,12 @@ button.btn-cancel,
 }
 
 .btn-cancel:hover:not(:disabled) {
-  background: #EEEEEE;
-  border-color: #BDBDBD;
+  background: var(--color-background-light);
+  border-color: var(--color-border-dark);
 }
 
 .btn-cancel:active:not(:disabled) {
-  background: #E0E0E0;
+  background: var(--color-background);
 }
 
 .btn-cancel:focus {
@@ -152,13 +152,13 @@ button.btn-danger {
 .btn-cancel:disabled,
 .btn-danger:disabled,
 button:disabled {
-  background: #BDBDBD !important;
-  color: #757575 !important;
+  background: var(--state-disabled-bg) !important;
+  color: var(--state-disabled-text) !important;
   cursor: not-allowed !important;
   opacity: 0.6;
   transform: none !important;
   box-shadow: none !important;
-  border-color: #E0E0E0 !important;
+  border-color: var(--color-border) !important;
 }
 
 /* Classes auxiliares para botões em formulários */
@@ -191,15 +191,15 @@ button:disabled {
 }
 
 .form-actions button[type="button"] {
-  background: #F5F5F5;
-  color: #212121;
-  border: 1px solid #E0E0E0;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 10px 20px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   min-height: 44px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -207,18 +207,18 @@ button:disabled {
 }
 
 .form-actions button[type="button"]:hover:not(:disabled) {
-  background: #EEEEEE;
-  border-color: #BDBDBD;
+  background: var(--color-background-light);
+  border-color: var(--color-border-dark);
 }
 
 .form-actions button:disabled {
-  background: #BDBDBD !important;
-  color: #757575 !important;
+  background: var(--state-disabled-bg) !important;
+  color: var(--state-disabled-text) !important;
   cursor: not-allowed !important;
   opacity: 0.6;
   transform: none !important;
   box-shadow: none !important;
-  border-color: #E0E0E0 !important;
+  border-color: var(--color-border) !important;
 }
 
 /* Botões específicos - manter compatibilidade */
@@ -249,15 +249,15 @@ button:disabled {
 
 .btn-cancelar,
 .btn-cancelar[type="button"] {
-  background: #F5F5F5;
-  color: #212121;
-  border: 1px solid #E0E0E0;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   min-height: 44px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -286,14 +286,14 @@ button:disabled {
 }
 
 .btn-cancelar:hover:not(:disabled) {
-  background: #EEEEEE;
-  border-color: #BDBDBD;
+  background: var(--color-background-light);
+  border-color: var(--color-border-dark);
 }
 
 .btn-salvar:disabled,
 .btn-cancelar:disabled {
-  background: #BDBDBD !important;
-  color: #757575 !important;
+  background: var(--state-disabled-bg) !important;
+  color: var(--state-disabled-text) !important;
   cursor: not-allowed !important;
   opacity: 0.6;
 }

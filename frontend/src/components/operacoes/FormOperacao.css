@@ -138,9 +138,10 @@
   max-height: 300px;
   overflow-y: auto;
   padding: 10px;
-  background: white;
+  background: var(--color-background);
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .checkbox-label {
@@ -197,14 +198,15 @@
 }
 
 .btn-cancelar {
-  background: #F5F5F5;
-  color: #212121;
-  border: 1px solid #E0E0E0;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .btn-cancelar:hover:not(:disabled) {
-  background: #EEEEEE;
-  border-color: #BDBDBD;
+  background: var(--color-background-light);
+  border-color: var(--color-border-dark);
 }
 
 .btn-salvar {
@@ -227,8 +229,8 @@
 
 .btn-cancelar:disabled,
 .btn-salvar:disabled {
-  background: #BDBDBD !important;
-  color: #757575 !important;
+  background: var(--state-disabled-bg) !important;
+  color: var(--state-disabled-text) !important;
   cursor: not-allowed;
   opacity: 0.6;
   transform: none !important;
