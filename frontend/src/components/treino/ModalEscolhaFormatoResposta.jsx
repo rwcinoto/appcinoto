@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./ModalEscolhaFormatoResposta.css";
 
 const ModalEscolhaFormatoResposta = ({ sistemaTipo, onEscolher, onCancelar }) => {
-  const [formatoEscolhido, setFormatoEscolhido] = useState(null);
+  const [formatoEscolhido, setFormatoEscolhido] = useState("natural");
 
   const handleConfirmar = () => {
     if (formatoEscolhido) {
