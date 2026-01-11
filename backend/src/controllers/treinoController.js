@@ -442,6 +442,59 @@ class TreinoController {
       });
     }
   }
+
+  /**
+   * Confirmar início do treino (incrementar quantidade)
+   * Deve ser chamado quando a contagem regressiva começar (após escolher formato se necessário)
+   */
+  async confirmarInicio(req, res) {
+    try {
+      const erros = validationResult(req);
+      if (!erros.isEmpty()) {
+        return res.status(400).json({ errors: erros.array() });
+      }
+
+      const { treino_id } = req.body;
+      const usuario = req.usuario;
+
+      // Buscar treino
+      const treino = treinosAtivos.get(treino_id);
+
+      if (!treino) {
+        return res.status(404).json({ message: "Treino não encontrado" });
+      }
+
+      // Validar que o treino pertence ao usuário
+      if (treino.id_usuario !== usuario.id) {
+        return res.status(403).json({
+          message: "Este treino não pertence a você",
+        });
+      }
+
+      // Incrementar quantidade de treinos (ou criar registro se não existir)
+      // Isso deve ser feito quando a contagem regressiva começar
+      try {
+        await recordeService.incrementarQuantidadeTreino(
+          usuario.id,
+          treino.operacao.id,
+          treino.limite.id,
+          treino.sistema.id
+        );
+      } catch (error) {
+        // Se houver erro ao incrementar quantidade, registrar mas não bloquear
+        console.error("Erro ao incrementar quantidade de treino:", error);
+        // Continuar mesmo assim (não bloquear o treino por erro na quantidade)
+      }
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Erro ao confirmar início do treino:", error);
+      return res.status(500).json({
+        message: "Erro ao confirmar início do treino",
+        error: error.message,
+      });
+    }
+  }
 }
 
 module.exports = new TreinoController();

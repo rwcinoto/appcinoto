@@ -55,7 +55,7 @@ const TreinoAtivo = () => {
 
     if (!dados) {
       navigate("/novo-treino");
-      return;
+      return null;
     }
 
     try {
@@ -81,9 +81,13 @@ const TreinoAtivo = () => {
       setMostrarResultado(false); // Garantir que o resultado está oculto
       finalizadoRef.current = false; // Resetar flag de finalizado
       setTreinoFinalizado(false); // Resetar flag de treino finalizado
+
+      // Retornar treino_id para usar na confirmação
+      return treino_id;
     } catch (error) {
       logError("TreinoAtivo - iniciarTreino", error);
       setErro(getErrorMessage(error));
+      return null;
     } finally {
       setLoading(false);
     }
@@ -233,13 +237,35 @@ const TreinoAtivo = () => {
     } else {
       // Sistema não requer escolha, ir direto para contagem
       setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+      // O treino será criado quando a contagem terminar (handleContagemTerminar -> iniciarTreino)
+      // A confirmação será feita no handleContagemTerminar após criar o treino
       setMostrarContagem(true);
     }
   };
 
-  const handleEscolherFormato = (formato) => {
+  const confirmarInicioTreino = async (treinoIdParaConfirmar) => {
+    if (!treinoIdParaConfirmar) {
+      return;
+    }
+
+    try {
+      await api.post("/treinos/confirmar-inicio", {
+        treino_id: treinoIdParaConfirmar,
+      });
+    } catch (error) {
+      // Não bloquear a contagem regressiva se houver erro
+      logError("TreinoAtivo - confirmarInicioTreino", error);
+    }
+  };
+
+  const handleEscolherFormato = async (formato) => {
     setFormatoResposta(formato);
     setMostrarModalFormato(false);
+    // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+    // Buscar treino_id do treino atual ou do estado
+    if (treinoId) {
+      await confirmarInicioTreino(treinoId);
+    }
     // Após escolher formato, mostrar contagem regressiva
     setMostrarContagem(true);
   };
@@ -256,7 +282,18 @@ const TreinoAtivo = () => {
   const handleContagemTerminar = async () => {
     setMostrarContagem(false);
     // Reiniciar treino com os mesmos dados usando a função compartilhada
-    await iniciarTreino(treinoData);
+    const novoTreinoId = await iniciarTreino(treinoData);
+    // Confirmar início do treino (incrementar quantidade) após criar novo treino
+    if (novoTreinoId) {
+      try {
+        await api.post("/treinos/confirmar-inicio", {
+          treino_id: novoTreinoId,
+        });
+      } catch (error) {
+        // Não bloquear se houver erro
+        logError("TreinoAtivo - handleContagemTerminar confirmarInicio", error);
+      }
+    }
   };
 
   const handleRecomecarDuranteTreino = async () => {
@@ -292,6 +329,8 @@ const TreinoAtivo = () => {
     } else {
       // Sistema não requer escolha, ir direto para contagem
       setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+      // O treino será criado quando a contagem terminar (handleContagemTerminar -> iniciarTreino)
+      // A confirmação será feita no handleContagemTerminar após criar o treino
       setMostrarContagem(true);
     }
   };

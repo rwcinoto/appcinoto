@@ -133,7 +133,7 @@ class RankingService {
     // O índice (id_operacao, id_limite, id_sistema, total DESC) será usado para WHERE e ORDER BY
     const recordesOrdenados = await Recorde.findAll({
       where: whereRecorde,
-      attributes: ["id_usuario", "total", "atualizado_em"],
+      attributes: ["id_usuario", "total", "quantidade", "atualizado_em"],
       include: [
         {
           association: "usuario",
@@ -160,6 +160,7 @@ class RankingService {
       nome: recorde.usuario.nome,
       email: recorde.usuario.email,
       total: recorde.total,
+      quantidade: recorde.quantidade,
       data_recorde: recorde.atualizado_em,
     }));
 

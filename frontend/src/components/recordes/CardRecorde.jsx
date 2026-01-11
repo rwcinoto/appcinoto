@@ -163,6 +163,15 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       } else {
         // Sistema não requer escolha, ir direto para contagem
         setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+        // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+        try {
+          await api.post("/treinos/confirmar-inicio", {
+            treino_id: response.data.treino_id,
+          });
+        } catch (error) {
+          // Não bloquear a contagem regressiva se houver erro
+          logError("CardRecorde - handleIniciarTreino confirmarInicio", error);
+        }
         setMostrarContagem(true);
       }
     } catch (error) {
@@ -172,9 +181,26 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
     }
   };
 
-  const handleEscolherFormato = (formato) => {
+  const confirmarInicioTreino = async () => {
+    if (!dadosTreino?.treino_id) {
+      return;
+    }
+
+    try {
+      await api.post("/treinos/confirmar-inicio", {
+        treino_id: dadosTreino.treino_id,
+      });
+    } catch (error) {
+      // Não bloquear a contagem regressiva se houver erro
+      logError("CardRecorde - confirmarInicioTreino", error);
+    }
+  };
+
+  const handleEscolherFormato = async (formato) => {
     setFormatoResposta(formato);
     setMostrarModalFormato(false);
+    // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+    await confirmarInicioTreino();
     // Após escolher formato, mostrar contagem regressiva
     setMostrarContagem(true);
   };
@@ -280,17 +306,22 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
         </div>
       </div>
 
-      {posicaoRanking !== null && recorde.operacao && recorde.limite && recorde.sistema && (
-        <div className="card-recorde-posicao-ranking">
-          <span className="card-recorde-posicao-label">Posição no ranking global:</span>
-          <Link
-            to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
-            className="card-recorde-posicao-valor card-recorde-posicao-link"
-          >
-            #{posicaoRanking}
-          </Link>
-        </div>
-      )}
+      <div className="card-recorde-posicao-ranking">
+        <span className="card-recorde-tentativas-texto">
+          Treinos: {recorde.quantidade || 0}
+        </span>
+        {posicaoRanking !== null && recorde.operacao && recorde.limite && recorde.sistema && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span className="card-recorde-posicao-label">Posição global:</span>
+            <Link
+              to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
+              className="card-recorde-posicao-valor card-recorde-posicao-link"
+            >
+              #{posicaoRanking}
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
     </>
   );

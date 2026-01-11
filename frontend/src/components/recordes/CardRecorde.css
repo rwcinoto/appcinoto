@@ -101,6 +101,11 @@
   font-size: 14px;
 }
 
+.card-recorde-tentativas-texto {
+  font-size: 14px;
+  color: #999;
+}
+
 .card-recorde-info-linha {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

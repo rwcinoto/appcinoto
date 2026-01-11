@@ -27,6 +27,7 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
               <th className="coluna-nome-header">Nome</th>
               <th className="coluna-pontuacao-header">Pontuação</th>
               <th className="coluna-data-header">Data</th>
+              <th className="coluna-tentativas-header">Treinos</th>
             </tr>
           </thead>
           <tbody>
@@ -108,6 +109,9 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
                     month: "2-digit",
                     year: "2-digit",
                   })}
+                </div>
+                <div className="card-ranking-tentativas-mobile">
+                  {item.quantidade || 0} {item.quantidade === 1 ? "treino" : "treinos"}
                 </div>
               </div>
             </div>

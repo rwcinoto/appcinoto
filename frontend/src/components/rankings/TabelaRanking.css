@@ -20,6 +20,7 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
+  table-layout: fixed;
 }
 
 .tabela-ranking-table thead {
@@ -50,12 +51,17 @@
 }
 
 .coluna-pontuacao-header {
-  text-align: center;
-  width: 240px;
+  text-align: center !important;
+  width: 220px;
 }
 
 .coluna-data-header {
-  text-align: center;
+  text-align: center !important;
+  width: 120px;
+}
+
+.coluna-tentativas-header {
+  text-align: center !important;
   width: 120px;
 }
 
@@ -195,6 +201,18 @@
   font-family: "Courier New", monospace;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.card-ranking-tentativas-mobile {
+  font-size: 0.9rem;
+  color: #666;
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
 }
 
 /* Responsivo: mostrar cards no mobile, tabela no desktop */

@@ -218,6 +218,15 @@ const NovoTreino = () => {
       } else {
         // Sistema não requer escolha, ir direto para contagem
         setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+        // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+        try {
+          await api.post("/treinos/confirmar-inicio", {
+            treino_id: response.data.treino_id,
+          });
+        } catch (error) {
+          // Não bloquear a contagem regressiva se houver erro
+          logError("NovoTreino - handleIniciarTreino confirmarInicio", error);
+        }
         setMostrarContagem(true);
       }
     } catch (error) {
@@ -227,9 +236,26 @@ const NovoTreino = () => {
     }
   };
 
-  const handleEscolherFormato = (formato) => {
+  const confirmarInicioTreino = async () => {
+    if (!dadosTreino?.treino_id) {
+      return;
+    }
+
+    try {
+      await api.post("/treinos/confirmar-inicio", {
+        treino_id: dadosTreino.treino_id,
+      });
+    } catch (error) {
+      // Não bloquear a contagem regressiva se houver erro
+      logError("NovoTreino - confirmarInicioTreino", error);
+    }
+  };
+
+  const handleEscolherFormato = async (formato) => {
     setFormatoResposta(formato);
     setMostrarModalFormato(false);
+    // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+    await confirmarInicioTreino();
     // Após escolher formato, mostrar contagem regressiva
     setMostrarContagem(true);
   };

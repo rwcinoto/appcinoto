@@ -92,6 +92,7 @@
   padding: 12px;
   text-align: center;
   font-weight: 600;
+  width: 100px;
 }
 
 .posicao-container {
@@ -153,7 +154,7 @@
   padding: 12px;
   text-align: center;
   font-weight: 600;
-  min-width: 240px;
+  width: 220px;
 }
 
 .pontuacao-valor {
@@ -174,9 +175,22 @@
   text-align: center;
   color: #666;
   font-size: 0.9rem;
+  width: 120px;
 }
 
 .data-recorde {
+  font-family: "Courier New", monospace;
+}
+
+.coluna-tentativas {
+  padding: 12px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  width: 120px;
+}
+
+.tentativas-valor {
   font-family: "Courier New", monospace;
 }
 
@@ -207,7 +221,8 @@
   .coluna-posicao,
   .coluna-nome,
   .coluna-pontuacao,
-  .coluna-data {
+  .coluna-data,
+  .coluna-tentativas {
     padding: 8px 4px;
     font-size: 0.9rem;
   }
