@@ -92,23 +92,31 @@ export const formatarNumero = (numero, sistema) => {
     return "";
   }
 
-  // Se não for um número inteiro válido, tentar converter para string
-  if (!Number.isInteger(numero)) {
-    return numero.toString();
-  }
-
   switch (sistema) {
     case "natural":
-      return numero;
+      return numero.toString();
     case "inteiro":
-      return numero;
+      return numero.toString();
     case "decimal":
-      return parseFloat(numero).toFixed(2);
+      // Formatar com vírgula como separador decimal (padrão brasileiro)
+      return parseFloat(numero).toFixed(2).replace(".", ",");
     case "romano":
+      // Para romano, precisa ser inteiro
+      if (!Number.isInteger(numero) || numero < 1 || numero > 3999) {
+        return numero.toString();
+      }
       return paraRomano(numero);
     case "binario":
+      // Para binário, precisa ser inteiro
+      if (!Number.isInteger(numero) || numero < 0 || numero > 2047) {
+        return numero.toString();
+      }
       return paraBinario(numero);
     case "hexadecimal":
+      // Para hexadecimal, precisa ser inteiro
+      if (!Number.isInteger(numero) || numero < 0) {
+        return numero.toString();
+      }
       return paraHexadecimal(numero);
     default:
       return numero.toString();

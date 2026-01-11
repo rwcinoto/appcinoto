@@ -252,32 +252,38 @@ class TreinoService {
         
         parcela1 = this.numeroAleatorio(minParcela1Mult, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
+        // Para multiplicação com sistema decimal: parcela1 sempre é inteira (natural)
         if (sistema === "decimal") {
-          // Para multiplicação: adicionar apenas 1 casa decimal (0.0 a 0.9)
-          const casaDecimal = this.numeroAleatorio(0, 9);
-          parcela1 = Math.round((parcela1 + casaDecimal / 10) * 10) / 10;
+          // Manter parcela1 como inteira (sem casas decimais)
+          parcela1 = Math.round(parcela1);
         } else {
           parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
         }
         
         parcela2 = this.numeroAleatorio(minParcela2Mult, max_parcela_2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
+        const temParcela3 = min_parcela_3 !== null && max_parcela_3 !== null;
         if (sistema === "decimal") {
-          // Para multiplicação: adicionar apenas 1 casa decimal (0.0 a 0.9)
-          const casaDecimal = this.numeroAleatorio(0, 9);
-          parcela2 = Math.round((parcela2 + casaDecimal / 10) * 10) / 10;
+          if (temParcela3) {
+            // Se há 3 parcelas: parcela2 é inteira (natural)
+            parcela2 = Math.round(parcela2);
+          } else {
+            // Se há 2 parcelas: parcela2 tem 2 casas decimais
+            const casasDecimais = this.numeroAleatorio(1, 99) / 100;
+            parcela2 = Math.round((parcela2 + casasDecimais) * 100) / 100;
+          }
         } else {
           parcela2 = this.adicionarCasasDecimais(parcela2, sistema);
         }
 
-        if (min_parcela_3 !== null && max_parcela_3 !== null) {
+        if (temParcela3) {
           const minParcela3Mult = sistema === "romano" ? Math.max(1, min_parcela_3) : min_parcela_3;
           parcela3 = this.numeroAleatorio(minParcela3Mult, max_parcela_3);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
           if (sistema === "decimal") {
-            // Para multiplicação: adicionar apenas 1 casa decimal (0.0 a 0.9)
-            const casaDecimal = this.numeroAleatorio(0, 9);
-            parcela3 = Math.round((parcela3 + casaDecimal / 10) * 10) / 10;
+            // Para multiplicação com 3 parcelas: parcela3 tem 2 casas decimais
+            const casasDecimais = this.numeroAleatorio(1, 99) / 100;
+            parcela3 = Math.round((parcela3 + casasDecimais) * 100) / 100;
           } else {
             parcela3 = this.adicionarCasasDecimais(parcela3, sistema);
           }

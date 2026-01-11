@@ -268,6 +268,10 @@
             text-decoration: none;
             color: white;
             transition: background 0.3s ease;
+            max-width: 100%;
+            box-sizing: border-box;
+            word-break: break-all;
+            overflow-wrap: break-word;
         }
 
         .cta-box .email:hover {
@@ -305,6 +309,60 @@
             color: #667eea;
             font-weight: bold;
             font-size: 1.5em;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .level-card h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .level-content {
+            font-size: 0.95em;
+        }
+
+        .level-info {
+            margin-bottom: 15px;
+        }
+
+        .level-info strong {
+            color: #764ba2;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .level-info ul {
+            margin-left: 20px;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .level-info li {
+            font-size: 0.95em;
+            margin-bottom: 5px;
         }
 
         footer {
@@ -347,6 +405,31 @@
             .image-placeholder {
                 height: 250px;
             }
+
+            .levels-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .level-card {
+                padding: 20px;
+            }
+
+            .level-card h3 {
+                font-size: 1.3em;
+            }
+
+            .cta-box {
+                padding: 30px 20px;
+            }
+
+            .cta-box .email {
+                font-size: 1.1em;
+                padding: 12px 20px;
+                display: block;
+                width: 100%;
+                text-align: center;
+                word-break: break-all;
+            }
         }
     </style>
 </head>
@@ -363,9 +446,6 @@
                     Com o sistema funcionando, percebi que outros interessados também poderiam usar.
                     É possível praticar diferentes operações matemáticas e comparar com o resultado de outros usuários, vendo assim onde pode melhorar.
                 </p>
-                <div class="access-button-container">
-                    <a href="https://numix.cinoto.com.br" class="access-button" target="_blank">Acessar o sistema</a>
-                </div>
             </section>
 
             <section class="section">
@@ -434,35 +514,149 @@
             </section>
 
             <section class="section">
-                <h2>Tipos de operações</h2>
+                <h2>Níveis de dificuldade</h2>
                 <p>
-                    No Numix vai encontrar as operações matemáticas básicas (soma, subtração, multiplicação e divisão) com números naturais.
-                    Em futuras atualizações pretendo inlcuir:
+                    Cada nível inclui todas as funcionalidades dos níveis anteriores, além de novas operações e recursos.
+                    Todo nível possui um modo aleatório com todas as operações até aquele nível.
                 </p>
-                <ul>
-                    <li><strong>Nova operação:</strong> raiz quadrada</li>
-                    <li><strong>Mais conjuntos numéricos:</strong> inteiros, racionais e complexo</li>
-                    <li><strong>Outros sistemas numéricos:</strong> binário, hexadecimal e romano</li>
-                    <li><strong>Maiores limites de tempo:</strong> até 10 minutos</li>
-                </ul>
-                <p>
-                    Cada operação oferece um nível diferente de desafio, permitindo que você 
-                    mantenha o treino sempre interessante.
-                </p>
+                
+                <div class="levels-grid">
+                    <div class="level-card">
+                        <h3>Nível natural</h3>
+                        <div class="level-content">
+                            <div class="level-info">
+                                <strong>Sistemas numéricos:</strong> Números naturais
+                            </div>
+                            <div class="level-info">
+                                <strong>Limite de tempo:</strong> 1 minuto
+                            </div>
+                            <div class="level-info">
+                                <strong>Conjuntos:</strong> Criar até 2, participar de 3
+                            </div>
+                            <div class="level-info">
+                                <strong>Operações:</strong>
+                                <ul>
+                                    <li>Soma de duas parcelas com até 3 algarismos</li>
+                                    <li>Subtração de duas parcelas com até 3 algarismos</li>
+                                    <li>Multiplicação de duas parcelas com até 3 algarismos</li>
+                                    <li>Multiplicação de 1 algarismo por até 2 algarismos</li>
+                                    <li>Divisão de 2 algarismos por 1 algarismo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="level-card">
+                        <h3>Nível inteiro</h3>
+                        <div class="level-content">
+                            <div class="level-info">
+                                <strong>Sistemas numéricos:</strong> Números inteiros e números romanos
+                            </div>
+                            <div class="level-info">
+                                <strong>Limite de tempo:</strong> 2 ou 3 minutos
+                            </div>
+                            <div class="level-info">
+                                <strong>Conjuntos:</strong> Criar até 4, participar de 6
+                            </div>
+                            <div class="level-info">
+                                <strong>Operações:</strong>
+                                <ul>
+                                    <li>Multiplicação de 1 algarismo por 3 algarismos</li>
+                                    <li>Divisão de 3 algarismos por 1 algarismo</li>
+                                    <li>Raiz quadrada de até 2 algarismos</li>
+                                    <li>Conversão de números romanos em naturais (até 2 algarismos)</li>
+                                    <li>Tabuadas do 0 ao 9</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="level-card">
+                        <h3>Nível decimal</h3>
+                        <div class="level-content">
+                            <div class="level-info">
+                                <strong>Sistemas numéricos:</strong> Números decimais (duas casas)
+                            </div>
+                            <div class="level-info">
+                                <strong>Limite de tempo:</strong> 4 ou 5 minutos
+                            </div>
+                            <div class="level-info">
+                                <strong>Conjuntos:</strong> Criar até 8, participar de 12
+                            </div>
+                            <div class="level-info">
+                                <strong>Operações:</strong>
+                                <ul>
+                                    <li>Multiplicação 2 algarismos por 2 algarismos</li>
+                                    <li>Divisão de 3 algarismos por 2 algarismos</li>
+                                    <li>Raiz quadrada de 3 algarismos</li>
+                                    <li>Soma, subtração e multiplicação com 3 parcelas de 1 algarismo</li>
+                                    <li>Conversão de números romanos em naturais (até 3 algarismos)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="level-card">
+                        <h3>Nível binário</h3>
+                        <div class="level-content">
+                            <div class="level-info">
+                                <strong>Sistemas numéricos:</strong> Números binários
+                            </div>
+                            <div class="level-info">
+                                <strong>Limite de tempo:</strong> 6 ou 7 minutos
+                            </div>
+                            <div class="level-info">
+                                <strong>Conjuntos:</strong> Criar até 16, participar de 24
+                            </div>
+                            <div class="level-info">
+                                <strong>Operações:</strong>
+                                <ul>
+                                    <li>Raiz quadrada de 4 algarismos</li>
+                                    <li>Soma com 3 parcelas de 2 algarismos</li>
+                                    <li>Subtração com 3 parcelas de 2 algarismos</li>
+                                    <li>Multiplicação com 3 parcelas de 2 algarismos</li>
+                                    <li>Conversão de números romanos ou binários em naturais (até 4 algarismos)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="level-card">
+                        <h3>Nível hexadecimal</h3>
+                        <div class="level-content">
+                            <div class="level-info">
+                                <strong>Sistemas numéricos:</strong> Números hexadecimais
+                            </div>
+                            <div class="level-info">
+                                <strong>Limite de tempo:</strong> 8, 9 ou 10 minutos
+                            </div>
+                            <div class="level-info">
+                                <strong>Conjuntos:</strong> Criar até 32, participar de 48
+                            </div>
+                            <div class="level-info">
+                                <strong>Operações:</strong>
+                                <ul>
+                                    <li>Soma com 3 parcelas de 3 algarismos</li>
+                                    <li>Subtração com 3 parcelas de 3 algarismos</li>
+                                    <li>Multiplicação com 3 parcelas de 3 algarismos</li>
+                                    <li>Conversão de números romanos, binários ou hexadecimais em naturais (até 4 algarismos)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section class="section">
                 <div class="benefits">
-                    <h3>Benefícios de praticar cálculos matemáticos</h3>
+                    <h3>Benefícios do Numix</h3>
                     <ul>
-                        <li>Melhora a agilidade mental e o raciocínio rápido</li>
-                        <li>Desenvolve a capacidade de concentração e foco</li>
-                        <li>Fortalece a memória de trabalho</li>
+                        <li>Melhora a agilidade mental</li>
+                        <li>Desenvolve a capacidade de concentração</li>
                         <li>Aumenta a confiança em situações que exigem cálculos rápidos</li>
                         <li>Pode ajudar no desempenho acadêmico e profissional</li>
                         <li>Mantém o cérebro ativo e saudável</li>
                         <li>Proporciona sensação de realização ao superar seus próprios recordes</li>
-                        <li>Cria uma rotina de aprendizado contínuo</li>
                     </ul>
                 </div>
             </section>

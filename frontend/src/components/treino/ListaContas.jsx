@@ -154,6 +154,10 @@ const ListaContas = ({
 
   // Handler de mudança no input
   const handleChange = (conta, index, e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
     const novoValor = e.target.value;
 
     // Filtrar entrada conforme o sistema de entrada (pode ser natural mesmo se sistema for romano/hex)
@@ -172,16 +176,15 @@ const ListaContas = ({
       }
     } else if (sistemaEntrada === "decimal") {
       // Números decimais: permitir números, ponto ou vírgula (apenas um)
-      // Converter vírgula para ponto para facilitar validação
-      let temp = novoValor.replace(",", ".");
-      // Permitir apenas números e um ponto decimal
-      const partes = temp.split(".");
+      // Converter ponto para vírgula (padrão brasileiro) - aceitar ambos na entrada
+      let temp = novoValor.replace(".", ",");
+      // Se houver mais de uma vírgula, manter apenas a primeira
+      const partes = temp.split(",");
       if (partes.length > 2) {
-        // Mais de um ponto, manter apenas o primeiro
-        temp = partes[0] + "." + partes.slice(1).join("");
+        temp = partes[0] + "," + partes.slice(1).join("");
       }
-      // Remover caracteres inválidos (manter apenas números e ponto)
-      temp = temp.replace(/[^0-9.]/g, "");
+      // Remover caracteres inválidos (manter apenas números e vírgula)
+      temp = temp.replace(/[^0-9,]/g, "");
       valorFiltrado = temp;
     } else if (sistemaEntrada === "romano") {
       valorFiltrado = novoValor.toUpperCase().replace(/[^IVXLCDM]/g, "");
@@ -216,117 +219,193 @@ const ListaContas = ({
       if (sistemaEntrada === "natural" || sistemaEntrada === "inteiro") {
         respostaEsperadaFormatada = resultadoEsperado.toString();
         const respostaNormalizada = valorFiltrado.trim();
-        const respostaNumero = parseInt(respostaNormalizada, 10);
 
-        if (!isNaN(respostaNumero)) {
-          // Calcular tamanho do valor absoluto (sem contar o sinal de menos)
-          const tamanhoAbsolutoEsperado = Math.abs(resultadoEsperado).toString().length;
-          const tamanhoAbsolutoResposta = Math.abs(respostaNumero).toString().length;
-
-          // Validar quando o tamanho do valor absoluto for igual ao esperado
-          if (tamanhoAbsolutoResposta === tamanhoAbsolutoEsperado) {
-            const correto = respostaNumero === resultadoEsperado;
-            if (!correto) {
-              detectouErro = true;
-            } else {
-              // Atualizar estado visual - acertou
-              estadoValidacaoRef.current[index] = null;
-              e.target.classList.remove("errado");
-              contaComErroRef.current = null; // Limpar estado de erro ao acertar
-            }
-          } else if (tamanhoAbsolutoResposta < tamanhoAbsolutoEsperado) {
-            // Ainda digitando - manter vermelho se já teve erro, senão limpar
-            estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+        // Verificar se resultado é negativo
+        const resultadoNegativo = resultadoEsperado < 0;
+        const esperado = String(resultadoEsperado);
+        
+        // Se campo está vazio
+        if (respostaNormalizada === "") {
+          if (contaTeveErro) {
+            e.target.classList.add("errado");
+          } else {
+            e.target.classList.remove("errado");
+          }
+        }
+        // Se usuário digitou apenas "-"
+        else if (respostaNormalizada === "-") {
+          // Se resultado é positivo, erro imediato (digitou "-" quando não deveria)
+          if (!resultadoNegativo) {
+            detectouErro = true;
+          } else {
+            // Resultado é negativo, permitir "-" (ainda está digitando)
             if (contaTeveErro) {
               e.target.classList.add("errado");
             } else {
               e.target.classList.remove("errado");
             }
-          } else {
-            // Tamanho maior que esperado, já está errado
-            detectouErro = true;
-          }
-        } else if (valorFiltrado !== "" && valorFiltrado !== "-") {
-          // Resposta inválida (não é número), manter estado anterior
-          if (contaTeveErro) {
-            e.target.classList.add("errado");
           }
         } else {
-          // Campo vazio ou apenas "-", manter vermelho se já teve erro
-          if (contaTeveErro) {
-            e.target.classList.add("errado");
-          } else {
-            e.target.classList.remove("errado");
+          // Validar caractere por caractere - qualquer caractere errado detecta erro imediato
+          const tamanhoDigitado = respostaNormalizada.length;
+          const tamanhoEsperado = esperado.length;
+          
+          // Se resultado é negativo e usuário não digitou "-" no início, erro
+          if (resultadoNegativo && !respostaNormalizada.startsWith("-")) {
+            detectouErro = true;
+          }
+          // Se resultado é positivo e usuário digitou "-", erro imediato
+          else if (!resultadoNegativo && respostaNormalizada.startsWith("-")) {
+            detectouErro = true;
+          }
+          // Se digitou mais caracteres que o esperado, erro
+          else if (tamanhoDigitado > tamanhoEsperado) {
+            detectouErro = true;
+          }
+          else {
+            // Comparar caractere por caractere - qualquer diferença é erro imediato
+            let caractereErrado = false;
+            for (let i = 0; i < tamanhoDigitado; i++) {
+              if (respostaNormalizada.charAt(i) !== esperado.charAt(i)) {
+                caractereErrado = true;
+                break;
+              }
+            }
+            
+            if (caractereErrado) {
+              detectouErro = true;
+            } else if (tamanhoDigitado === tamanhoEsperado) {
+              // Tamanho igual e todos caracteres corretos = acertou
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
+            } else {
+              // Ainda está digitando e tudo certo até agora
+              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              if (contaTeveErro) {
+                e.target.classList.add("errado");
+              } else {
+                e.target.classList.remove("errado");
+              }
+            }
           }
         }
       } else if (sistemaEntrada === "decimal") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
         const respostaNormalizada = valorFiltrado.trim();
-        const respostaComPonto = respostaNormalizada.replace(",", ".");
-        const respostaNumero = parseFloat(respostaComPonto);
 
-        if (!isNaN(respostaNumero) && respostaNormalizada.length > 0) {
-          // Para decimal, validar quando tiver pelo menos o tamanho mínimo esperado
-          // Comparar com tolerância para erros de ponto flutuante
-          const diferenca = Math.abs(respostaNumero - resultadoEsperado);
-          const correto = diferenca < 0.001; // Tolerância de 0.001
-          
-          // Calcular tamanho esperado (número de dígitos significativos)
-          const tamanhoEsperado = respostaEsperadaFormatada.length;
-          const tamanhoAtual = respostaNormalizada.length;
-          
-          // Se já digitou o suficiente para validar (tem pelo menos o tamanho esperado)
-          if (tamanhoAtual >= tamanhoEsperado) {
-            if (correto) {
-              estadoValidacaoRef.current[index] = null;
-              e.target.classList.remove("errado");
-              contaComErroRef.current = null;
-            } else {
-              detectouErro = true;
-            }
-          } else {
-            // Ainda está digitando - manter vermelho se já teve erro
-            estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
-            if (contaTeveErro) {
-              e.target.classList.add("errado");
-            } else {
-              e.target.classList.remove("errado");
-            }
-          }
-        } else if (respostaNormalizada !== "" && respostaNormalizada !== "." && respostaNormalizada !== ",") {
-          // Resposta inválida (não é número), manter estado anterior
-          if (contaTeveErro) {
-            e.target.classList.add("errado");
-          }
-        } else {
-          // Campo vazio ou apenas ponto/vírgula, manter vermelho se já teve erro
+        // Se campo está vazio, limpar estado
+        if (respostaNormalizada === "") {
           if (contaTeveErro) {
             e.target.classList.add("errado");
           } else {
             e.target.classList.remove("errado");
           }
         }
-      } else if (sistemaEntrada === "romano") {
-        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
-        const tamanhoEsperado = respostaEsperadaFormatada.length;
-        const respostaNormalizada = valorFiltrado.trim().toUpperCase();
-
-        if (respostaNormalizada.length === tamanhoEsperado) {
-          const correto =
-            respostaNormalizada === respostaEsperadaFormatada.toUpperCase();
-          if (!correto) {
+        // Se usuário digitou apenas vírgula
+        else if (respostaNormalizada === ",") {
+          // Se a resposta esperada não começa com vírgula (começa com número), erro imediato
+          // respostaEsperadaFormatada sempre começa com número (ex: "5,34"), nunca com vírgula
+          if (!respostaEsperadaFormatada.startsWith(",")) {
             detectouErro = true;
           } else {
-            estadoValidacaoRef.current[index] = null;
-            e.target.classList.remove("errado");
-            contaComErroRef.current = null;
+            // Caso raro: resposta esperada começa com vírgula (permitir)
+            if (contaTeveErro) {
+              e.target.classList.add("errado");
+            } else {
+              e.target.classList.remove("errado");
+            }
           }
-        } else if (respostaNormalizada.length < tamanhoEsperado) {
-          estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+        } else {
+          // Comparar caractere por caractere (usando vírgula como padrão brasileiro)
+          // respostaEsperadaFormatada já vem com vírgula da função formatarNumero
+          const tamanhoDigitado = respostaNormalizada.length;
+          const tamanhoEsperado = respostaEsperadaFormatada.length;
+          
+          if (tamanhoDigitado > tamanhoEsperado) {
+            detectouErro = true;
+          } else {
+            let caractereErrado = false;
+            for (let i = 0; i < tamanhoDigitado; i++) {
+              if (respostaNormalizada.charAt(i) !== respostaEsperadaFormatada.charAt(i)) {
+                caractereErrado = true;
+                break;
+              }
+            }
+            
+            if (caractereErrado) {
+              detectouErro = true;
+            } else if (tamanhoDigitado === tamanhoEsperado) {
+              // Validar valor numérico para confirmar (convertendo vírgula para ponto para parseFloat)
+              const respostaComPonto = respostaNormalizada.replace(",", ".");
+              const respostaNumero = parseFloat(respostaComPonto);
+              if (!isNaN(respostaNumero)) {
+                const diferenca = Math.abs(respostaNumero - resultadoEsperado);
+                if (diferenca < 0.001) {
+                  // Acertou
+                  estadoValidacaoRef.current[index] = null;
+                  e.target.classList.remove("errado");
+                  contaComErroRef.current = null;
+                } else {
+                  detectouErro = true;
+                }
+              } else {
+                detectouErro = true;
+              }
+            } else {
+              // Ainda digitando
+              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              if (contaTeveErro) {
+                e.target.classList.add("errado");
+              } else {
+                e.target.classList.remove("errado");
+              }
+            }
+          }
+        }
+      } else if (sistemaEntrada === "romano") {
+        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
+        const esperadoUpper = respostaEsperadaFormatada.toUpperCase();
+        const respostaNormalizada = valorFiltrado.trim().toUpperCase();
+
+        if (respostaNormalizada === "") {
           if (contaTeveErro) {
             e.target.classList.add("errado");
           } else {
             e.target.classList.remove("errado");
+          }
+        } else {
+          // Comparar caractere por caractere
+          const tamanhoDigitado = respostaNormalizada.length;
+          const tamanhoEsperado = esperadoUpper.length;
+          
+          if (tamanhoDigitado > tamanhoEsperado) {
+            detectouErro = true;
+          } else {
+            let caractereErrado = false;
+            for (let i = 0; i < tamanhoDigitado; i++) {
+              if (respostaNormalizada.charAt(i) !== esperadoUpper.charAt(i)) {
+                caractereErrado = true;
+                break;
+              }
+            }
+            
+            if (caractereErrado) {
+              detectouErro = true;
+            } else if (tamanhoDigitado === tamanhoEsperado) {
+              // Acertou
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
+            } else {
+              // Ainda digitando
+              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              if (contaTeveErro) {
+                e.target.classList.add("errado");
+              } else {
+                e.target.classList.remove("errado");
+              }
+            }
           }
         }
       } else if (sistemaEntrada === "binario") {
@@ -334,28 +413,46 @@ const ListaContas = ({
           resultadoEsperado,
           "binario"
         );
-        const tamanhoEsperado = respostaEsperadaFormatada.length;
         const respostaNormalizada = valorFiltrado.trim();
 
-        if (respostaNormalizada.length === tamanhoEsperado) {
-          if (/^[01]+$/.test(respostaNormalizada)) {
-            const correto = respostaNormalizada === respostaEsperadaFormatada;
-            if (!correto) {
-              detectouErro = true;
-            } else {
-              estadoValidacaoRef.current[index] = null;
-              e.target.classList.remove("errado");
-              contaComErroRef.current = null;
-            }
-          } else {
-            detectouErro = true;
-          }
-        } else if (respostaNormalizada.length < tamanhoEsperado) {
-          estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+        if (respostaNormalizada === "") {
           if (contaTeveErro) {
             e.target.classList.add("errado");
           } else {
             e.target.classList.remove("errado");
+          }
+        } else {
+          // Comparar caractere por caractere
+          const tamanhoDigitado = respostaNormalizada.length;
+          const tamanhoEsperado = respostaEsperadaFormatada.length;
+          
+          if (tamanhoDigitado > tamanhoEsperado) {
+            detectouErro = true;
+          } else {
+            let caractereErrado = false;
+            for (let i = 0; i < tamanhoDigitado; i++) {
+              if (respostaNormalizada.charAt(i) !== respostaEsperadaFormatada.charAt(i)) {
+                caractereErrado = true;
+                break;
+              }
+            }
+            
+            if (caractereErrado) {
+              detectouErro = true;
+            } else if (tamanhoDigitado === tamanhoEsperado) {
+              // Acertou
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
+            } else {
+              // Ainda digitando
+              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              if (contaTeveErro) {
+                e.target.classList.add("errado");
+              } else {
+                e.target.classList.remove("errado");
+              }
+            }
           }
         }
       } else if (sistemaEntrada === "hexadecimal") {
@@ -363,28 +460,47 @@ const ListaContas = ({
           resultadoEsperado,
           "hexadecimal"
         );
-        const tamanhoEsperado = respostaEsperadaFormatada.length;
+        const esperadoUpper = respostaEsperadaFormatada.toUpperCase();
         const respostaNormalizada = valorFiltrado.trim().toUpperCase();
 
-        if (respostaNormalizada.length === tamanhoEsperado) {
-          if (/^[0-9A-F]+$/.test(respostaNormalizada)) {
-            const correto = respostaNormalizada === respostaEsperadaFormatada.toUpperCase();
-            if (!correto) {
-              detectouErro = true;
-            } else {
-              estadoValidacaoRef.current[index] = null;
-              e.target.classList.remove("errado");
-              contaComErroRef.current = null;
-            }
-          } else {
-            detectouErro = true;
-          }
-        } else if (respostaNormalizada.length < tamanhoEsperado) {
-          estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+        if (respostaNormalizada === "") {
           if (contaTeveErro) {
             e.target.classList.add("errado");
           } else {
             e.target.classList.remove("errado");
+          }
+        } else {
+          // Comparar caractere por caractere
+          const tamanhoDigitado = respostaNormalizada.length;
+          const tamanhoEsperado = esperadoUpper.length;
+          
+          if (tamanhoDigitado > tamanhoEsperado) {
+            detectouErro = true;
+          } else {
+            let caractereErrado = false;
+            for (let i = 0; i < tamanhoDigitado; i++) {
+              if (respostaNormalizada.charAt(i) !== esperadoUpper.charAt(i)) {
+                caractereErrado = true;
+                break;
+              }
+            }
+            
+            if (caractereErrado) {
+              detectouErro = true;
+            } else if (tamanhoDigitado === tamanhoEsperado) {
+              // Acertou
+              estadoValidacaoRef.current[index] = null;
+              e.target.classList.remove("errado");
+              contaComErroRef.current = null;
+            } else {
+              // Ainda digitando
+              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              if (contaTeveErro) {
+                e.target.classList.add("errado");
+              } else {
+                e.target.classList.remove("errado");
+              }
+            }
           }
         }
       }
@@ -453,6 +569,10 @@ const ListaContas = ({
 
   // Handler de tecla pressionada
   const handleKeyDown = (e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
     if (e.key === "Enter") {
       e.preventDefault();
     }
@@ -478,6 +598,7 @@ const ListaContas = ({
           // Para conversão, ajustar formato de parcela1 baseado em formatoResposta
           // Se formato_resposta = "natural": mostrar número no sistema escolhido
           // Se formato_resposta = "sistema": mostrar número em natural
+          // Para multiplicação com sistema decimal: parcela1 sempre é natural (sem vírgula)
           let parcela1Formatada;
           if (conta.tipo === "conversao") {
             if (formatoResposta === "natural") {
@@ -487,6 +608,10 @@ const ListaContas = ({
               // Mostrar número em natural, usuário responde no sistema escolhido
               parcela1Formatada = formatarNumero(conta.parcela1, "natural");
             }
+          } else if (conta.tipo === "multiplicacao" && sistema === "decimal") {
+            // Para multiplicação com sistema decimal: parcela1 é natural (sem vírgula)
+            // O backend já envia a parcela1 como inteira
+            parcela1Formatada = conta.parcela1.toString();
           } else {
             parcela1Formatada = formatarNumero(conta.parcela1, sistema);
           }
@@ -499,18 +624,47 @@ const ListaContas = ({
             }
             return formatarNumero(valor, sistema);
           };
+          
+          // Para multiplicação com sistema decimal:
+          // - Se 2 parcelas: primeira é natural, segunda é decimal
+          // - Se 3 parcelas: primeira e segunda são naturais, terceira é decimal
+          const formatarParcelaMultiplicacao = (valor, sistema, tipo, numeroParcela, temParcela3) => {
+            if (tipo === "multiplicacao" && sistema === "decimal") {
+              if (temParcela3) {
+                // 3 parcelas: parcela1 e parcela2 são naturais, parcela3 é decimal
+                // O backend já envia parcela1 e parcela2 como inteiras
+                if (numeroParcela === 1 || numeroParcela === 2) {
+                  return valor.toString(); // Natural (sem vírgula)
+                } else if (numeroParcela === 3) {
+                  return formatarNumero(valor, "decimal"); // Decimal (com vírgula)
+                }
+              } else {
+                // 2 parcelas: parcela1 é natural, parcela2 é decimal
+                // O backend já envia parcela1 como inteira
+                if (numeroParcela === 1) {
+                  return valor.toString(); // Natural (sem vírgula)
+                } else if (numeroParcela === 2) {
+                  return formatarNumero(valor, "decimal"); // Decimal (com vírgula)
+                }
+              }
+            }
+            // Para outros casos, usar formatação normal (divisão ou outros sistemas)
+            return formatarParcelaDivisao(valor, sistema, tipo);
+          };
+          
+          const temParcela3 = conta.parcela3 !== null && conta.parcela3 !== undefined;
           const parcela2Formatada =
             conta.parcela2 !== null && conta.parcela2 !== undefined
               ? formatarParcelaComParenteses(
                   conta.parcela2,
-                  formatarParcelaDivisao(conta.parcela2, sistema, conta.tipo)
+                  formatarParcelaMultiplicacao(conta.parcela2, sistema, conta.tipo, 2, temParcela3)
                 )
               : "";
           const parcela3Formatada =
             conta.parcela3 !== null && conta.parcela3 !== undefined
               ? formatarParcelaComParenteses(
                   conta.parcela3,
-                  formatarParcelaDivisao(conta.parcela3, sistema, conta.tipo)
+                  formatarParcelaMultiplicacao(conta.parcela3, sistema, conta.tipo, 3, temParcela3)
                 )
               : null;
           const simbolo = obterSimboloOperacao(conta.tipo);

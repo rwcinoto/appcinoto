@@ -33,160 +33,188 @@ const InputResultado = ({
     }
   }, [contaKey]);
 
-  // Validar resposta em tempo real
+  // Validar resposta em tempo real, caractere por caractere
   const validarResposta = (respostaDigitada) => {
-    if (!conta || !respostaDigitada) {
+    if (!conta) {
+      setEstadoValidacao(null);
+      return false;
+    }
+    
+    // Se resposta digitada está vazia, ainda não validar
+    if (!respostaDigitada || respostaDigitada.length === 0) {
       setEstadoValidacao(null);
       return false;
     }
 
-    const resultadoEsperado = conta.resultado;
+    const resultadoEsperado = Number(conta.resultado);
     let respostaEsperadaFormatada;
-    let tamanhoEsperado = null;
 
     try {
       // Formatar resultado esperado conforme sistema
       if (sistema === "natural" || sistema === "inteiro") {
-        respostaEsperadaFormatada = resultadoEsperado.toString();
-        tamanhoEsperado = respostaEsperadaFormatada.length;
+        respostaEsperadaFormatada = String(resultadoEsperado);
       } else if (sistema === "decimal") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
-        tamanhoEsperado = respostaEsperadaFormatada.length;
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
-        tamanhoEsperado = respostaEsperadaFormatada.length;
       } else if (sistema === "binario") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
           "binario"
         );
-        tamanhoEsperado = respostaEsperadaFormatada.length;
       } else if (sistema === "hexadecimal") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
           "hexadecimal"
         );
-        tamanhoEsperado = respostaEsperadaFormatada.length;
       } else {
         setEstadoValidacao(null);
         return false;
       }
 
-      // Para números com múltiplos dígitos, validar apenas quando estiver completo
-      const respostaNormalizada = respostaDigitada.trim();
+      const respostaNormalizada = String(respostaDigitada).trim();
+      const esperadoUpper = String(respostaEsperadaFormatada).toUpperCase();
+      const respostaUpper = respostaNormalizada.toUpperCase();
 
+      // Validar caractere por caractere
       if (sistema === "natural" || sistema === "inteiro") {
-        // Para natural e inteiro: validar quando o tamanho do valor absoluto for igual
-        // Calcular tamanho do valor absoluto (sem contar o sinal de menos)
-        const tamanhoAbsolutoEsperado = Math.abs(resultadoEsperado).toString().length;
-        const respostaNumero = parseInt(respostaNormalizada, 10);
+        // Para natural e inteiro: comparar caractere por caractere
+        const esperado = String(respostaEsperadaFormatada);
         
-        if (!isNaN(respostaNumero)) {
-          const tamanhoAbsolutoResposta = Math.abs(respostaNumero).toString().length;
-          
-          // Validar quando o tamanho do valor absoluto for igual ao esperado
-          if (tamanhoAbsolutoResposta === tamanhoAbsolutoEsperado) {
-            const correto = respostaNumero === resultadoEsperado;
-            setEstadoValidacao(correto ? "correto" : "errado");
-
-            if (correto) {
-              return true;
-            }
-          } else if (tamanhoAbsolutoResposta < tamanhoAbsolutoEsperado) {
-            // Ainda está digitando, não validar ainda
-            setEstadoValidacao(null);
-            return false;
-          } else {
-            // Tamanho maior que esperado, já está errado
-            setEstadoValidacao("errado");
+        // Verificar se resultado é negativo
+        const resultadoNegativo = resultadoEsperado < 0;
+        
+        // Se resultado é negativo e usuário não digitou "-" ainda, mas já digitou número, erro
+        if (resultadoNegativo) {
+          if (!respostaNormalizada.startsWith("-") && respostaNormalizada.length > 0) {
+            return "erro";
           }
         } else {
-          // Resposta inválida, não validar ainda
-          setEstadoValidacao(null);
+          // Se resultado é positivo e usuário digitou "-", erro imediato
+          if (respostaNormalizada.startsWith("-")) {
+            return "erro";
+          }
+        }
+        
+        // Se a resposta está vazia, ainda não validar
+        if (respostaNormalizada.length === 0) {
           return false;
         }
+        
+        // Comparar cada caractere digitado com o caractere correspondente da resposta esperada
+        // Exemplo: se resposta esperada é "17" e usuário digitou "2", comparamos "2" com "1" → erro imediato
+        // Exemplo: se resposta esperada é "17" e usuário digitou "1", comparamos "1" com "1" → OK, continua
+        const tamanhoDigitado = respostaNormalizada.length;
+        const tamanhoEsperado = esperado.length;
+        
+        // Se digitou mais caracteres que o esperado, erro
+        if (tamanhoDigitado > tamanhoEsperado) {
+          return "erro";
+        }
+        
+        // Comparar caractere por caractere - qualquer diferença é erro imediato
+        for (let i = 0; i < tamanhoDigitado; i++) {
+          const charDigitado = respostaNormalizada.charAt(i);
+          const charEsperado = esperado.charAt(i);
+          if (charDigitado !== charEsperado) {
+            return "erro";
+          }
+        }
+        
+        // Se chegou aqui, todos os caracteres digitados estão corretos
+        // Se o tamanho é igual, está completo e correto
+        if (tamanhoDigitado === tamanhoEsperado) {
+          return true;
+        }
+        
+        // Ainda está digitando e tudo certo até agora
+        return false;
       } else if (sistema === "decimal") {
-        // Para decimal: validar quando o tamanho for igual (considerando ponto decimal)
-        if (respostaNormalizada.length < tamanhoEsperado) {
-          // Ainda está digitando
-          setEstadoValidacao(null);
-          return false;
-        }
-
-        // Converter vírgula para ponto
-        const respostaComPonto = respostaNormalizada.replace(",", ".");
-        const respostaNumero = parseFloat(respostaComPonto);
+        // Para decimal: usar vírgula como padrão (padrão brasileiro)
+        // respostaEsperadaFormatada já vem com vírgula da função formatarNumero
         
-        if (!isNaN(respostaNumero)) {
-          // Comparar com tolerância para erros de ponto flutuante
-          const diferenca = Math.abs(respostaNumero - resultadoEsperado);
-          const correto = diferenca < 0.001; // Tolerância de 0.001
-          setEstadoValidacao(correto ? "correto" : "errado");
-          
-          if (correto) {
-            return true;
+        // Se está vazio, ainda não validar
+        if (respostaNormalizada.length === 0) {
+          return false;
+        }
+        
+        // Se usuário digitou apenas vírgula
+        if (respostaNormalizada === ",") {
+          // Se a resposta esperada não começa com vírgula (começa com número), erro imediato
+          // respostaEsperadaFormatada sempre começa com número (ex: "5,34"), nunca com vírgula
+          if (!respostaEsperadaFormatada.startsWith(",")) {
+            return "erro";
+          } else {
+            // Caso raro: resposta esperada começa com vírgula (permitir)
+            return false;
           }
-        } else {
-          setEstadoValidacao("errado");
         }
+        
+        // Comparar cada caractere digitado com o caractere correspondente
+        for (let i = 0; i < respostaNormalizada.length; i++) {
+          if (i >= respostaEsperadaFormatada.length || respostaNormalizada[i] !== respostaEsperadaFormatada[i]) {
+            return "erro";
+          }
+        }
+        
+        // Se chegou aqui, todos os caracteres digitados estão corretos
+        // Se o tamanho é igual, validar o valor numérico para confirmar
+        if (respostaNormalizada.length === respostaEsperadaFormatada.length) {
+          // Converter vírgula para ponto para parseFloat
+          const respostaComPonto = respostaNormalizada.replace(",", ".");
+          const respostaNumero = parseFloat(respostaComPonto);
+          if (!isNaN(respostaNumero)) {
+            const diferenca = Math.abs(respostaNumero - resultadoEsperado);
+            const correto = diferenca < 0.001;
+            return correto;
+          }
+          return "erro";
+        }
+        
+        // Ainda está digitando e tudo certo até agora
+        return false;
       } else if (sistema === "romano") {
-        // Para romano: validar apenas quando o tamanho for igual
-        if (respostaNormalizada.length < tamanhoEsperado) {
-          // Ainda está digitando
-          setEstadoValidacao(null);
-          return false;
+        // Para romano: comparar caractere por caractere (case insensitive)
+        for (let i = 0; i < respostaUpper.length; i++) {
+          if (i >= esperadoUpper.length || respostaUpper[i] !== esperadoUpper[i]) {
+            return "erro";
+          }
         }
-
-        const respostaUpper = respostaNormalizada.toUpperCase();
-        const esperadoUpper = respostaEsperadaFormatada.toUpperCase();
-        const correto = respostaUpper === esperadoUpper;
-
-        setEstadoValidacao(correto ? "correto" : "errado");
-
-        if (correto) {
+        
+        // Se chegou aqui e o tamanho é igual, está correto
+        if (respostaUpper.length === esperadoUpper.length) {
           return true;
         }
+        
+        return false;
       } else if (sistema === "binario") {
-        // Para binário: validar apenas quando o tamanho for igual
-        if (respostaNormalizada.length < tamanhoEsperado) {
-          // Ainda está digitando
-          setEstadoValidacao(null);
-          return false;
+        // Para binário: comparar caractere por caractere
+        for (let i = 0; i < respostaNormalizada.length; i++) {
+          if (i >= respostaEsperadaFormatada.length || respostaNormalizada[i] !== respostaEsperadaFormatada[i]) {
+            return "erro";
+          }
         }
-
-        // Validar formato binário
-        if (!/^[01]+$/.test(respostaNormalizada)) {
-          setEstadoValidacao("errado");
-          return false;
-        }
-
-        const correto = respostaNormalizada === respostaEsperadaFormatada;
-        setEstadoValidacao(correto ? "correto" : "errado");
-
-        if (correto) {
+        
+        // Se chegou aqui e o tamanho é igual, está correto
+        if (respostaNormalizada.length === respostaEsperadaFormatada.length) {
           return true;
         }
+        
+        return false;
       } else if (sistema === "hexadecimal") {
-        // Para hexadecimal: validar apenas quando o tamanho for igual
-        if (respostaNormalizada.length < tamanhoEsperado) {
-          // Ainda está digitando
-          setEstadoValidacao(null);
-          return false;
+        // Para hexadecimal: comparar caractere por caractere (case insensitive)
+        for (let i = 0; i < respostaUpper.length; i++) {
+          if (i >= esperadoUpper.length || respostaUpper[i] !== esperadoUpper[i]) {
+            return "erro";
+          }
         }
-
-        // Validar formato hexadecimal (0-9 e A-F, case insensitive)
-        const respostaUpper = respostaNormalizada.toUpperCase();
-        if (!/^[0-9A-F]+$/.test(respostaUpper)) {
-          setEstadoValidacao("errado");
-          return false;
-        }
-
-        const correto = respostaUpper === respostaEsperadaFormatada.toUpperCase();
-        setEstadoValidacao(correto ? "correto" : "errado");
-
-        if (correto) {
+        
+        // Se chegou aqui e o tamanho é igual, está correto
+        if (respostaUpper.length === esperadoUpper.length) {
           return true;
         }
+        
+        return false;
       }
     } catch (error) {
       console.error("Erro ao validar resposta:", error);
@@ -197,6 +225,10 @@ const InputResultado = ({
   };
 
   const handleChange = (e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
     const novoValor = e.target.value;
 
     // Filtrar entrada conforme o sistema
@@ -217,16 +249,15 @@ const InputResultado = ({
       }
     } else if (sistema === "decimal") {
       // Números decimais: permitir números, ponto ou vírgula (apenas um)
-      // Converter vírgula para ponto para facilitar validação
-      let temp = novoValor.replace(",", ".");
-      // Permitir apenas números e um ponto decimal
-      const partes = temp.split(".");
+      // Converter ponto para vírgula (padrão brasileiro) - aceitar ambos na entrada
+      let temp = novoValor.replace(".", ",");
+      // Se houver mais de uma vírgula, manter apenas a primeira
+      const partes = temp.split(",");
       if (partes.length > 2) {
-        // Mais de um ponto, manter apenas o primeiro
-        temp = partes[0] + "." + partes.slice(1).join("");
+        temp = partes[0] + "," + partes.slice(1).join("");
       }
-      // Remover caracteres inválidos (manter apenas números e ponto)
-      temp = temp.replace(/[^0-9.]/g, "");
+      // Remover caracteres inválidos (manter apenas números e vírgula)
+      temp = temp.replace(/[^0-9,]/g, "");
       valorFiltrado = temp;
     } else if (sistema === "romano") {
       // Apenas letras romanas (I, V, X, L, C, D, M)
@@ -239,12 +270,40 @@ const InputResultado = ({
       valorFiltrado = novoValor.toUpperCase().replace(/[^0-9A-F]/g, "");
     }
 
-    setValor(valorFiltrado);
+    // Validar em tempo real antes de atualizar o valor
+    const resultadoValidacao = validarResposta(valorFiltrado);
 
-    // Validar em tempo real
-    const correto = validarResposta(valorFiltrado);
-
-    if (correto) {
+    if (resultadoValidacao === "erro") {
+      // Erro detectado: marcar como erro e limpar campo
+      setEstadoValidacao("errado");
+      setValor("");
+      
+      // Garantir que o input está limpo no DOM também
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+      
+      // Chamar callback de erro se fornecido
+      if (onErro) {
+        onErro();
+      }
+      
+      // Resetar estado após um breve delay para mostrar feedback visual
+      setTimeout(() => {
+        setEstadoValidacao(null);
+        // Garantir foco após limpar
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 300);
+      
+      // Prevenir que o valor seja atualizado no input
+      return;
+    } else if (resultadoValidacao === true) {
+      // Resposta correta completa: atualizar valor e marcar como correto
+      setValor(valorFiltrado);
+      setEstadoValidacao("correto");
+      
       // Aguardar um pouco antes de chamar o callback (para mostrar feedback visual)
       setTimeout(() => {
         if (onAcerto) {
@@ -254,10 +313,18 @@ const InputResultado = ({
         setValor("");
         setEstadoValidacao(null);
       }, 300);
+    } else {
+      // Ainda digitando e tudo certo até agora: atualizar valor normalmente
+      setValor(valorFiltrado);
+      setEstadoValidacao(null);
     }
   };
 
   const handleKeyDown = (e) => {
+    // Validar que o evento é confiável (não foi disparado por script)
+    if (!e.isTrusted) {
+      return;
+    }
     // Prevenir Enter de submeter o formulário (se estiver dentro de um form)
     if (e.key === "Enter") {
       e.preventDefault();
