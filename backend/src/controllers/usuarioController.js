@@ -73,6 +73,7 @@ class UsuarioController {
 
   /**
    * Obtém apenas o nome do usuário (público para usuários autenticados)
+   * Também retorna o plano para permitir filtrar dados baseados no plano do usuário visualizado
    */
   async obterNome(req, res) {
     try {
@@ -85,7 +86,8 @@ class UsuarioController {
       }
 
       const usuario = await Usuario.findByPk(id, {
-        attributes: ["id", "nome", "email"],
+        attributes: ["id", "nome", "email", "id_plano"],
+        include: [{ association: "plano" }],
       });
 
       if (!usuario) {
@@ -96,6 +98,7 @@ class UsuarioController {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
+        plano: usuario.plano,
       });
     } catch (error) {
       console.error("Erro ao obter nome do usuário:", error);

@@ -31,11 +31,13 @@ const Rankings = () => {
     setErro("");
 
     try {
+      // Usar parâmetro todos=true para carregar todas as operações, limites e sistemas
+      // independentemente do plano do usuário, permitindo ver rankings de coisas que ainda não tem
       const [operacoesRes, limitesRes, sistemasRes, conjuntosRes] =
         await Promise.all([
-          api.get("/operacoes"),
-          api.get("/limites"),
-          api.get("/sistemas"),
+          api.get("/operacoes?todos=true"),
+          api.get("/limites?todos=true"),
+          api.get("/sistemas?todos=true"),
           api.get("/conjuntos").catch(() => ({ data: [] })),
         ]);
 
@@ -306,6 +308,7 @@ const Rankings = () => {
             posicaoUsuario={posicaoUsuario}
             totalParticipantes={totalParticipantes}
             ranking={ranking}
+            isVisitante={usuario?.isVisitante || false}
           />
 
           <TabelaRanking 

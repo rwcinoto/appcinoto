@@ -112,6 +112,11 @@ class RecordeController {
         usuarioIdParaBuscar = usuarioIdQuery;
       }
 
+      // Visitantes (ID 0) não têm recordes salvos no banco, retornar array vazio
+      if (usuarioIdParaBuscar === 0) {
+        return res.json([]);
+      }
+
       // Chamar service para listar recordes
       const recordes = await recordeService.listarRecordes(
         usuarioIdParaBuscar,

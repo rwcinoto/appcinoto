@@ -3,7 +3,7 @@ import CardRecorde from "./CardRecorde";
 import Loading from "../common/Loading";
 import "./ListaRecordes.css";
 
-const ListaRecordes = ({ recordes, loading, usuarioIdVisualizado = null }) => {
+const ListaRecordes = ({ recordes, loading, usuarioIdVisualizado = null, isVisitante = false }) => {
   if (loading) {
     return <Loading text="Carregando recordes..." />;
   }
@@ -13,7 +13,10 @@ const ListaRecordes = ({ recordes, loading, usuarioIdVisualizado = null }) => {
       <div className="lista-recordes-vazia">
         <p>Nenhum recorde encontrado</p>
         <span className="lista-recordes-vazia-descricao">
-          Complete treinos para começar a registrar seus recordes!
+          {isVisitante 
+            ? "Visitantes não têm recordes salvos. Faça login para salvar seus recordes permanentemente!"
+            : "Complete treinos para começar a registrar seus recordes!"
+          }
         </span>
       </div>
     );

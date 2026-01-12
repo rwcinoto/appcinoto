@@ -10,7 +10,8 @@ const Login = () => {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const { login } = useAuth();
+  const [carregandoVisitante, setCarregandoVisitante] = useState(false);
+  const { login, loginVisitante } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,6 +27,21 @@ const Login = () => {
       setErro(getErrorMessage(error));
     } finally {
       setCarregando(false);
+    }
+  };
+
+  const handleLoginVisitante = async () => {
+    setErro("");
+    setCarregandoVisitante(true);
+
+    try {
+      await loginVisitante();
+      navigate("/");
+    } catch (error) {
+      logError("Login - handleLoginVisitante", error);
+      setErro(getErrorMessage(error));
+    } finally {
+      setCarregandoVisitante(false);
     }
   };
 
@@ -69,10 +85,21 @@ const Login = () => {
               onDismiss={() => setErro("")}
             />
           )}
-          <button type="submit" disabled={carregando}>
+          <button type="submit" disabled={carregando || carregandoVisitante}>
             {carregando ? "Entrando..." : "Entrar"}
           </button>
         </form>
+        <div className="login-divisor">
+          <span>ou</span>
+        </div>
+        <button
+          type="button"
+          className="login-botao-visitante"
+          onClick={handleLoginVisitante}
+          disabled={carregando || carregandoVisitante}
+        >
+          {carregandoVisitante ? "Entrando..." : "Entrar como visitante"}
+        </button>
         <div className="login-texto-motivacional">
           <p>
             Faça cálculos de cabeça mais rápido.
