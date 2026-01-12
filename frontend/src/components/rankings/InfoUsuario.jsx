@@ -1,7 +1,7 @@
 import React from "react";
 import "./InfoUsuario.css";
 
-const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking }) => {
+const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking, isVisitante = false }) => {
   // Encontrar dados do usuário no ranking (se estiver no top 100)
   const usuarioNoRanking = ranking?.find(
     (item) => item.posicao === posicaoUsuario
@@ -17,7 +17,10 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking }) => {
         <div className="info-usuario-mensagem">
           <p>Você ainda não tem recorde neste ranking.</p>
           <p className="info-usuario-subtitulo">
-            Complete um treino para aparecer no ranking!
+            {isVisitante 
+              ? "Visitantes não aparecem no ranking. Faça login para participar e aparecer no ranking!"
+              : "Complete um treino para aparecer no ranking!"
+            }
           </p>
         </div>
       </div>

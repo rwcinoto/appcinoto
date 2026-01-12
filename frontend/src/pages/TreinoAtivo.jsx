@@ -11,6 +11,7 @@ import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { getErrorMessage, logError } from "../utils/errorHandler";
+import { verificarESalvarRecordeVisitante } from "../utils/recordesVisitante";
 import api from "../services/api";
 import "./TreinoAtivo.css";
 
@@ -348,10 +349,26 @@ const TreinoAtivo = () => {
       });
 
       // IMPORTANTE: Usar o valor retornado pelo backend como fonte da verdade
-      setResultado({
+      let resultadoFinal = {
         ...response.data,
         total: response.data.total, // Garantir que usamos o valor do backend
-      });
+      };
+
+      // Se for visitante, verificar recordes locais no localStorage
+      if (usuario?.isVisitante && treinoData) {
+        const resultadoRecorde = verificarESalvarRecordeVisitante(
+          treinoData.operacao.id,
+          treinoData.limite.id,
+          treinoData.sistema.id,
+          response.data.total
+        );
+
+        // Sobrescrever informações de recorde com dados locais
+        resultadoFinal.bateuRecorde = resultadoRecorde.bateuRecorde;
+        resultadoFinal.recordeAnterior = resultadoRecorde.recordeAnterior;
+      }
+
+      setResultado(resultadoFinal);
       setMostrarResultado(true);
       
       // Atualizar o estado visual com o valor correto do backend
@@ -360,8 +377,8 @@ const TreinoAtivo = () => {
       // Limpar sessionStorage ao finalizar
       limparTreinoDoStorage();
       
-      // Toast será mostrado se houver recorde
-      if (response.data.bateuRecorde) {
+      // Toast será mostrado se houver recorde (tanto para usuários normais quanto visitantes)
+      if (resultadoFinal.bateuRecorde) {
         showSuccess("Parabéns! Você bateu um novo recorde!");
       }
     } catch (error) {

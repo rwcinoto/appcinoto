@@ -23,6 +23,15 @@ class AuthController {
     }
   }
 
+  async loginVisitante(req, res, next) {
+    try {
+      const resultado = await authService.loginVisitante();
+      return res.json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async me(req, res, next) {
     try {
       const usuario = await req.usuario.reload({
@@ -36,6 +45,7 @@ class AuthController {
         tipo: usuario.tipo,
         id_plano: usuario.id_plano,
         plano: usuario.plano,
+        isVisitante: usuario.isVisitante || false,
       });
     } catch (error) {
       next(error);

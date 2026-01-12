@@ -10,7 +10,30 @@ class PlanoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
+      // Se houver usuario_id na query, filtrar planos baseado no plano desse usuário
+      let ordemPlanoUsuario = req.usuario.plano?.ordem;
+      if (req.query.usuario_id) {
+        const usuarioId = parseInt(req.query.usuario_id);
+        if (!isNaN(usuarioId) && usuarioId > 0) {
+          const usuarioVisualizado = await Usuario.findByPk(usuarioId, {
+            include: [{ association: "plano" }],
+          });
+          if (usuarioVisualizado && usuarioVisualizado.plano) {
+            ordemPlanoUsuario = usuarioVisualizado.plano.ordem;
+          }
+        }
+      }
+
+      // Se não houver ordem do plano, retornar todos os planos (comportamento padrão)
+      const where = {};
+      if (ordemPlanoUsuario) {
+        where.ordem = {
+          [Op.lte]: ordemPlanoUsuario,
+        };
+      }
+
       const planos = await Plano.findAll({
+        where,
         order: [["ordem", "ASC"]],
       });
 

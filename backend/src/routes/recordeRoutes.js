@@ -16,7 +16,7 @@ const validarListarRecordes = [
     .withMessage("sistema_id deve ser um número inteiro válido"),
   query("usuario_id")
     .optional()
-    .isInt({ min: 1 })
+    .isInt({ min: 0 })
     .withMessage("usuario_id deve ser um número inteiro válido"),
 ];
 

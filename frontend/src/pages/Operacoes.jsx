@@ -178,7 +178,7 @@ const Operacoes = () => {
             <option value="subtracao">Subtração</option>
             <option value="multiplicacao">Multiplicação</option>
             <option value="divisao">Divisão</option>
-            <option value="raiz">Raiz</option>
+            <option value="raiz">Raiz quadrada</option>
             <option value="aleatorio">Aleatório</option>
             <option value="conversao">Conversão</option>
           </select>

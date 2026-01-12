@@ -19,6 +19,7 @@ const NovoTreino = () => {
   const [operacaoSelecionada, setOperacaoSelecionada] = useState(null);
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
   const [sistemaSelecionado, setSistemaSelecionado] = useState("");
+  const [tipoOperacaoSelecionado, setTipoOperacaoSelecionado] = useState("");
   const [erro, setErro] = useState("");
   const [iniciando, setIniciando] = useState(false);
   const [mostrarContagem, setMostrarContagem] = useState(false);
@@ -84,15 +85,42 @@ const NovoTreino = () => {
     }
   }, [sistemas, sistemaSelecionado]);
 
-  // Definir operação padrão (id = 1)
+  // Obter tipos únicos de operação para o filtro
+  // Se o plano do usuário for id = 2, não mostrar "raiz" nem "conversao"
+  const tiposOperacaoDisponiveis = useMemo(() => {
+    const tipos = Array.from(new Set(operacoes.map((op) => op.tipo)));
+    if (usuario?.id_plano === 2) {
+      return tipos.filter((tipo) => tipo !== "raiz" && tipo !== "conversao");
+    }
+    return tipos;
+  }, [operacoes, usuario]);
+
+  // Filtrar operações baseado no tipo selecionado
+  const operacoesFiltradas = useMemo(() => {
+    if (!tipoOperacaoSelecionado) {
+      return operacoes;
+    }
+    return operacoes.filter((operacao) => operacao.tipo === tipoOperacaoSelecionado);
+  }, [operacoes, tipoOperacaoSelecionado]);
+
+  // Definir operação padrão (id = 1) - apenas se não houver filtro ativo ou se a operação padrão estiver nas filtradas
   useEffect(() => {
-    if (operacoes.length > 0 && !operacaoSelecionada) {
-      const operacaoPadrao = operacoes.find((operacao) => operacao.id === 1);
-      if (operacaoPadrao) {
-        setOperacaoSelecionada(operacaoPadrao);
+    if (operacoesFiltradas.length > 0 && !operacaoSelecionada) {
+      // Se não há filtro de tipo, usar operação padrão (id = 1)
+      if (!tipoOperacaoSelecionado) {
+        const operacaoPadrao = operacoesFiltradas.find((operacao) => operacao.id === 1);
+        if (operacaoPadrao) {
+          setOperacaoSelecionada(operacaoPadrao);
+        } else if (operacoesFiltradas.length > 0) {
+          // Se não encontrar id=1, selecionar a primeira disponível
+          setOperacaoSelecionada(operacoesFiltradas[0]);
+        }
+      } else {
+        // Se há filtro ativo, selecionar a primeira operação filtrada
+        setOperacaoSelecionada(operacoesFiltradas[0]);
       }
     }
-  }, [operacoes, operacaoSelecionada]);
+  }, [operacoesFiltradas, operacaoSelecionada, tipoOperacaoSelecionado]);
 
   // Filtrar sistemas disponíveis: 
   // - Se operação for raiz, remover sistema "inteiro"
@@ -124,6 +152,22 @@ const NovoTreino = () => {
       setSistemaSelecionado("");
     }
   }, [sistemasDisponiveis, sistemaSelecionado]);
+
+  // Se a operação selecionada não está mais disponível após filtrar, selecionar a primeira disponível
+  useEffect(() => {
+    if (operacaoSelecionada && operacoesFiltradas.length > 0) {
+      const operacaoAtual = operacoesFiltradas.find(
+        (op) => op.id === operacaoSelecionada.id
+      );
+      if (!operacaoAtual) {
+        // Operação selecionada não está mais disponível, selecionar a primeira disponível
+        setOperacaoSelecionada(operacoesFiltradas[0]);
+      }
+    } else if (operacaoSelecionada && operacoesFiltradas.length === 0) {
+      // Não há operações disponíveis, limpar seleção
+      setOperacaoSelecionada(null);
+    }
+  }, [operacoesFiltradas, operacaoSelecionada]);
 
   const formatarTipoOperacao = (tipo) => {
     const tipos = {
@@ -323,6 +367,25 @@ const NovoTreino = () => {
         <div className="novo-treino-header">
           <h1>Novo treino</h1>
           <div className="filtros-header">
+            {/* Tipo de operação */}
+            {tiposOperacaoDisponiveis.length > 1 ? (
+              <div className="select-group-filtro">
+                <span className="filtro-label">Tipo:</span>
+                <select
+                  value={tipoOperacaoSelecionado}
+                  onChange={(e) => setTipoOperacaoSelecionado(e.target.value)}
+                  className="select-filtro"
+                >
+                  <option value="">Todos</option>
+                  {tiposOperacaoDisponiveis.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {formatarTipoOperacao(tipo)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
             {/* Limite de tempo - mostra select se houver múltiplas opções, senão mostra apenas o valor */}
             {limites.length > 1 ? (
               <div className="select-group-filtro">
@@ -386,12 +449,14 @@ const NovoTreino = () => {
           {/* Seção de Operações */}
           <section className="secao-selecao">
             <div className="cards-operacoes">
-              {operacoes.length === 0 ? (
+              {operacoesFiltradas.length === 0 ? (
                 <p className="sem-opcoes">
-                  Nenhuma operação disponível no seu plano.
+                  {tipoOperacaoSelecionado 
+                    ? "Nenhuma operação encontrada para o tipo selecionado."
+                    : "Nenhuma operação disponível no seu plano."}
                 </p>
               ) : (
-                operacoes.map((operacao) => {
+                operacoesFiltradas.map((operacao) => {
                   const corOperacao = obterCorOperacao(operacao.tipo);
                   return (
                     <div

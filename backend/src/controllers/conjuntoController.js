@@ -202,6 +202,13 @@ class ConjuntoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
+      // Bloquear criação de conjuntos para visitantes
+      if (req.usuario.isVisitante) {
+        return res.status(403).json({
+          message: "Visitantes não podem criar conjuntos. Faça login para criar conjuntos.",
+        });
+      }
+
       const { nome } = req.body;
       const usuarioId = req.usuario.id;
 

@@ -391,38 +391,31 @@ class TreinoController {
       // O totalAcertos do backend é o valor correto, independente do que o frontend enviou
       // Isso evita problemas de sincronia entre frontend e backend
 
-      // Verificar e salvar recorde
+      // Verificar e salvar recorde (pular se for visitante)
       let bateuRecorde = false;
       let recordeAnterior = null;
       let erroRecorde = null;
 
-      try {
-        console.log("Tentando salvar recorde:", {
-          usuarioId: usuario.id,
-          operacaoId: treino.operacao.id,
-          limiteId: treino.limite.id,
-          sistemaId: treino.sistema.id,
-          totalAcertos: treino.totalAcertos,
-        });
+      // Visitantes não salvam recordes
+      if (!usuario.isVisitante) {
+        try {
+          const resultado = await recordeService.verificarESalvarRecorde(
+            usuario.id,
+            treino.operacao.id,
+            treino.limite.id,
+            treino.sistema.id,
+            treino.totalAcertos
+          );
 
-        const resultado = await recordeService.verificarESalvarRecorde(
-          usuario.id,
-          treino.operacao.id,
-          treino.limite.id,
-          treino.sistema.id,
-          treino.totalAcertos
-        );
-
-        console.log("Resultado do recorde:", resultado);
-
-        bateuRecorde = resultado.bateuRecorde;
-        recordeAnterior = resultado.recordeAnterior || null;
-      } catch (error) {
-        console.error("Erro ao verificar e salvar recorde:", error);
-        console.error("Stack trace:", error.stack);
-        erroRecorde = error.message;
-        // Continuar mesmo se houver erro ao verificar recorde
-        // Não bloquear a finalização do treino por erro no recorde
+          bateuRecorde = resultado.bateuRecorde;
+          recordeAnterior = resultado.recordeAnterior || null;
+        } catch (error) {
+          console.error("Erro ao verificar e salvar recorde:", error);
+          console.error("Stack trace:", error.stack);
+          erroRecorde = error.message;
+          // Continuar mesmo se houver erro ao verificar recorde
+          // Não bloquear a finalização do treino por erro no recorde
+        }
       }
 
       // Remover treino da memória
@@ -473,17 +466,20 @@ class TreinoController {
 
       // Incrementar quantidade de treinos (ou criar registro se não existir)
       // Isso deve ser feito quando a contagem regressiva começar
-      try {
-        await recordeService.incrementarQuantidadeTreino(
-          usuario.id,
-          treino.operacao.id,
-          treino.limite.id,
-          treino.sistema.id
-        );
-      } catch (error) {
-        // Se houver erro ao incrementar quantidade, registrar mas não bloquear
-        console.error("Erro ao incrementar quantidade de treino:", error);
-        // Continuar mesmo assim (não bloquear o treino por erro na quantidade)
+      // Visitantes não incrementam quantidade de treinos
+      if (!usuario.isVisitante) {
+        try {
+          await recordeService.incrementarQuantidadeTreino(
+            usuario.id,
+            treino.operacao.id,
+            treino.limite.id,
+            treino.sistema.id
+          );
+        } catch (error) {
+          // Se houver erro ao incrementar quantidade, registrar mas não bloquear
+          console.error("Erro ao incrementar quantidade de treino:", error);
+          // Continuar mesmo assim (não bloquear o treino por erro na quantidade)
+        }
       }
 
       return res.json({ success: true });

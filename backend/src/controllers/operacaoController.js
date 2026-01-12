@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator");
 const { Op } = require("sequelize");
-const { Operacao, Plano } = require("../models");
+const { Operacao, Plano, Usuario } = require("../models");
 
 class OperacaoController {
   async listar(req, res) {
@@ -10,8 +10,33 @@ class OperacaoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
+      // Se o parâmetro todos=true estiver presente, retornar todas as operações sem filtrar por plano
+      if (req.query.todos === "true") {
+        const operacoes = await Operacao.findAll({
+          include: [
+            { association: "plano" },
+            { association: "operacoes_incluidas" },
+          ],
+          order: [["ordem", "ASC"]],
+        });
+        return res.json(operacoes);
+      }
+
+      // Se houver usuario_id na query, usar o plano desse usuário ao invés do usuário logado
+      let ordemPlanoUsuario = req.usuario.plano?.ordem;
+      if (req.query.usuario_id) {
+        const usuarioId = parseInt(req.query.usuario_id);
+        if (!isNaN(usuarioId) && usuarioId > 0) {
+          const usuarioVisualizado = await Usuario.findByPk(usuarioId, {
+            include: [{ association: "plano" }],
+          });
+          if (usuarioVisualizado && usuarioVisualizado.plano) {
+            ordemPlanoUsuario = usuarioVisualizado.plano.ordem;
+          }
+        }
+      }
+
       // Buscar a ordem do plano do usuário (admin sempre está no maior plano e verá tudo automaticamente)
-      const ordemPlanoUsuario = req.usuario.plano?.ordem;
       if (!ordemPlanoUsuario) {
         return res
           .status(400)
