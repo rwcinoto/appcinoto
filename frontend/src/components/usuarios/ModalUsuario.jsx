@@ -6,7 +6,7 @@ import { useToast } from "../../context/ToastContext";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
 import "./ModalUsuario.css";
 
-const ModalUsuario = ({ usuario, planos, onFechar, onSalvo }) => {
+const ModalUsuario = ({ usuario, planos, onFechar, onSalvo, tipoUsuarioLogado }) => {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const { showSuccess } = useToast();
@@ -59,6 +59,7 @@ const ModalUsuario = ({ usuario, planos, onFechar, onSalvo }) => {
             onSalvar={handleSalvar}
             onCancelar={onFechar}
             disabled={salvando}
+            tipoUsuarioLogado={tipoUsuarioLogado}
           />
         </div>
       </div>

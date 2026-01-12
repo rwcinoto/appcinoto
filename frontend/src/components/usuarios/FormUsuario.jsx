@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./FormUsuario.css";
 
-const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }) => {
+const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false, tipoUsuarioLogado }) => {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -19,17 +19,19 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
         email: usuario.email || "",
         senha: "",
         tipo: usuario.tipo || "comum",
-        id_plano: usuario.id_plano?.toString() || "",
+        id_plano: tipoUsuarioLogado === "profe" ? "2" : (usuario.id_plano?.toString() || ""),
         ativo: usuario.ativo !== undefined ? usuario.ativo : true,
       });
     } else if (planos.length > 0) {
-      // Se for criação e há planos, selecionar o primeiro por padrão
+      // Se for criação e há planos
+      // Se for profe, sempre usar tipo "comum" e plano id=2
       setFormData((prev) => ({
         ...prev,
-        id_plano: planos[0].id.toString(),
+        tipo: tipoUsuarioLogado === "profe" ? "comum" : prev.tipo,
+        id_plano: tipoUsuarioLogado === "profe" ? "2" : planos[0].id.toString(),
       }));
     }
-  }, [usuario, planos]);
+  }, [usuario, planos, tipoUsuarioLogado]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -78,8 +80,8 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
     const dados = {
       nome: formData.nome.trim(),
       email: formData.email.trim(),
-      tipo: formData.tipo,
-      id_plano: parseInt(formData.id_plano),
+      tipo: tipoUsuarioLogado === "profe" ? "comum" : formData.tipo,
+      id_plano: tipoUsuarioLogado === "profe" ? 2 : parseInt(formData.id_plano),
       ativo: formData.ativo,
     };
 
@@ -132,37 +134,42 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false }
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="tipo">Tipo</label>
-        <select
-          id="tipo"
-          name="tipo"
-          value={formData.tipo}
-          onChange={handleChange}
-          required
-        >
-          <option value="comum">Comum</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
+      {tipoUsuarioLogado !== "profe" && (
+        <div className="form-group">
+          <label htmlFor="tipo">Tipo</label>
+          <select
+            id="tipo"
+            name="tipo"
+            value={formData.tipo}
+            onChange={handleChange}
+            required
+          >
+            <option value="comum">Comum</option>
+            <option value="profe">Professor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      )}
 
-      <div className="form-group">
-        <label htmlFor="id_plano">Plano</label>
-        <select
-          id="id_plano"
-          name="id_plano"
-          value={formData.id_plano}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Selecione um plano</option>
-          {planos.map((plano) => (
-            <option key={plano.id} value={plano.id}>
-              {plano.nome}
-            </option>
-          ))}
-        </select>
-      </div>
+      {tipoUsuarioLogado !== "profe" && (
+        <div className="form-group">
+          <label htmlFor="id_plano">Plano</label>
+          <select
+            id="id_plano"
+            name="id_plano"
+            value={formData.id_plano}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Selecione um plano</option>
+            {planos.map((plano) => (
+              <option key={plano.id} value={plano.id}>
+                {plano.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="form-group checkbox-group">
         <label>

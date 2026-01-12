@@ -85,7 +85,7 @@ module.exports = {
         allowNull: false,
       },
       tipo: {
-        type: Sequelize.ENUM("admin", "comum"),
+        type: Sequelize.ENUM("admin", "comum", "profe"),
         allowNull: false,
         defaultValue: "comum",
       },

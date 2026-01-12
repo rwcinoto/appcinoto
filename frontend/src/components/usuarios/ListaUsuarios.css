@@ -66,6 +66,17 @@
   color: var(--color-text-light);
 }
 
+.badge-profe {
+  background: #2196f3;
+  color: white;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .badge-profe {
+  background: rgba(33, 150, 243, 0.3);
+  color: #64B5F6;
+}
+
 .status {
   padding: 4px 8px;
   border-radius: 4px;

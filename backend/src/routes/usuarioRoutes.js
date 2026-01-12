@@ -5,7 +5,9 @@ const usuarioController = require("../controllers/usuarioController");
 const authMiddleware = require("../middlewares/auth");
 const {
   autorizarAdmin,
+  autorizarAdminOuProfe,
   autorizarProprioOuAdmin,
+  autorizarProprioOuAdminOuProfe,
 } = require("../middlewares/autorizacao");
 
 // Validações para criar usuário
@@ -22,8 +24,8 @@ const validarCriarUsuario = [
     .withMessage("Nome deve ter no mínimo 3 caracteres"),
   body("tipo")
     .optional()
-    .isIn(["admin", "comum"])
-    .withMessage("Tipo deve ser 'admin' ou 'comum'"),
+    .isIn(["admin", "comum", "profe"])
+    .withMessage("Tipo deve ser 'admin', 'comum' ou 'profe'"),
   body("id_plano")
     .isInt({ min: 1 })
     .withMessage("ID do plano deve ser um número inteiro válido"),
@@ -55,8 +57,8 @@ const validarAtualizarUsuario = [
     .withMessage("Nome deve ter no mínimo 3 caracteres"),
   body("tipo")
     .optional()
-    .isIn(["admin", "comum"])
-    .withMessage("Tipo deve ser 'admin' ou 'comum'"),
+    .isIn(["admin", "comum", "profe"])
+    .withMessage("Tipo deve ser 'admin', 'comum' ou 'profe'"),
   body("id_plano")
     .optional()
     .isInt({ min: 1 })
@@ -79,8 +81,8 @@ const validarListarUsuarios = [
     .withMessage("Limite deve ser um número entre 1 e 100"),
   query("tipo")
     .optional()
-    .isIn(["admin", "comum"])
-    .withMessage("Tipo deve ser 'admin' ou 'comum'"),
+    .isIn(["admin", "comum", "profe"])
+    .withMessage("Tipo deve ser 'admin', 'comum' ou 'profe'"),
   query("ativo")
     .optional()
     .isIn(["true", "false"])
@@ -107,7 +109,7 @@ const validarId = [
 router.get(
   "/",
   authMiddleware,
-  autorizarAdmin,
+  autorizarAdminOuProfe,
   validarListarUsuarios,
   usuarioController.listar.bind(usuarioController)
 );
@@ -142,7 +144,7 @@ router.get(
 router.post(
   "/",
   authMiddleware,
-  autorizarAdmin,
+  autorizarAdminOuProfe,
   validarCriarUsuario,
   usuarioController.criar.bind(usuarioController)
 );
@@ -150,7 +152,7 @@ router.post(
 router.put(
   "/:id",
   authMiddleware,
-  autorizarProprioOuAdmin,
+  autorizarProprioOuAdminOuProfe,
   validarAtualizarUsuario,
   usuarioController.atualizar.bind(usuarioController)
 );

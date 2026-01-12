@@ -89,7 +89,7 @@ const Sidebar = ({ aberto = true, onFechar }) => {
   }, [location.pathname, isCadastrosActive]);
 
   const filteredMenuItems = menuItems.filter((item) => {
-    if (item.adminOnly && (!usuario || usuario.tipo !== "admin")) {
+    if (item.adminOnly && (!usuario || (usuario.tipo !== "admin" && usuario.tipo !== "profe"))) {
       return false;
     }
     return true;

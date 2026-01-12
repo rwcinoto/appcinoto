@@ -80,14 +80,14 @@ const Usuarios = () => {
   }, [paginacao.pagina, paginacao.limite, filtrosDebounced]);
 
   useEffect(() => {
-    if (usuario && usuario.tipo === "admin") {
+    if (usuario && (usuario.tipo === "admin" || usuario.tipo === "profe")) {
       carregarPlanos();
       carregarUsuarios();
     }
   }, [usuario, carregarPlanos, carregarUsuarios]);
 
-  // Redirecionar se não for admin
-  if (!usuario || usuario.tipo !== "admin") {
+  // Redirecionar se não for admin ou profe
+  if (!usuario || (usuario.tipo !== "admin" && usuario.tipo !== "profe")) {
     return <Navigate to="/novo-treino" />;
   }
 
@@ -161,17 +161,20 @@ const Usuarios = () => {
           />
         </div>
 
-        <div className="filtro-group">
-          <label>Tipo</label>
-          <select
-            value={filtros.tipo}
-            onChange={(e) => handleFiltroChange("tipo", e.target.value)}
-          >
-            <option value="">Todos</option>
-            <option value="admin">Admin</option>
-            <option value="comum">Comum</option>
-          </select>
-        </div>
+        {usuario.tipo === "admin" && (
+          <div className="filtro-group">
+            <label>Tipo</label>
+            <select
+              value={filtros.tipo}
+              onChange={(e) => handleFiltroChange("tipo", e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="admin">Admin</option>
+              <option value="profe">Professor</option>
+              <option value="comum">Comum</option>
+            </select>
+          </div>
+        )}
 
         <div className="filtro-group">
           <label>Status</label>
@@ -186,7 +189,7 @@ const Usuarios = () => {
         </div>
 
         <div className="filtro-group">
-          <label>Plano</label>
+          <label>Nível</label>
           <select
             value={filtros.id_plano}
             onChange={(e) => handleFiltroChange("id_plano", e.target.value)}
@@ -209,6 +212,7 @@ const Usuarios = () => {
             usuarios={usuarios}
             onEditar={handleEditarUsuario}
             onDesativar={handleDesativarUsuario}
+            tipoUsuarioLogado={usuario.tipo}
           />
 
           {paginacao.totalPaginas > 1 && (
@@ -239,6 +243,7 @@ const Usuarios = () => {
           planos={planos}
           onFechar={handleModalFechar}
           onSalvo={handleUsuarioSalvo}
+          tipoUsuarioLogado={usuario.tipo}
         />
       )}
     </div>
