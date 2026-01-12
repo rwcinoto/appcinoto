@@ -19,6 +19,11 @@ class UsuarioController {
       // Filtros
       const where = {};
 
+      // Se for profe, só pode ver usuários criados por ele
+      if (req.usuario.tipo === "profe") {
+        where.criado_por = req.usuario.id;
+      }
+
       if (req.query.tipo) {
         where.tipo = req.query.tipo;
       }
@@ -157,8 +162,12 @@ class UsuarioController {
         return res.status(400).json({ message: "Email já está em uso" });
       }
 
+      // Se for profe, sempre usar plano id=2 e tipo "comum"
+      const idPlanoUsuario = req.usuario.tipo === "profe" ? 2 : id_plano;
+      const tipoUsuario = req.usuario.tipo === "profe" ? "comum" : (tipo || "comum");
+
       // Validar plano existe
-      const plano = await Plano.findByPk(id_plano);
+      const plano = await Plano.findByPk(idPlanoUsuario);
       if (!plano) {
         return res.status(400).json({ message: "Plano não encontrado" });
       }
@@ -168,8 +177,8 @@ class UsuarioController {
         email,
         senha,
         nome,
-        tipo: tipo || "comum",
-        id_plano,
+        tipo: tipoUsuario,
+        id_plano: idPlanoUsuario,
         ativo: ativo !== undefined ? ativo : true,
         criado_por: req.usuario.id,
         atualizado_por: req.usuario.id,
@@ -198,23 +207,28 @@ class UsuarioController {
 
       const id = parseInt(req.params.id);
       const isAdmin = req.usuario.tipo === "admin";
+      const isProfe = req.usuario.tipo === "profe";
       const isProprioUsuario = req.usuario.id === id;
-
-      // Verifica se o usuário pode atualizar este perfil
-      if (!isAdmin && !isProprioUsuario) {
-        return res.status(403).json({
-          message: "Acesso negado. Você só pode atualizar seu próprio perfil.",
-        });
-      }
 
       const usuario = await Usuario.findByPk(id);
       if (!usuario) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
 
+      // Verifica se o usuário pode atualizar este perfil
+      const podeAtualizar = isAdmin || isProprioUsuario || (isProfe && usuario.criado_por === req.usuario.id);
+      
+      if (!podeAtualizar) {
+        return res.status(403).json({
+          message: "Acesso negado. Você só pode atualizar seu próprio perfil ou usuários criados por você.",
+        });
+      }
+
       // Campos que podem ser atualizados
       const camposPermitidos = isAdmin
         ? ["email", "senha", "nome", "tipo", "id_plano", "ativo"]
+        : isProfe
+        ? ["email", "senha", "nome", "ativo"] // Profe não pode alterar tipo nem plano
         : ["email", "senha", "nome"];
 
       const dadosAtualizacao = {};
@@ -222,6 +236,16 @@ class UsuarioController {
       for (const campo of camposPermitidos) {
         if (req.body[campo] !== undefined) {
           dadosAtualizacao[campo] = req.body[campo];
+        }
+      }
+
+      // Se for profe, garantir que não está tentando alterar o tipo nem o plano
+      if (isProfe) {
+        if (req.body.tipo !== undefined) {
+          delete dadosAtualizacao.tipo;
+        }
+        if (req.body.id_plano !== undefined) {
+          delete dadosAtualizacao.id_plano;
         }
       }
 
@@ -235,7 +259,12 @@ class UsuarioController {
         }
       }
 
-      // Validar plano existe (se admin alterar)
+      // Se for profe, sempre usar plano id=2
+      if (isProfe) {
+        dadosAtualizacao.id_plano = 2;
+      }
+
+      // Validar plano existe (se for alterar)
       if (dadosAtualizacao.id_plano) {
         const plano = await Plano.findByPk(dadosAtualizacao.id_plano);
         if (!plano) {

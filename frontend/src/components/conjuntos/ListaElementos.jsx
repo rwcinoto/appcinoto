@@ -35,7 +35,7 @@ const ListaElementos = ({
           <thead>
             <tr>
               <th>Nome</th>
-              <th>Plano</th>
+              <th>Nível</th>
               <th>Tipo</th>
               {mostrarStatus && <th>Status</th>}
               {podeGerenciar && <th>Ações</th>}

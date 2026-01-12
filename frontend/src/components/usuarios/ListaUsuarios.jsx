@@ -1,7 +1,7 @@
 import React from "react";
 import "./ListaUsuarios.css";
 
-const ListaUsuarios = ({ usuarios, onEditar, onDesativar }) => {
+const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) => {
   if (usuarios.length === 0) {
     return <div className="sem-usuarios">Nenhum usuário encontrado</div>;
   }
@@ -13,8 +13,8 @@ const ListaUsuarios = ({ usuarios, onEditar, onDesativar }) => {
           <tr>
             <th>Nome</th>
             <th>Email</th>
-            <th>Tipo</th>
-            <th>Plano</th>
+            {tipoUsuarioLogado !== "profe" && <th>Tipo</th>}
+            <th>Nível</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
@@ -24,11 +24,13 @@ const ListaUsuarios = ({ usuarios, onEditar, onDesativar }) => {
             <tr key={usuario.id}>
               <td>{usuario.nome}</td>
               <td>{usuario.email}</td>
-              <td>
-                <span className={`badge badge-${usuario.tipo}`}>
-                  {usuario.tipo === "admin" ? "Admin" : "Comum"}
-                </span>
-              </td>
+              {tipoUsuarioLogado !== "profe" && (
+                <td>
+                  <span className={`badge badge-${usuario.tipo}`}>
+                    {usuario.tipo === "admin" ? "Admin" : usuario.tipo === "profe" ? "Professor" : "Comum"}
+                  </span>
+                </td>
+              )}
               <td>{usuario.plano?.nome || "-"}</td>
               <td>
                 <span
