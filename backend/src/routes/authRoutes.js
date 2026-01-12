@@ -14,6 +14,7 @@ const validarLogin = [
 
 // Rotas
 router.post("/login", validarLogin, authController.login.bind(authController));
+router.post("/visitante", authController.loginVisitante.bind(authController));
 router.get("/me", authMiddleware, authController.me.bind(authController));
 
 module.exports = router;

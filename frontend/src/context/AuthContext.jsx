@@ -40,6 +40,17 @@ export const AuthProvider = ({ children }) => {
     return usuario;
   };
 
+  const loginVisitante = async () => {
+    const response = await api.post("/auth/visitante");
+    const { token, usuario } = response.data;
+
+    localStorage.setItem("token", token);
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    setUsuario(usuario);
+
+    return usuario;
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
@@ -57,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ usuario, loading, login, logout, atualizarUsuario }}
+      value={{ usuario, loading, login, loginVisitante, logout, atualizarUsuario }}
     >
       {children}
     </AuthContext.Provider>

@@ -97,10 +97,19 @@ const Perfil = () => {
     return <div>Carregando...</div>;
   }
 
+  const isVisitante = usuario?.isVisitante;
+
   return (
     <div className="perfil-container">
       <div className="perfil-card">
         <h1>Meu perfil</h1>
+        
+        {isVisitante && (
+          <div className="mensagem-visitante">
+            <p>Visitantes não podem editar o perfil. Faça login para personalizar suas informações.</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome">Nome</label>
@@ -113,6 +122,7 @@ const Perfil = () => {
               required
               minLength={3}
               autoComplete="name"
+              disabled={isVisitante}
             />
           </div>
 
@@ -126,6 +136,7 @@ const Perfil = () => {
               onChange={handleChange}
               required
               autoComplete="email"
+              disabled={isVisitante}
             />
           </div>
 
@@ -142,6 +153,7 @@ const Perfil = () => {
               minLength={6}
               autoComplete="new-password"
               placeholder="Deixe em branco para manter a senha atual"
+              disabled={isVisitante}
             />
           </div>
 
@@ -154,7 +166,11 @@ const Perfil = () => {
             />
           )}
 
-          <button type="submit" disabled={carregando} className="btn-salvar">
+          <button 
+            type="submit" 
+            disabled={carregando || isVisitante} 
+            className="btn-salvar"
+          >
             {carregando ? "Salvando..." : "Salvar alterações"}
           </button>
         </form>

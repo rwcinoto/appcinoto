@@ -21,7 +21,11 @@ const ResultadoTreino = ({ resultado, onRecomecar, onNovoTreino }) => {
             <div className="resultado-recorde-destaque">
               <span className="recorde-badge">🎉 Novo Recorde!</span>
               <p>
-                {recordeAnterior === null || recordeAnterior === undefined
+                {recordeAnterior === null || 
+                 recordeAnterior === undefined || 
+                 recordeAnterior?.total === 0 ||
+                 recordeAnterior?.total === null ||
+                 recordeAnterior?.total === undefined
                   ? "Parabéns! Você estabeleceu seu primeiro recorde!"
                   : `Parabéns! Você bateu seu recorde anterior de ${recordeAnterior?.total || 0} acertos!`}
               </p>

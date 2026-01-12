@@ -136,10 +136,18 @@ const Conjuntos = () => {
     <div className="conjuntos-container">
       <div className="conjuntos-header">
         <h1>Conjuntos</h1>
-        <button className="btn-criar" onClick={handleCriarConjunto}>
-          + Criar conjunto
-        </button>
+        {!usuario?.isVisitante && (
+          <button className="btn-criar" onClick={handleCriarConjunto}>
+            + Criar conjunto
+          </button>
+        )}
       </div>
+
+      {usuario?.isVisitante && (
+        <div className="mensagem-visitante">
+          <p>Visitantes não podem criar conjuntos. Faça login para criar e gerenciar seus conjuntos.</p>
+        </div>
+      )}
 
       {erro && (
         <ErrorMessage

@@ -33,11 +33,23 @@ const Recordes = () => {
     setErro("");
 
     try {
+      // Se estiver visualizando outro usuário, passar usuario_id para filtrar pelo plano dele
+      const params = new URLSearchParams();
+      if (usuarioIdParam) {
+        const usuarioId = parseInt(usuarioIdParam);
+        if (!isNaN(usuarioId) && usuarioId !== 0 && usuarioId !== usuario?.id) {
+          params.append("usuario_id", usuarioId.toString());
+        }
+      }
+
+      const queryString = params.toString();
+      const querySuffix = queryString ? `?${queryString}` : "";
+
       const [operacoesRes, limitesRes, sistemasRes, planosRes] = await Promise.all([
-        api.get("/operacoes"),
-        api.get("/limites"),
-        api.get("/sistemas"),
-        api.get("/planos"),
+        api.get(`/operacoes${querySuffix}`),
+        api.get(`/limites${querySuffix}`),
+        api.get(`/sistemas${querySuffix}`),
+        api.get(`/planos${querySuffix}`),
       ]);
 
       setOperacoes(operacoesRes.data);
@@ -48,14 +60,15 @@ const Recordes = () => {
       logError("Recordes - carregarDados", error);
       setErro(getErrorMessage(error));
     }
-  }, []);
+  }, [usuarioIdParam, usuario]);
 
   // Carregar dados do usuário visualizado se houver usuario_id na URL
   useEffect(() => {
     const carregarUsuarioVisualizado = async () => {
       if (usuarioIdParam) {
         const usuarioId = parseInt(usuarioIdParam);
-        if (!isNaN(usuarioId) && usuarioId !== usuario?.id) {
+        // Visitantes podem ver recordes de outros usuários, mas não os seus próprios (id=0)
+        if (!isNaN(usuarioId) && usuarioId !== 0 && usuarioId !== usuario?.id) {
           try {
             const response = await api.get(`/usuarios/${usuarioId}/nome`);
             setUsuarioVisualizado(response.data);
@@ -107,9 +120,13 @@ const Recordes = () => {
       // Adicionar usuario_id se estiver visualizando outro usuário
       if (usuarioIdParam) {
         const usuarioId = parseInt(usuarioIdParam);
-        if (!isNaN(usuarioId) && usuarioId !== usuario?.id) {
+        // Visitantes podem ver recordes de outros usuários, mas não os seus próprios (id=0)
+        if (!isNaN(usuarioId) && usuarioId !== 0 && usuarioId !== usuario?.id) {
           params.append("usuario_id", usuarioId.toString());
         }
+      } else if (usuario?.isVisitante) {
+        // Se for visitante e não houver usuario_id na URL, usar id=0 (retornará array vazio)
+        params.append("usuario_id", "0");
       }
 
       const queryString = params.toString();
@@ -129,7 +146,7 @@ const Recordes = () => {
     if (usuario) {
       carregarDados();
     }
-  }, [usuario, carregarDados]);
+  }, [usuario, usuarioIdParam, carregarDados]);
 
   // Carregar recordes sempre (sem filtros obrigatórios)
   useEffect(() => {
@@ -185,7 +202,7 @@ const Recordes = () => {
   // Obter tipos únicos de operação para o filtro
   const tiposOperacao = Array.from(
     new Set(operacoes.map((op) => op.tipo))
-  ).sort();
+  );
 
   return (
     <div className="recordes-container">
@@ -292,6 +309,7 @@ const Recordes = () => {
         recordes={recordes} 
         loading={loading} 
         usuarioIdVisualizado={usuarioIdParam ? parseInt(usuarioIdParam) : null}
+        isVisitante={usuario?.isVisitante || false}
       />
     </div>
   );
