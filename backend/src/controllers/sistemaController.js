@@ -95,7 +95,7 @@ class SistemaController {
       ) {
         return res.status(403).json({
           message:
-            "Acesso negado. Este sistema não está disponível no seu plano.",
+            "Acesso negado. Este sistema não está disponível no seu nível.",
         });
       }
 

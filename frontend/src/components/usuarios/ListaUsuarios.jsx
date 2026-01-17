@@ -1,6 +1,13 @@
 import React from "react";
 import "./ListaUsuarios.css";
 
+const formatarDataUltimoTreino = (valor) => {
+  if (!valor) return "-";
+  const s = String(valor).split("T")[0];
+  const [y, m, d] = s.split("-");
+  return y && m && d ? `${d}/${m}/${y}` : "-";
+};
+
 const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) => {
   if (usuarios.length === 0) {
     return <div className="sem-usuarios">Nenhum usuário encontrado</div>;
@@ -15,6 +22,7 @@ const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) =
             <th>Email</th>
             {tipoUsuarioLogado !== "profe" && <th>Tipo</th>}
             <th>Nível</th>
+            <th>Último treino</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
@@ -32,6 +40,7 @@ const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) =
                 </td>
               )}
               <td>{usuario.plano?.nome || "-"}</td>
+              <td>{formatarDataUltimoTreino(usuario.data_ultimo_treino)}</td>
               <td>
                 <span
                   className={`status status-${

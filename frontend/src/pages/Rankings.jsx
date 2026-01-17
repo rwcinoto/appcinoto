@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import ErrorMessage from "../components/common/ErrorMessage";
+import Loading from "../components/common/Loading";
 import InfoUsuario from "../components/rankings/InfoUsuario";
 import TabelaRanking from "../components/rankings/TabelaRanking";
-import Loading from "../components/common/Loading";
-import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
-import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Rankings.css";
 
 const Rankings = () => {
@@ -46,21 +46,27 @@ const Rankings = () => {
       setSistemas(sistemasRes.data);
       setConjuntos(conjuntosRes.data || []);
 
-      // Ler query params da URL para inicializar filtros
+      // Ler query params da URL
       const operacaoIdParam = searchParams.get("operacao_id");
       const limiteIdParam = searchParams.get("limite_id");
       const sistemaIdParam = searchParams.get("sistema_id");
       const conjuntoIdParam = searchParams.get("conjunto_id");
 
-      // Definir valores: usar query params se disponíveis, senão usar padrões
+      // Ordem de prioridade: 1) query params, 2) preferências do usuário (operacao_id, limite_id, sistema_id), 3) primeiro da lista
+      // Operação
       if (operacaoIdParam && operacoesRes.data.find((o) => String(o.id) === operacaoIdParam)) {
         setOperacaoSelecionada(operacaoIdParam);
+      } else if (usuario?.operacao_id && operacoesRes.data.find((o) => o.id === usuario.operacao_id)) {
+        setOperacaoSelecionada(String(usuario.operacao_id));
       } else if (operacoesRes.data.length > 0) {
         setOperacaoSelecionada(String(operacoesRes.data[0].id));
       }
 
+      // Limite
       if (limiteIdParam && limitesRes.data.find((l) => String(l.id) === limiteIdParam)) {
         setLimiteSelecionado(limiteIdParam);
+      } else if (usuario?.limite_id && limitesRes.data.find((l) => l.id === usuario.limite_id)) {
+        setLimiteSelecionado(String(usuario.limite_id));
       } else {
         const limitePadrao =
           limitesRes.data.find((l) => l.id === 1) || limitesRes.data[0];
@@ -69,11 +75,31 @@ const Rankings = () => {
         }
       }
 
-      if (sistemaIdParam && sistemasRes.data.find((s) => String(s.id) === sistemaIdParam)) {
+      // Sistema: depende da operação (raiz sem inteiro, conversão só romano/binário/hex). Usar a operação já definida acima.
+      const operacaoParaSistema = operacaoIdParam && operacoesRes.data.find((o) => String(o.id) === operacaoIdParam)
+        ? operacoesRes.data.find((o) => String(o.id) === operacaoIdParam)
+        : usuario?.operacao_id && operacoesRes.data.find((o) => o.id === usuario.operacao_id)
+        ? operacoesRes.data.find((o) => o.id === usuario.operacao_id)
+        : operacoesRes.data[0];
+
+      let sistemasValidos = sistemasRes.data;
+      if (operacaoParaSistema) {
+        if (operacaoParaSistema.tipo === "raiz") {
+          sistemasValidos = sistemasRes.data.filter((s) => s.tipo !== "inteiro");
+        } else if (operacaoParaSistema.tipo === "conversao") {
+          sistemasValidos = sistemasRes.data.filter((s) =>
+            s.tipo === "romano" || s.tipo === "binario" || s.tipo === "hexadecimal"
+          );
+        }
+      }
+
+      if (sistemaIdParam && sistemasValidos.find((s) => String(s.id) === sistemaIdParam)) {
         setSistemaSelecionado(sistemaIdParam);
+      } else if (usuario?.sistema_id && sistemasValidos.find((s) => s.id === usuario.sistema_id)) {
+        setSistemaSelecionado(String(usuario.sistema_id));
       } else {
         const sistemaPadrao =
-          sistemasRes.data.find((s) => s.id === 1) || sistemasRes.data[0];
+          sistemasValidos.find((s) => s.id === 1) || sistemasValidos[0];
         if (sistemaPadrao) {
           setSistemaSelecionado(String(sistemaPadrao.id));
         }
@@ -89,7 +115,7 @@ const Rankings = () => {
       logError("Rankings - carregarDados", error);
       setErro(getErrorMessage(error));
     }
-  }, [searchParams]);
+  }, [searchParams, usuario]);
 
   const carregarRanking = useCallback(async () => {
     // Não carregar se filtros não estão completos
@@ -124,7 +150,7 @@ const Rankings = () => {
       setRanking(response.data.ranking || []);
       setPosicaoUsuario(response.data.posicaoUsuario);
       setTotalParticipantes(response.data.totalParticipantes || 0);
-      
+
       // Obter tempo do limite para calcular tempo médio
       setTempoLimite(response.data.filtros?.limite?.tempo || null);
     } catch (error) {
@@ -151,14 +177,6 @@ const Rankings = () => {
       carregarRanking();
     }
   }, [usuario, operacaoSelecionada, limiteSelecionado, sistemaSelecionado, conjuntoSelecionado, carregarRanking]);
-
-  if (!usuario) {
-    return (
-      <div className="rankings-container">
-        <Loading text="Carregando..." />
-      </div>
-    );
-  }
 
   const formatarTipoOperacao = (tipo) => {
     const tipos = {
@@ -191,6 +209,58 @@ const Rankings = () => {
     }
     return formatarTipoSistema(sistema.tipo);
   };
+
+  // Encontrar a operação selecionada
+  const operacaoAtual = useMemo(() => {
+    if (!operacaoSelecionada) return null;
+    return operacoes.find((op) => String(op.id) === operacaoSelecionada);
+  }, [operacoes, operacaoSelecionada]);
+
+  // Filtrar sistemas disponíveis baseado no tipo da operação selecionada:
+  // - Se operação for raiz, remover sistema "inteiro"
+  // - Se operação for conversão, permitir apenas romano, binário ou hexadecimal
+  // - Em todos os outros casos, mostrar todos os sistemas
+  const sistemasDisponiveis = useMemo(() => {
+    if (!operacaoAtual) {
+      return sistemas;
+    }
+
+    if (operacaoAtual.tipo === "raiz") {
+      return sistemas.filter((sistema) => sistema.tipo !== "inteiro");
+    }
+
+    if (operacaoAtual.tipo === "conversao") {
+      return sistemas.filter((sistema) =>
+        sistema.tipo === "romano" || sistema.tipo === "binario" || sistema.tipo === "hexadecimal"
+      );
+    }
+
+    return sistemas;
+  }, [sistemas, operacaoAtual]);
+
+  // Se o sistema selecionado atual não está mais disponível, ajustar seleção
+  useEffect(() => {
+    if (sistemaSelecionado && sistemasDisponiveis.length > 0) {
+      const sistemaAtual = sistemasDisponiveis.find(
+        (s) => String(s.id) === sistemaSelecionado
+      );
+      if (!sistemaAtual) {
+        // Sistema selecionado não está mais disponível, selecionar o primeiro disponível
+        setSistemaSelecionado(String(sistemasDisponiveis[0].id));
+      }
+    } else if (sistemaSelecionado && sistemasDisponiveis.length === 0) {
+      // Não há sistemas disponíveis, limpar seleção
+      setSistemaSelecionado("");
+    }
+  }, [sistemasDisponiveis, sistemaSelecionado]);
+
+  if (!usuario) {
+    return (
+      <div className="rankings-container">
+        <Loading text="Carregando..." />
+      </div>
+    );
+  }
 
   return (
     <div className="rankings-container">
@@ -246,7 +316,7 @@ const Rankings = () => {
           ) : null}
 
           {/* Sistema numérico */}
-          {sistemas.length > 1 ? (
+          {sistemasDisponiveis.length > 1 ? (
             <div className="select-group-filtro">
               <span className="filtro-label">Sistema:</span>
               <select
@@ -254,18 +324,18 @@ const Rankings = () => {
                 onChange={(e) => setSistemaSelecionado(e.target.value)}
                 className="select-sistema"
               >
-                {sistemas.map((sistema) => (
+                {sistemasDisponiveis.map((sistema) => (
                   <option key={sistema.id} value={sistema.id}>
                     {obterDescricaoSistema(sistema)}
                   </option>
                 ))}
               </select>
             </div>
-          ) : sistemas.length === 1 ? (
+          ) : sistemasDisponiveis.length === 1 ? (
             <div className="filtro-valor-unico">
               <span className="filtro-label">Sistema:</span>
               <span className="filtro-valor">
-                {obterDescricaoSistema(sistemas[0])}
+                {obterDescricaoSistema(sistemasDisponiveis[0])}
               </span>
             </div>
           ) : null}
@@ -311,8 +381,8 @@ const Rankings = () => {
             isVisitante={usuario?.isVisitante || false}
           />
 
-          <TabelaRanking 
-            ranking={ranking} 
+          <TabelaRanking
+            ranking={ranking}
             posicaoUsuario={posicaoUsuario}
             tempoLimite={tempoLimite}
           />

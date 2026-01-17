@@ -95,7 +95,7 @@ class LimiteController {
       ) {
         return res.status(403).json({
           message:
-            "Acesso negado. Este limite não está disponível no seu plano.",
+            "Acesso negado. Este limite não está disponível no seu nível.",
         });
       }
 

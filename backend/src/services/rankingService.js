@@ -109,6 +109,18 @@ class RankingService {
       };
     }
 
+    // Construir where do usuário
+    // Para rankings globais (sem conjunto_id), filtrar apenas usuários com ranking_global = true
+    // Para rankings de conjunto, mostrar todos (ranking privado)
+    const whereUsuario = {
+      ativo: true, // Apenas usuários ativos
+    };
+
+    // Se for ranking global (sem conjunto_id), filtrar por ranking_global
+    if (usuariosConjuntoIds === null) {
+      whereUsuario.ranking_global = true;
+    }
+
     // Contar total de participantes usando COUNT (mais eficiente que buscar todos)
     // Usar índice composto (idx_recordes_ranking) para otimização
     const totalParticipantes = await Recorde.count({
@@ -117,9 +129,7 @@ class RankingService {
         {
           association: "usuario",
           required: true,
-          where: {
-            ativo: true, // Apenas usuários ativos
-          },
+          where: whereUsuario,
         },
       ],
       distinct: true,
@@ -138,10 +148,8 @@ class RankingService {
         {
           association: "usuario",
           required: true,
-          where: {
-            ativo: true, // Apenas usuários ativos
-          },
-          attributes: ["id", "nome", "email", "ativo"],
+          where: whereUsuario,
+          attributes: ["id", "nome", "ativo"],
         },
       ],
       // Ordenar por total DESC, atualizado_em ASC (maior pontuação, mais antiga em caso de empate)
@@ -159,7 +167,6 @@ class RankingService {
       posicao: index + 1,
       id_usuario: recorde.id_usuario,
       nome: recorde.usuario.nome,
-      email: recorde.usuario.email,
       total: recorde.total,
       quantidade: recorde.quantidade,
       data_recorde: recorde.atualizado_em,
@@ -189,31 +196,6 @@ class RankingService {
       );
     }
 
-    // Buscar recorde do usuário para obter total e data
-    const recordeUsuario = await Recorde.findOne({
-      where: {
-        id_usuario: usuarioId,
-        id_operacao: filtros.operacao_id,
-        id_limite: filtros.limite_id,
-        id_sistema: filtros.sistema_id,
-      },
-      attributes: ["total", "atualizado_em"],
-      include: [
-        {
-          association: "usuario",
-          required: true,
-          where: {
-            ativo: true,
-          },
-        },
-      ],
-    });
-
-    // Se não tem recorde, retornar null
-    if (!recordeUsuario) {
-      return null;
-    }
-
     // Se conjunto_id fornecido, validar e filtrar
     let usuariosConjuntoIds = null;
     if (filtros.conjunto_id) {
@@ -238,6 +220,40 @@ class RankingService {
       usuariosConjuntoIds = usuariosConjunto.map((uc) => uc.id_usuario);
     }
 
+    // Construir where do usuário para buscar o recorde
+    // Para rankings globais (sem conjunto_id), verificar se usuário tem ranking_global = true
+    const whereUsuarioRecorde = {
+      ativo: true,
+    };
+
+    // Se for ranking global (sem conjunto_id), verificar ranking_global
+    if (usuariosConjuntoIds === null) {
+      whereUsuarioRecorde.ranking_global = true;
+    }
+
+    // Buscar recorde do usuário para obter total e data
+    const recordeUsuario = await Recorde.findOne({
+      where: {
+        id_usuario: usuarioId,
+        id_operacao: filtros.operacao_id,
+        id_limite: filtros.limite_id,
+        id_sistema: filtros.sistema_id,
+      },
+      attributes: ["total", "atualizado_em"],
+      include: [
+        {
+          association: "usuario",
+          required: true,
+          where: whereUsuarioRecorde,
+        },
+      ],
+    });
+
+    // Se não tem recorde ou não tem ranking_global = true (para rankings globais), retornar null
+    if (!recordeUsuario) {
+      return null;
+    }
+
     // Construir condições de busca
     const whereRecorde = {
       id_operacao: filtros.operacao_id,
@@ -250,6 +266,18 @@ class RankingService {
       whereRecorde.id_usuario = {
         [Op.in]: usuariosConjuntoIds,
       };
+    }
+
+    // Construir where do usuário
+    // Para rankings globais (sem conjunto_id), filtrar apenas usuários com ranking_global = true
+    // Para rankings de conjunto, mostrar todos (ranking privado)
+    const whereUsuario = {
+      ativo: true,
+    };
+
+    // Se for ranking global (sem conjunto_id), filtrar por ranking_global
+    if (usuariosConjuntoIds === null) {
+      whereUsuario.ranking_global = true;
     }
 
     // Contar quantos recordes têm total maior OU (total igual e data mais antiga)
@@ -272,9 +300,7 @@ class RankingService {
         {
           association: "usuario",
           required: true,
-          where: {
-            ativo: true,
-          },
+          where: whereUsuario,
         },
       ],
     });

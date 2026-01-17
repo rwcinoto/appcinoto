@@ -15,9 +15,9 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking, isVisitante 
     return (
       <div className="info-usuario sem-recorde">
         <div className="info-usuario-mensagem">
-          <p>Você ainda não tem recorde neste ranking.</p>
+          <p>Você ainda não tem recorde neste ranking (ou deabilitou no perfil para aparecer no ranking global).</p>
           <p className="info-usuario-subtitulo">
-            {isVisitante 
+            {isVisitante
               ? "Visitantes não aparecem no ranking. Faça login para participar e aparecer no ranking!"
               : "Complete um treino para aparecer no ranking!"
             }

@@ -1,7 +1,7 @@
 "use strict";
 
 const { validationResult } = require("express-validator");
-const { Operacao, Limite, Sistema } = require("../models");
+const { Operacao, Limite, Sistema, Usuario } = require("../models");
 const treinoService = require("../services/treinoService");
 const recordeService = require("../services/recordeService");
 
@@ -67,7 +67,7 @@ class TreinoController {
         ordemPlanoOperacao > ordemPlanoUsuario
       ) {
         return res.status(403).json({
-          message: "Esta operação não está disponível no seu plano",
+          message: "Esta operação não está disponível no seu nível",
         });
       }
 
@@ -89,7 +89,7 @@ class TreinoController {
         ordemPlanoLimite > ordemPlanoUsuario
       ) {
         return res.status(403).json({
-          message: "Este limite não está disponível no seu plano",
+          message: "Este limite não está disponível no seu nível",
         });
       }
 
@@ -111,7 +111,7 @@ class TreinoController {
         ordemPlanoSistema > ordemPlanoUsuario
       ) {
         return res.status(403).json({
-          message: "Este sistema não está disponível no seu plano",
+          message: "Este sistema não está disponível no seu nível",
         });
       }
 
@@ -285,7 +285,7 @@ class TreinoController {
 
       // Pegar primeira conta (a conta atual que o usuário está respondendo)
       const contaAtual = treino.contas[0];
-      
+
       // Pegar a próxima conta que será adicionada no final do array do frontend
       // O frontend remove a primeira e adiciona esta no final
       // Precisamos retornar a conta que está na posição 2 (antes do shift)
@@ -296,10 +296,10 @@ class TreinoController {
       // Obter formato de resposta (pode ser "sistema" ou "natural")
       // Se não fornecido, usar "sistema" como padrão
       const formatoResposta = req.body.formato_resposta || "sistema";
-      
+
       // Determinar sistema de validação baseado no formato escolhido e tipo de operação
       let sistemaValidacao;
-      
+
       // Se for operação de conversão, inverter a direção da conversão baseado no formato_resposta
       if (treino.operacao.tipo === "conversao") {
         // Para conversão:
@@ -307,15 +307,15 @@ class TreinoController {
         //   -> Validar como natural (resultado esperado = parcela1 em natural)
         // - Se formato_resposta = "sistema": mostrar número em natural, usuário responde no sistema
         //   -> Validar no sistema escolhido (resultado esperado = parcela1 convertido para o sistema)
-        sistemaValidacao = formatoResposta === "natural" 
-          ? "natural" 
+        sistemaValidacao = formatoResposta === "natural"
+          ? "natural"
           : treino.sistema.tipo;
       } else {
         // Para outras operações, comportamento normal
         // Se formato_resposta for "natural", validar como natural
         // Caso contrário, usar o sistema do treino
-        sistemaValidacao = formatoResposta === "natural" 
-          ? "natural" 
+        sistemaValidacao = formatoResposta === "natural"
+          ? "natural"
           : treino.sistema.tipo;
       }
 
@@ -415,6 +415,24 @@ class TreinoController {
           erroRecorde = error.message;
           // Continuar mesmo se houver erro ao verificar recorde
           // Não bloquear a finalização do treino por erro no recorde
+        }
+      }
+
+      // Atualizar data_ultimo_treino do usuário (apenas usuários logados, não visitantes)
+      // Usar query raw com a string da data para evitar que Sequelize/MySQL convertam
+      // a data para UTC e a data caia no dia anterior no fuso do Brasil
+      if (!usuario.isVisitante) {
+        try {
+          const dataBrasil = new Date().toLocaleDateString("en-CA", {
+            timeZone: "America/Sao_Paulo",
+          });
+          await Usuario.sequelize.query(
+            "UPDATE usuarios SET data_ultimo_treino = :data WHERE id = :id",
+            { replacements: { data: dataBrasil, id: usuario.id } }
+          );
+        } catch (error) {
+          console.error("Erro ao atualizar data_ultimo_treino:", error);
+          // Não bloquear a finalização do treino
         }
       }
 

@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import ListaRecordes from "../components/recordes/ListaRecordes";
-import Loading from "../components/common/Loading";
 import ErrorMessage from "../components/common/ErrorMessage";
+import Loading from "../components/common/Loading";
+import ListaRecordes from "../components/recordes/ListaRecordes";
 import { useAuth } from "../context/AuthContext";
-import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Recordes.css";
 
 const Recordes = () => {
@@ -19,14 +19,14 @@ const Recordes = () => {
   const [limites, setLimites] = useState([]);
   const [sistemas, setSistemas] = useState([]);
   const [planos, setPlanos] = useState([]);
-  
+
   // Filtros opcionais
   const [operacaoSelecionada, setOperacaoSelecionada] = useState("");
   const [tipoOperacaoSelecionado, setTipoOperacaoSelecionado] = useState("");
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
   const [sistemaSelecionado, setSistemaSelecionado] = useState("");
   const [planoSelecionado, setPlanoSelecionado] = useState("");
-  
+
   const [erro, setErro] = useState("");
 
   const carregarDados = useCallback(async () => {
@@ -96,27 +96,27 @@ const Recordes = () => {
     try {
       // Construir query string com filtros opcionais
       const params = new URLSearchParams();
-      
+
       if (operacaoSelecionada) {
         params.append("operacao_id", operacaoSelecionada);
       }
-      
+
       if (tipoOperacaoSelecionado) {
         params.append("tipo_operacao", tipoOperacaoSelecionado);
       }
-      
+
       if (limiteSelecionado) {
         params.append("limite_id", limiteSelecionado);
       }
-      
+
       if (sistemaSelecionado) {
         params.append("sistema_id", sistemaSelecionado);
       }
-      
+
       if (planoSelecionado) {
         params.append("plano_id", planoSelecionado);
       }
-      
+
       // Adicionar usuario_id se estiver visualizando outro usuário
       if (usuarioIdParam) {
         const usuarioId = parseInt(usuarioIdParam);
@@ -195,9 +195,15 @@ const Recordes = () => {
     return formatarTipoSistema(sistema.tipo);
   };
 
-  const titulo = usuarioVisualizado 
-    ? `Recordes de ${usuarioVisualizado.nome}` 
+  const titulo = usuarioVisualizado
+    ? `Recordes de ${usuarioVisualizado.nome}`
     : "Meus recordes";
+
+  // Limitar recordes exibidos a 60
+  const LIMITE_EXIBICAO = 60;
+  const totalRecordes = recordes.length;
+  const recordesExibidos = recordes.slice(0, LIMITE_EXIBICAO);
+  const temMaisRecordes = totalRecordes > LIMITE_EXIBICAO;
 
   // Obter tipos únicos de operação para o filtro
   const tiposOperacao = Array.from(
@@ -207,7 +213,14 @@ const Recordes = () => {
   return (
     <div className="recordes-container">
       <div className="recordes-header">
-        <h1>{titulo}</h1>
+        <div className="recordes-titulo-container">
+          <h1>{titulo}</h1>
+          {temMaisRecordes && (
+            <span className="recordes-contador">
+              (mostrando {LIMITE_EXIBICAO} de {totalRecordes})
+            </span>
+          )}
+        </div>
         <div className="filtros-header">
           {/* Tipo de operação */}
           <div className="select-group-filtro">
@@ -305,9 +318,9 @@ const Recordes = () => {
         />
       )}
 
-      <ListaRecordes 
-        recordes={recordes} 
-        loading={loading} 
+      <ListaRecordes
+        recordes={recordesExibidos}
+        loading={loading}
         usuarioIdVisualizado={usuarioIdParam ? parseInt(usuarioIdParam) : null}
         isVisitante={usuario?.isVisitante || false}
       />

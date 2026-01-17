@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ErrorMessage from "../components/common/ErrorMessage";
+import Loading from "../components/common/Loading";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
 import ModalEscolhaFormatoResposta from "../components/treino/ModalEscolhaFormatoResposta";
-import Loading from "../components/common/Loading";
-import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
-import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./NovoTreino.css";
 
 const NovoTreino = () => {
@@ -54,36 +54,22 @@ const NovoTreino = () => {
     }
   }, [usuario, carregarDados]);
 
-  // Definir valores padrão para limite e sistema automaticamente
+  // Definir valores padrão para limite: preferência do usuário (limite_id) ou primeiro da lista
   useEffect(() => {
     if (limites.length > 0 && !limiteSelecionado) {
-      // Se há apenas um limite, seleciona automaticamente
-      if (limites.length === 1) {
+      const limiteFavorito = usuario?.limite_id && limites.find((l) => l.id === usuario.limite_id);
+      if (limiteFavorito) {
+        setLimiteSelecionado(limiteFavorito.id.toString());
+      } else if (limites.length === 1) {
         setLimiteSelecionado(limites[0].id.toString());
       } else {
-        // Caso contrário, tenta o id = 1
-        const limitePadrao = limites.find((limite) => limite.id === 1);
+        const limitePadrao = limites.find((limite) => limite.id === 1) || limites[0];
         if (limitePadrao) {
-          setLimiteSelecionado("1");
+          setLimiteSelecionado(limitePadrao.id.toString());
         }
       }
     }
-  }, [limites, limiteSelecionado]);
-
-  useEffect(() => {
-    if (sistemas.length > 0 && !sistemaSelecionado) {
-      // Se há apenas um sistema, seleciona automaticamente
-      if (sistemas.length === 1) {
-        setSistemaSelecionado(sistemas[0].id.toString());
-      } else {
-        // Caso contrário, tenta o id = 1
-        const sistemaPadrao = sistemas.find((sistema) => sistema.id === 1);
-        if (sistemaPadrao) {
-          setSistemaSelecionado("1");
-        }
-      }
-    }
-  }, [sistemas, sistemaSelecionado]);
+  }, [limites, limiteSelecionado, usuario]);
 
   // Obter tipos únicos de operação para o filtro
   // Se o plano do usuário for id = 2, não mostrar "raiz" nem "conversao"
@@ -103,39 +89,60 @@ const NovoTreino = () => {
     return operacoes.filter((operacao) => operacao.tipo === tipoOperacaoSelecionado);
   }, [operacoes, tipoOperacaoSelecionado]);
 
-  // Definir operação padrão (id = 1) - apenas se não houver filtro ativo ou se a operação padrão estiver nas filtradas
+  // Definir operação padrão: preferência do usuário (operacao_id) se estiver em operacoesFiltradas, senão id=1 ou primeira
   useEffect(() => {
     if (operacoesFiltradas.length > 0 && !operacaoSelecionada) {
-      // Se não há filtro de tipo, usar operação padrão (id = 1)
-      if (!tipoOperacaoSelecionado) {
-        const operacaoPadrao = operacoesFiltradas.find((operacao) => operacao.id === 1);
-        if (operacaoPadrao) {
-          setOperacaoSelecionada(operacaoPadrao);
-        } else if (operacoesFiltradas.length > 0) {
-          // Se não encontrar id=1, selecionar a primeira disponível
-          setOperacaoSelecionada(operacoesFiltradas[0]);
-        }
+      const operacaoFavorita = usuario?.operacao_id && operacoesFiltradas.find((o) => o.id === usuario.operacao_id);
+      if (operacaoFavorita) {
+        setOperacaoSelecionada(operacaoFavorita);
+      } else if (!tipoOperacaoSelecionado) {
+        const operacaoPadrao = operacoesFiltradas.find((o) => o.id === 1) || operacoesFiltradas[0];
+        setOperacaoSelecionada(operacaoPadrao);
       } else {
-        // Se há filtro ativo, selecionar a primeira operação filtrada
         setOperacaoSelecionada(operacoesFiltradas[0]);
       }
     }
-  }, [operacoesFiltradas, operacaoSelecionada, tipoOperacaoSelecionado]);
+  }, [operacoesFiltradas, operacaoSelecionada, tipoOperacaoSelecionado, usuario]);
 
-  // Filtrar sistemas disponíveis: 
+  // Filtrar sistemas disponíveis baseado no tipo da operação selecionada:
   // - Se operação for raiz, remover sistema "inteiro"
   // - Se operação for conversão, permitir apenas romano, binário ou hexadecimal
+  // - Caso contrário, mostrar todos os sistemas
   const sistemasDisponiveis = useMemo(() => {
-    if (operacaoSelecionada?.tipo === "raiz") {
+    // Se não há operação selecionada (caso raro: durante carregamento ou sem operações disponíveis),
+    // retornar todos os sistemas
+    if (!operacaoSelecionada) {
+      return sistemas;
+    }
+
+    // Aplicar filtros baseados no tipo da operação selecionada
+    if (operacaoSelecionada.tipo === "raiz") {
       return sistemas.filter((sistema) => sistema.tipo !== "inteiro");
     }
-    if (operacaoSelecionada?.tipo === "conversao") {
-      return sistemas.filter((sistema) => 
+    if (operacaoSelecionada.tipo === "conversao") {
+      return sistemas.filter((sistema) =>
         sistema.tipo === "romano" || sistema.tipo === "binario" || sistema.tipo === "hexadecimal"
       );
     }
     return sistemas;
   }, [sistemas, operacaoSelecionada]);
+
+  // Definir valor padrão para sistema: preferência do usuário (sistema_id) se estiver em sistemasDisponiveis, senão primeiro da lista
+  useEffect(() => {
+    if (sistemasDisponiveis.length > 0 && !sistemaSelecionado) {
+      const sistemaFavorito = usuario?.sistema_id && sistemasDisponiveis.find((s) => s.id === usuario.sistema_id);
+      if (sistemaFavorito) {
+        setSistemaSelecionado(sistemaFavorito.id.toString());
+      } else if (sistemasDisponiveis.length === 1) {
+        setSistemaSelecionado(sistemasDisponiveis[0].id.toString());
+      } else {
+        const sistemaPadrao = sistemasDisponiveis.find((s) => s.id === 1) || sistemasDisponiveis[0];
+        if (sistemaPadrao) {
+          setSistemaSelecionado(sistemaPadrao.id.toString());
+        }
+      }
+    }
+  }, [sistemasDisponiveis, sistemaSelecionado, usuario]);
 
   // Se o sistema selecionado atual não está mais disponível, ajustar seleção
   useEffect(() => {
@@ -208,7 +215,7 @@ const NovoTreino = () => {
 
   const handleSelecionarOperacao = (operacao) => {
     setOperacaoSelecionada(operacao);
-    
+
     // Se a operação for raiz quadrada e o sistema selecionado for "inteiro",
     // limpar a seleção do sistema
     if (operacao.tipo === "raiz" && sistemaSelecionado) {
@@ -219,7 +226,7 @@ const NovoTreino = () => {
         setSistemaSelecionado("");
       }
     }
-    
+
     // Se a operação for conversão e o sistema selecionado não for válido,
     // limpar a seleção do sistema
     if (operacao.tipo === "conversao" && sistemaSelecionado) {
@@ -255,7 +262,7 @@ const NovoTreino = () => {
       const sistemaAtual = sistemas.find(
         (s) => s.id.toString() === sistemaSelecionado
       );
-      
+
       if (sistemaAtual && (sistemaAtual.tipo === "romano" || sistemaAtual.tipo === "hexadecimal" || sistemaAtual.tipo === "binario")) {
         // Mostrar modal de escolha de formato
         setMostrarModalFormato(true);
@@ -318,12 +325,12 @@ const NovoTreino = () => {
     const sistemaAtual = sistemas.find(
       (s) => s.id.toString() === sistemaSelecionado
     );
-    navigate("/treino-ativo", { 
-      state: { 
+    navigate("/treino-ativo", {
+      state: {
         treinoData: dadosTreino,
         formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
         sistemaTipo: sistemaAtual?.tipo || "natural"
-      } 
+      }
     });
   };
 
@@ -451,9 +458,9 @@ const NovoTreino = () => {
             <div className="cards-operacoes">
               {operacoesFiltradas.length === 0 ? (
                 <p className="sem-opcoes">
-                  {tipoOperacaoSelecionado 
+                  {tipoOperacaoSelecionado
                     ? "Nenhuma operação encontrada para o tipo selecionado."
-                    : "Nenhuma operação disponível no seu plano."}
+                    : "Nenhuma operação disponível no seu nível."}
                 </p>
               ) : (
                 operacoesFiltradas.map((operacao) => {
