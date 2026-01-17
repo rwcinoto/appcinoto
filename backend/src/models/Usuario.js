@@ -24,6 +24,24 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: "id_conjunto",
         as: "conjuntos",
       });
+
+      // Um usuário tem uma operação preferida
+      Usuario.belongsTo(models.Operacao, {
+        foreignKey: "operacao_id",
+        as: "operacao",
+      });
+
+      // Um usuário tem um limite preferido
+      Usuario.belongsTo(models.Limite, {
+        foreignKey: "limite_id",
+        as: "limite",
+      });
+
+      // Um usuário tem um sistema preferido
+      Usuario.belongsTo(models.Sistema, {
+        foreignKey: "sistema_id",
+        as: "sistema",
+      });
     }
 
     // Método para verificar senha
@@ -79,6 +97,27 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true,
+      },
+      operacao_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      limite_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      sistema_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      ranking_global: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      data_ultimo_treino: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
       criado_em: {
         type: DataTypes.DATE,

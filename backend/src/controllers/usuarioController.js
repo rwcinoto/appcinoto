@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator");
 const { AppError, formatValidationErrors } = require("../utils/errors");
-const { Usuario, Plano } = require("../models");
+const { Usuario, Plano, Operacao, Limite, Sistema } = require("../models");
 const { Op } = require("sequelize");
 
 class UsuarioController {
@@ -86,7 +86,7 @@ class UsuarioController {
       }
 
       const usuario = await Usuario.findByPk(id, {
-        attributes: ["id", "nome", "email", "id_plano"],
+        attributes: ["id", "nome", "id_plano"],
         include: [{ association: "plano" }],
       });
 
@@ -97,7 +97,6 @@ class UsuarioController {
       return res.json({
         id: usuario.id,
         nome: usuario.nome,
-        email: usuario.email,
         plano: usuario.plano,
       });
     } catch (error) {
@@ -183,6 +182,7 @@ class UsuarioController {
         tipo: tipoUsuario,
         id_plano: idPlanoUsuario,
         ativo: ativo !== undefined ? ativo : true,
+        ranking_global: true, // Padrão: true
         criado_por: req.usuario.id,
         atualizado_por: req.usuario.id,
         criado_em: new Date(),
@@ -220,7 +220,7 @@ class UsuarioController {
 
       // Verifica se o usuário pode atualizar este perfil
       const podeAtualizar = isAdmin || isProprioUsuario || (isProfe && usuario.criado_por === req.usuario.id);
-      
+
       if (!podeAtualizar) {
         return res.status(403).json({
           message: "Acesso negado. Você só pode atualizar seu próprio perfil ou usuários criados por você.",
@@ -229,10 +229,10 @@ class UsuarioController {
 
       // Campos que podem ser atualizados
       const camposPermitidos = isAdmin
-        ? ["email", "senha", "nome", "tipo", "id_plano", "ativo"]
+        ? ["email", "senha", "nome", "tipo", "id_plano", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"]
         : isProfe
-        ? ["email", "senha", "nome", "ativo"] // Profe não pode alterar tipo nem plano
-        : ["email", "senha", "nome"];
+        ? ["email", "senha", "nome", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"] // Profe não pode alterar tipo nem plano
+        : ["email", "senha", "nome", "operacao_id", "limite_id", "sistema_id", "ranking_global"];
 
       const dadosAtualizacao = {};
 
@@ -272,6 +272,108 @@ class UsuarioController {
         const plano = await Plano.findByPk(dadosAtualizacao.id_plano);
         if (!plano) {
           return res.status(400).json({ message: "Plano não encontrado" });
+        }
+      }
+
+      // Carregar plano do usuário para validação
+      const planoUsuario = await Plano.findByPk(usuario.id_plano);
+      if (!planoUsuario) {
+        return res.status(400).json({ message: "Plano do usuário não encontrado" });
+      }
+
+      // Validar que operacao_id pertence ao plano do usuário (se fornecido)
+      if (dadosAtualizacao.operacao_id !== undefined) {
+        if (dadosAtualizacao.operacao_id === null) {
+          // Permitir null (remover preferência)
+          dadosAtualizacao.operacao_id = null;
+        } else {
+          // Buscar planos disponíveis baseado na hierarquia
+          const planosDisponiveis = await Plano.findAll({
+            where: {
+              ordem: {
+                [Op.lte]: planoUsuario.ordem,
+              },
+            },
+            attributes: ["id"],
+          });
+          const idsPlanos = planosDisponiveis.map((p) => p.id);
+
+          const operacao = await Operacao.findOne({
+            where: {
+              id: dadosAtualizacao.operacao_id,
+              id_plano: { [Op.in]: idsPlanos },
+            },
+          });
+
+          if (!operacao) {
+            return res.status(400).json({
+              message: "Operação não encontrada ou não disponível para seu plano",
+            });
+          }
+        }
+      }
+
+      // Validar que limite_id pertence ao plano do usuário (se fornecido)
+      if (dadosAtualizacao.limite_id !== undefined) {
+        if (dadosAtualizacao.limite_id === null) {
+          // Permitir null (remover preferência)
+          dadosAtualizacao.limite_id = null;
+        } else {
+          // Buscar planos disponíveis baseado na hierarquia
+          const planosDisponiveis = await Plano.findAll({
+            where: {
+              ordem: {
+                [Op.lte]: planoUsuario.ordem,
+              },
+            },
+            attributes: ["id"],
+          });
+          const idsPlanos = planosDisponiveis.map((p) => p.id);
+
+          const limite = await Limite.findOne({
+            where: {
+              id: dadosAtualizacao.limite_id,
+              id_plano: { [Op.in]: idsPlanos },
+            },
+          });
+
+          if (!limite) {
+            return res.status(400).json({
+              message: "Limite não encontrado ou não disponível para seu plano",
+            });
+          }
+        }
+      }
+
+      // Validar que sistema_id pertence ao plano do usuário (se fornecido)
+      if (dadosAtualizacao.sistema_id !== undefined) {
+        if (dadosAtualizacao.sistema_id === null) {
+          // Permitir null (remover preferência)
+          dadosAtualizacao.sistema_id = null;
+        } else {
+          // Buscar planos disponíveis baseado na hierarquia
+          const planosDisponiveis = await Plano.findAll({
+            where: {
+              ordem: {
+                [Op.lte]: planoUsuario.ordem,
+              },
+            },
+            attributes: ["id"],
+          });
+          const idsPlanos = planosDisponiveis.map((p) => p.id);
+
+          const sistema = await Sistema.findOne({
+            where: {
+              id: dadosAtualizacao.sistema_id,
+              id_plano: { [Op.in]: idsPlanos },
+            },
+          });
+
+          if (!sistema) {
+            return res.status(400).json({
+              message: "Sistema não encontrado ou não disponível para seu plano",
+            });
+          }
         }
       }
 

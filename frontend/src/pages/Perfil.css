@@ -26,6 +26,7 @@
 
 .form-group {
   margin-bottom: 20px;
+  position: relative;
 }
 
 .form-group label {
@@ -113,6 +114,69 @@
   color: var(--color-text-light);
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, background-color 0.3s ease, color 0.3s ease;
+  background: var(--color-card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  color: var(--color-text);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.dark .form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-group select:disabled {
+  background: var(--color-background-light);
+  color: var(--color-text-light);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-group select option {
+  background: var(--color-card);
+  color: var(--color-text);
+}
+
+.form-group .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-group .checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.form-group .checkbox-label span {
+  color: var(--color-text);
 }
 
 .mensagem-visitante {

@@ -35,6 +35,11 @@ class AuthService {
         tipo: usuario.tipo,
         id_plano: usuario.id_plano,
         plano: usuario.plano,
+        operacao_id: usuario.operacao_id,
+        limite_id: usuario.limite_id,
+        sistema_id: usuario.sistema_id,
+        ranking_global: usuario.ranking_global,
+        data_ultimo_treino: usuario.data_ultimo_treino,
       },
     };
   }

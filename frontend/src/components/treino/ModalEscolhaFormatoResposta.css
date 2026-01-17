@@ -12,6 +12,10 @@
   animation: fadeIn 0.3s ease-in;
 }
 
+.dark .modal-escolha-formato-overlay {
+  background: rgba(0, 0, 0, 0.85);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -22,12 +26,13 @@
 }
 
 .modal-escolha-formato-content {
-  background: white;
-  border-radius: 12px;
+  background: var(--color-background);
+  border-radius: var(--border-radius-lg);
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.3s ease-out;
+  transition: background-color 0.3s ease;
 }
 
 @keyframes slideUp {
@@ -42,106 +47,119 @@
 }
 
 .modal-escolha-formato-header {
-  padding: 24px;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+  transition: border-color 0.3s ease;
 }
 
 .modal-escolha-formato-header h2 {
   margin: 0;
-  color: #333;
-  font-size: 24px;
+  color: var(--color-text);
+  font-size: var(--font-size-2xl);
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .modal-escolha-formato-body {
-  padding: 24px;
+  padding: var(--spacing-lg);
 }
 
 /* .modal-escolha-formato-descricao {
   margin: 0 0 24px 0;
-  color: #666;
-  font-size: 16px;
-  line-height: 1.5;
+  color: var(--color-text-light);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
 } */
 
 .modal-escolha-formato-opcoes {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
 .modal-escolha-formato-opcao {
-  background: #f8f9fa;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
+  background: var(--color-background-light);
+  border: var(--border-width-medium) solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .modal-escolha-formato-opcao:hover {
-  background: #f0f0f0;
-  border-color: #2196F3;
+  background: var(--color-card-hover);
+  border-color: var(--color-primary);
 }
 
 .modal-escolha-formato-opcao.selecionado {
-  background: #e3f2fd;
-  border-color: #2196F3;
+  background: var(--state-focus-light);
+  border-color: var(--color-primary);
   box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
+.dark .modal-escolha-formato-opcao.selecionado {
+  background: var(--state-focus-dark);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
 .opcao-titulo {
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+  transition: color 0.3s ease;
 }
 
 .modal-escolha-formato-acoes {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: var(--spacing-sm);
 }
 
 .btn-confirmar {
-  background: #2196F3;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--border-radius-sm);
   padding: 12px 32px;
-  font-size: 16px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .btn-confirmar:hover:not(:disabled) {
-  background: #1976D2;
+  background: var(--color-primary-hover);
 }
 
 .btn-confirmar:disabled {
-  background: #ccc;
+  background: var(--state-disabled-bg);
+  color: var(--state-disabled-text);
   cursor: not-allowed;
 }
 
 .btn-cancelar {
   background: transparent;
-  color: #666;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  color: var(--color-text-light);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--border-radius-sm);
   padding: 12px 32px;
-  font-size: 16px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-cancelar:hover {
-  background: #f5f5f5;
-  border-color: #999;
-  color: #333;
+  background: var(--state-hover-light);
+  border-color: var(--color-border-dark);
+  color: var(--color-text);
+}
+
+.dark .btn-cancelar:hover {
+  background: var(--state-hover-dark);
 }
 
 /* Responsividade */

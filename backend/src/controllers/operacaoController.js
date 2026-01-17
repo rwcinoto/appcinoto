@@ -104,7 +104,7 @@ class OperacaoController {
       ) {
         return res.status(403).json({
           message:
-            "Acesso negado. Esta operação não está disponível no seu plano.",
+            "Acesso negado. Esta operação não está disponível no seu nível.",
         });
       }
 
@@ -401,7 +401,7 @@ class OperacaoController {
       // Se for operação aleatória e houver operacoes_incluidas no body, atualizar relações
       if (tipoAtual === "aleatorio" && req.body.operacoes_incluidas !== undefined) {
         const { operacoes_incluidas } = req.body;
-        
+
         if (!Array.isArray(operacoes_incluidas) || operacoes_incluidas.length === 0) {
           return res.status(400).json({
             message: "Operação do tipo 'aleatorio' deve ter pelo menos uma operação incluída",

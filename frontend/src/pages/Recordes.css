@@ -15,12 +15,25 @@
   flex-wrap: wrap;
 }
 
+.recordes-titulo-container {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
 .recordes-header h1 {
   margin: 0;
   font-size: 28px;
   font-weight: 600;
   color: var(--color-text);
-  flex: 0 0 auto;
+}
+
+.recordes-contador {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-text-light);
+  white-space: nowrap;
 }
 
 .filtros-header {
@@ -131,8 +144,18 @@
     align-items: flex-start;
   }
 
+  .recordes-titulo-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
   .recordes-header h1 {
     font-size: 1.5rem;
+  }
+
+  .recordes-contador {
+    font-size: 14px;
   }
 
   .filtros-header {
@@ -154,6 +177,10 @@
 
   .recordes-header h1 {
     font-size: 1.3rem;
+  }
+
+  .recordes-contador {
+    font-size: 13px;
   }
 
   .filtros-header {
