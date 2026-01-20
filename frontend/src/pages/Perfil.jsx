@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -8,6 +9,7 @@ import "./Perfil.css";
 
 const Perfil = () => {
   const { usuario, atualizarUsuario } = useAuth();
+  const navigate = useNavigate();
   const { showSuccess } = useToast();
   const [formData, setFormData] = useState({
     email: "",
@@ -144,7 +146,31 @@ const Perfil = () => {
   return (
     <div className="perfil-container">
       <div className="perfil-card">
-        <h1>Meu perfil</h1>
+        <div className="titulo-com-ajuda">
+          <h1>Meu perfil</h1>
+          <button
+            className="btn-ajuda"
+            onClick={() => navigate("/instrucoes/perfil")}
+            title="Ver instruções sobre perfil"
+            type="button"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
+        </div>
 
         {isVisitante && (
           <div className="mensagem-visitante">

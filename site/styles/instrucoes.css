@@ -1,0 +1,251 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: #E0E0E0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.logo-section {
+    background: white;
+    text-align: center;
+    padding: 40px 20px;
+    border-radius: 20px 20px 0 0;
+    margin-bottom: 0;
+}
+
+.logo-section img {
+    max-width: 100%;
+    max-height: 120px;
+    height: auto;
+}
+
+/* Menu de navegação */
+.menu {
+    background: #2A2A3A;
+    padding: 15px 20px;
+    border-radius: 0 0 20px 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.menu a {
+    color: #E0E0E0;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.menu a:hover {
+    background: #667eea;
+    color: white;
+}
+
+.menu a.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.instrucoes-content {
+    background: #1E1E1E;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 20px 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.instrucoes-content h1 {
+    color: #8B7ED8;
+    font-size: 2em;
+    margin-bottom: 30px;
+    text-align: left;
+    border-bottom: 3px solid #8B7ED8;
+    padding-bottom: 15px;
+}
+
+.instrucao-secao {
+    margin-bottom: 40px;
+}
+
+.instrucao-secao h2 {
+    color: #A78BFA;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.instrucao-secao h3 {
+    color: #A78BFA;
+    font-size: 1.3em;
+    margin: 20px 0 10px 0;
+}
+
+.instrucao-secao p {
+    color: #E0E0E0;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.instrucao-secao ul,
+.instrucao-secao ol {
+    color: #E0E0E0;
+    font-size: 1.1em;
+    margin: 15px 0 15px 30px;
+}
+
+.instrucao-secao li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.instrucao-item {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #404040;
+}
+
+.instrucao-item:first-of-type {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: none;
+}
+
+.instrucao-destaque {
+    background: rgba(33, 150, 243, 0.2);
+    border-left: 4px solid #2196F3;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+    font-size: 1.05em;
+    line-height: 1.6;
+}
+
+.instrucao-importante {
+    background: rgba(255, 152, 0, 0.2);
+    border-left-color: #FF9800;
+}
+
+.instrucao-imagem {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #404040;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+.access-button-container {
+    text-align: center;
+    margin: 40px 0 20px 0;
+}
+
+.access-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 1.2em;
+    font-weight: bold;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.access-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: white;
+    opacity: 0.9;
+}
+
+.btn-voltar-topo {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-voltar-topo:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+}
+
+@media (max-width: 768px) {
+    .logo-section {
+        padding: 30px 20px;
+    }
+
+    .logo-section img {
+        max-height: 80px;
+    }
+
+    .menu {
+        padding: 10px;
+        gap: 5px;
+    }
+
+    .menu a {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .instrucoes-content {
+        padding: 20px;
+    }
+
+    .instrucoes-content h1 {
+        font-size: 1.5em;
+    }
+
+    .instrucao-secao h2 {
+        font-size: 1.3em;
+    }
+
+    .instrucao-secao h3 {
+        font-size: 1.1em;
+    }
+
+    .instrucao-secao p,
+    .instrucao-secao ul,
+    .instrucao-secao ol {
+        font-size: 1em;
+    }
+
+    .access-button {
+        padding: 12px 30px;
+        font-size: 1em;
+    }
+}

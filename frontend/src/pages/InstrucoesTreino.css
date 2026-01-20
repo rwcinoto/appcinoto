@@ -1,0 +1,244 @@
+.instrucoes-container {
+  padding: 20px 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--color-background);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.instrucoes-header {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.instrucoes-header h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 28px;
+  transition: color 0.3s ease;
+}
+
+.btn-voltar {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-voltar:hover {
+  background: var(--color-card);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateX(-2px);
+}
+
+.instrucoes-content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.instrucao-secao {
+  background: var(--color-card);
+  padding: 25px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.instrucao-secao h2 {
+  margin: 0 0 15px 0;
+  color: var(--color-text);
+  font-size: 22px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.instrucao-secao h3 {
+  margin: 15px 0 10px 0;
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.instrucao-secao p {
+  margin: 0 0 15px 0;
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.6;
+  transition: color 0.3s ease;
+}
+
+.instrucao-secao p:last-child {
+  margin-bottom: 0;
+}
+
+.instrucao-secao ul {
+  margin: 15px 0;
+  padding-left: 25px;
+  color: var(--color-text);
+  transition: color 0.3s ease;
+}
+
+.instrucao-secao li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.instrucao-item {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  transition: border-color 0.3s ease;
+}
+
+.instrucao-item:first-of-type {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: none;
+}
+
+.instrucao-destaque {
+  background: rgba(33, 150, 243, 0.1);
+  border-left: 4px solid #2196F3;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 4px;
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .instrucao-destaque {
+  background: rgba(33, 150, 243, 0.2);
+}
+
+.instrucao-importante {
+  background: rgba(255, 152, 0, 0.1);
+  border-left-color: #FF9800;
+}
+
+.dark .instrucao-importante {
+  background: rgba(255, 152, 0, 0.2);
+}
+
+.imagem-placeholder {
+  background: var(--color-background-light);
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 40px 20px;
+  margin: 20px 0;
+  text-align: center;
+  color: var(--color-text-light);
+  font-size: 14px;
+  font-style: italic;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.instrucao-imagem {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark .instrucao-imagem {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.instrucao-imagem:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: zoom-in;
+}
+
+.dark .instrucao-imagem:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.instrucao-acoes {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-comecar-treino {
+  padding: 14px 40px;
+  background: #2196F3;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+}
+
+.btn-comecar-treino:hover {
+  background: #1976D2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-comecar-treino:active {
+  background: #1565C0;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .instrucoes-container {
+    padding: 15px 20px;
+  }
+
+  .instrucoes-header h1 {
+    font-size: 24px;
+  }
+
+  .instrucao-secao {
+    padding: 20px 15px;
+  }
+
+  .instrucao-secao h2 {
+    font-size: 20px;
+  }
+
+  .instrucao-secao h3 {
+    font-size: 17px;
+  }
+
+  .instrucao-secao p,
+  .instrucao-secao li {
+    font-size: 14px;
+  }
+
+  .imagem-placeholder {
+    padding: 30px 15px;
+    font-size: 13px;
+  }
+
+  .btn-comecar-treino {
+    width: 100%;
+    padding: 14px 20px;
+  }
+}

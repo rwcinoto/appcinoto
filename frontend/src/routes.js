@@ -7,14 +7,19 @@ import { useAuth } from "./context/AuthContext";
 // Lazy loading de componentes de páginas
 const Login = lazy(() => import("./pages/Login"));
 const Conjuntos = lazy(() => import("./pages/Conjuntos"));
+const InstrucoesConjuntos = lazy(() => import("./pages/InstrucoesConjuntos"));
 const DetalhesConjunto = lazy(() => import("./pages/DetalhesConjunto"));
 const Limites = lazy(() => import("./pages/Limites"));
 const NovoTreino = lazy(() => import("./pages/NovoTreino"));
+const InstrucoesTreino = lazy(() => import("./pages/InstrucoesTreino"));
 const Operacoes = lazy(() => import("./pages/Operacoes"));
 const Perfil = lazy(() => import("./pages/Perfil"));
+const InstrucoesPerfil = lazy(() => import("./pages/InstrucoesPerfil"));
 const Planos = lazy(() => import("./pages/Planos"));
 const Rankings = lazy(() => import("./pages/Rankings"));
+const InstrucoesRankings = lazy(() => import("./pages/InstrucoesRankings"));
 const Recordes = lazy(() => import("./pages/Recordes"));
+const InstrucoesRecordes = lazy(() => import("./pages/InstrucoesRecordes"));
 const Sistemas = lazy(() => import("./pages/Sistemas"));
 const TreinoAtivo = lazy(() => import("./pages/TreinoAtivo"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
@@ -43,11 +48,16 @@ const AppRoutes = () => {
           }
         >
           <Route path="/novo-treino" element={<NovoTreino />} />
+          <Route path="/instrucoes/novo-treino" element={<InstrucoesTreino />} />
           <Route path="/treino-ativo" element={<TreinoAtivo />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/instrucoes/perfil" element={<InstrucoesPerfil />} />
           <Route path="/recordes" element={<Recordes />} />
+          <Route path="/instrucoes/recordes" element={<InstrucoesRecordes />} />
           <Route path="/rankings" element={<Rankings />} />
+          <Route path="/instrucoes/rankings" element={<InstrucoesRankings />} />
           <Route path="/conjuntos" element={<Conjuntos />} />
+          <Route path="/instrucoes/conjuntos" element={<InstrucoesConjuntos />} />
           <Route path="/conjuntos/:id" element={<DetalhesConjunto />} />
           <Route path="/usuarios" element={<Usuarios />} />
           {/* Rotas de cadastros */}
