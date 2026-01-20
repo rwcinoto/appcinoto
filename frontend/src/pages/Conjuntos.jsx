@@ -1,18 +1,20 @@
 import React, { useCallback, useEffect, useState } from "react";
-import ListaConjuntos from "../components/conjuntos/ListaConjuntos";
-import ModalConjunto from "../components/conjuntos/ModalConjunto";
-import ModalAdicionarElemento from "../components/conjuntos/ModalAdicionarElemento";
-import ConvitesPendentes from "../components/conjuntos/ConvitesPendentes";
-import Loading from "../components/common/Loading";
+import { useNavigate } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
+import Loading from "../components/common/Loading";
+import ConvitesPendentes from "../components/conjuntos/ConvitesPendentes";
+import ListaConjuntos from "../components/conjuntos/ListaConjuntos";
+import ModalAdicionarElemento from "../components/conjuntos/ModalAdicionarElemento";
+import ModalConjunto from "../components/conjuntos/ModalConjunto";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications } from "../context/NotificationContext";
-import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Conjuntos.css";
 
 const Conjuntos = () => {
   const { usuario } = useAuth();
+  const navigate = useNavigate();
   const { carregarConvitesPendentes } = useNotifications();
   const [conjuntos, setConjuntos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,30 @@ const Conjuntos = () => {
   return (
     <div className="conjuntos-container">
       <div className="conjuntos-header">
-        <h1>Conjuntos</h1>
+        <div className="titulo-com-ajuda">
+          <h1>Conjuntos</h1>
+          <button
+            className="btn-ajuda"
+            onClick={() => navigate("/instrucoes/conjuntos")}
+            title="Ver instruções sobre conjuntos"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
+        </div>
         {!usuario?.isVisitante && (
           <button className="btn-criar" onClick={handleCriarConjunto}>
             + Criar conjunto

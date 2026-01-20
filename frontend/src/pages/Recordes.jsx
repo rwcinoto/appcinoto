@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import Loading from "../components/common/Loading";
 import ListaRecordes from "../components/recordes/ListaRecordes";
@@ -10,6 +10,7 @@ import "./Recordes.css";
 
 const Recordes = () => {
   const { usuario } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const usuarioIdParam = searchParams.get("usuario_id");
   const [usuarioVisualizado, setUsuarioVisualizado] = useState(null);
@@ -214,7 +215,30 @@ const Recordes = () => {
     <div className="recordes-container">
       <div className="recordes-header">
         <div className="recordes-titulo-container">
-          <h1>{titulo}</h1>
+          <div className="titulo-com-ajuda">
+            <h1>{titulo}</h1>
+            <button
+              className="btn-ajuda"
+              onClick={() => navigate("/instrucoes/recordes")}
+              title="Ver instruções sobre recordes"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
+          </div>
           {temMaisRecordes && (
             <span className="recordes-contador">
               (mostrando {LIMITE_EXIBICAO} de {totalRecordes})

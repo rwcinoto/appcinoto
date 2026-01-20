@@ -26,7 +26,7 @@ const ListaConjuntos = ({
             Os conjuntos permitem que você crie grupos com outros usuários e veja rankings específicos apenas dos elementos daquele conjunto.
           </p>
           <p>
-            Para começar, crie um conjunto e adicione os e-mails dos usuários que você deseja convidar. Eles receberão um convite e, ao aceitarem, poderão participar do conjunto e visualizar o ranking apenas dos elementos do grupo.
+            Para começar, crie um conjunto e adicione os e-mails dos usuários que você deseja convidar. Eles receberão um convite e, ao aceitarem, poderão participar do conjunto e visualizar o ranking apenas dos elementos do conjunto.
           </p>
         </div>
       </div>
