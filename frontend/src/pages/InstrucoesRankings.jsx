@@ -76,13 +76,19 @@ const InstrucoesRankings = () => {
             seguintes critérios, nesta ordem:
           </p>
           <div className="instrucao-item">
-            <h3>1. Quantidade de treinos</h3>
+            <h3>1. Quantidade de erros</h3>
+            <p>
+              O usuário com <strong>menos erros</strong> realizados fica em posição melhor.
+            </p>
+          </div>
+          <div className="instrucao-item">
+            <h3>2. Quantidade de treinos</h3>
             <p>
               O usuário com <strong>menos treinos</strong> realizados fica em posição melhor.
             </p>
           </div>
           <div className="instrucao-item">
-            <h3>2. Data do recorde</h3>
+            <h3>3. Data do recorde</h3>
             <p>
               Se ainda houver empate, o recorde <strong>mais antigo</strong> é
               recompensado por ter alcançado a pontuação primeiro.

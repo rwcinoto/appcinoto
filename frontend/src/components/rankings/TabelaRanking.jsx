@@ -26,14 +26,15 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
               <th className="coluna-posicao-header">Posição</th>
               <th className="coluna-nome-header">Nome</th>
               <th className="coluna-pontuacao-header">Pontuação</th>
+              <th className="coluna-precisao-header">Precisão</th>
               <th className="coluna-data-header">Data</th>
               <th className="coluna-tentativas-header">Treinos</th>
             </tr>
           </thead>
           <tbody>
             {ranking.map((item) => (
-              <LinhaRanking 
-                key={`${item.id_usuario}-${item.posicao}`} 
+              <LinhaRanking
+                key={`${item.id_usuario}-${item.posicao}`}
                 item={item}
                 tempoLimite={tempoLimite}
               />
@@ -46,7 +47,7 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
       <div className="tabela-ranking-mobile">
         {ranking.map((item) => {
           const eUsuarioLogado = usuario && item.id_usuario === usuario.id;
-          
+
           // Calcular tempo médio por conta
           const calcularTempoMedioPorConta = () => {
             const totalAcertos = item.total || 0;
@@ -61,7 +62,24 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
           };
 
           const tempoMedioFormatado = calcularTempoMedioPorConta();
-          
+
+          // Calcular precisão (mesma lógica do LinhaRanking)
+          const calcularPrecisao = () => {
+            if (item.erros === null || item.erros === undefined) {
+              return null;
+            }
+            const totalAcertos = item.total || 0;
+            const totalErros = item.erros || 0;
+            const totalRespostas = totalAcertos + totalErros;
+            if (totalRespostas === 0) {
+              return null;
+            }
+            const precisao = (totalAcertos / totalRespostas) * 100;
+            return precisao.toFixed(1).replace(".", ",") + "%";
+          };
+
+          const precisaoFormatada = calcularPrecisao();
+
           return (
             <div key={`${item.id_usuario}-${item.posicao}`} className="card-ranking-mobile">
               <div className="card-ranking-header-mobile">
@@ -85,14 +103,14 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
               <div className="card-ranking-nome-data-mobile">
                 <div className="card-ranking-nome-mobile">
                   {eUsuarioLogado ? (
-                    <Link 
+                    <Link
                       to="/recordes"
                       className="nome-usuario-link-mobile"
                     >
                       {item.nome}
                     </Link>
                   ) : (
-                    <Link 
+                    <Link
                       to={`/recordes?usuario_id=${item.id_usuario}`}
                       className="nome-usuario-link-mobile"
                     >
@@ -110,8 +128,15 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
                     year: "2-digit",
                   })}
                 </div>
-                <div className="card-ranking-tentativas-mobile">
-                  {item.quantidade || 0} {item.quantidade === 1 ? "treino" : "treinos"}
+                <div className="card-ranking-footer-mobile">
+                  <div className="card-ranking-tentativas-mobile">
+                    {item.quantidade || 0} {item.quantidade === 1 ? "treino" : "treinos"}
+                  </div>
+                  {precisaoFormatada && (
+                    <div className="card-ranking-precisao-mobile">
+                      Precisão: {precisaoFormatada}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
