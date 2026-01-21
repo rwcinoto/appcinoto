@@ -1,7 +1,114 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { getErrorMessage, logError } from "../../utils/errorHandler";
+import ContagemRegressiva from "../treino/ContagemRegressiva";
+import ModalEscolhaFormatoResposta from "../treino/ModalEscolhaFormatoResposta";
 import "./InfoUsuario.css";
 
-const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking, isVisitante = false }) => {
+const InfoUsuario = ({
+  posicaoUsuario,
+  totalParticipantes,
+  ranking,
+  isVisitante = false,
+  operacaoId,
+  limiteId,
+  sistemaId,
+  sistemaTipo
+}) => {
+  const navigate = useNavigate();
+  const [iniciandoTreino, setIniciandoTreino] = useState(false);
+  const [mostrarContagem, setMostrarContagem] = useState(false);
+  const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
+  const [dadosTreino, setDadosTreino] = useState(null);
+  const [formatoResposta, setFormatoResposta] = useState(null);
+
+  const handleIniciarTreino = async () => {
+    if (!operacaoId || !limiteId || !sistemaId) {
+      return;
+    }
+
+    setIniciandoTreino(true);
+
+    try {
+      const response = await api.post("/treinos/iniciar", {
+        operacao_id: operacaoId,
+        limite_id: limiteId,
+        sistema_id: sistemaId,
+      });
+
+      // Salvar dados do treino
+      setDadosTreino(response.data);
+
+      // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
+      if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") {
+        // Mostrar modal de escolha de formato
+        setMostrarModalFormato(true);
+      } else {
+        // Sistema não requer escolha, ir direto para contagem
+        setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
+        // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+        try {
+          await api.post("/treinos/confirmar-inicio", {
+            treino_id: response.data.treino_id,
+          });
+        } catch (error) {
+          // Não bloquear a contagem regressiva se houver erro
+          logError("InfoUsuario - handleIniciarTreino confirmarInicio", error);
+        }
+        setMostrarContagem(true);
+      }
+    } catch (error) {
+      logError("InfoUsuario - handleIniciarTreino", error);
+      alert(getErrorMessage(error));
+      setIniciandoTreino(false);
+    }
+  };
+
+  const confirmarInicioTreino = async () => {
+    if (!dadosTreino?.treino_id) {
+      return;
+    }
+
+    try {
+      await api.post("/treinos/confirmar-inicio", {
+        treino_id: dadosTreino.treino_id,
+      });
+    } catch (error) {
+      // Não bloquear a contagem regressiva se houver erro
+      logError("InfoUsuario - confirmarInicioTreino", error);
+    }
+  };
+
+  const handleEscolherFormato = async (formato) => {
+    setFormatoResposta(formato);
+    setMostrarModalFormato(false);
+    // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
+    await confirmarInicioTreino();
+    // Após escolher formato, mostrar contagem regressiva
+    setMostrarContagem(true);
+  };
+
+  const handleCancelarFormato = () => {
+    setMostrarModalFormato(false);
+    setIniciandoTreino(false);
+    setDadosTreino(null);
+    setFormatoResposta(null);
+  };
+
+  const handleContagemTerminar = () => {
+    setMostrarContagem(false);
+    setIniciandoTreino(false);
+    // Navegar para tela de treino ativo com dados do treino e formato escolhido
+    navigate("/treino-ativo", {
+      state: {
+        treinoData: dadosTreino,
+        formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
+        sistemaTipo: sistemaTipo || "natural"
+      }
+    });
+  };
+
   // Encontrar dados do usuário no ranking (se estiver no top 100)
   const usuarioNoRanking = ranking?.find(
     (item) => item.posicao === posicaoUsuario
@@ -13,17 +120,42 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking, isVisitante 
   // Se não tem posição, significa que não tem recorde
   if (posicaoUsuario === null || posicaoUsuario === undefined) {
     return (
-      <div className="info-usuario sem-recorde">
-        <div className="info-usuario-mensagem">
-          <p>Você ainda não tem recorde neste ranking (ou deabilitou no perfil para aparecer no ranking global).</p>
-          <p className="info-usuario-subtitulo">
-            {isVisitante
-              ? "Visitantes não aparecem no ranking. Faça login para participar e aparecer no ranking!"
-              : "Complete um treino para aparecer no ranking!"
-            }
-          </p>
+      <>
+        {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") && (
+          <ModalEscolhaFormatoResposta
+            sistemaTipo={sistemaTipo}
+            onEscolher={handleEscolherFormato}
+            onCancelar={handleCancelarFormato}
+          />
+        )}
+        {mostrarContagem && (
+          <ContagemRegressiva onTerminar={handleContagemTerminar} />
+        )}
+        <div className="info-usuario sem-recorde">
+          <div className="info-usuario-mensagem">
+            <p>Você ainda não tem recorde neste ranking (ou deabilitou no perfil para aparecer no ranking global).</p>
+            <p className="info-usuario-subtitulo">
+              {isVisitante
+                ? "Visitantes não aparecem no ranking. Faça login para participar e aparecer no ranking!"
+                : "Complete um treino para aparecer no ranking!"
+              }
+            </p>
+            {!isVisitante && operacaoId && limiteId && sistemaId && (
+              <div className="info-usuario-botao-container">
+                <button
+                  className="info-usuario-botao-treino"
+                  onClick={handleIniciarTreino}
+                  disabled={iniciandoTreino}
+                  title="Iniciar treino com estas configurações"
+                  aria-label="Iniciar treino com estas configurações"
+                >
+                  {iniciandoTreino ? "..." : "🏃 Iniciar esse treino"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -51,17 +183,28 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking, isVisitante 
   const emojiPosicao = obterEmojiPosicao();
 
   return (
-    <div
-      className={`info-usuario ${estaNoTop3 ? "top-3" : ""}`}
-      style={
-        estaNoTop3
-          ? {
-              borderColor: corPosicao,
-              background: `linear-gradient(135deg, ${corPosicao}15 0%, ${corPosicao}05 100%)`,
-            }
-          : {}
-      }
-    >
+    <>
+      {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") && (
+        <ModalEscolhaFormatoResposta
+          sistemaTipo={sistemaTipo}
+          onEscolher={handleEscolherFormato}
+          onCancelar={handleCancelarFormato}
+        />
+      )}
+      {mostrarContagem && (
+        <ContagemRegressiva onTerminar={handleContagemTerminar} />
+      )}
+      <div
+        className={`info-usuario ${estaNoTop3 ? "top-3" : ""}`}
+        style={
+          estaNoTop3
+            ? {
+                borderColor: corPosicao,
+                background: `linear-gradient(135deg, ${corPosicao}15 0%, ${corPosicao}05 100%)`,
+              }
+            : {}
+        }
+      >
       <div className="info-usuario-conteudo">
         <div className="info-usuario-coluna info-usuario-pontuacao">
           <span className="info-usuario-label">Sua pontuação</span>
@@ -89,8 +232,22 @@ const InfoUsuario = ({ posicaoUsuario, totalParticipantes, ranking, isVisitante 
             </span>
           </div>
         )}
+        {operacaoId && limiteId && sistemaId && (
+          <div className="info-usuario-coluna info-usuario-botao">
+            <button
+              className="info-usuario-botao-treino"
+              onClick={handleIniciarTreino}
+              disabled={iniciandoTreino}
+              title="Iniciar treino com estas configurações"
+              aria-label="Iniciar treino com estas configurações"
+            >
+              {iniciandoTreino ? "..." : "🏃"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
+    </>
   );
 };
 

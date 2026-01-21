@@ -217,6 +217,12 @@ const Rankings = () => {
     return operacoes.find((op) => String(op.id) === operacaoSelecionada);
   }, [operacoes, operacaoSelecionada]);
 
+  // Encontrar o sistema selecionado
+  const sistemaAtual = useMemo(() => {
+    if (!sistemaSelecionado) return null;
+    return sistemas.find((s) => String(s.id) === sistemaSelecionado);
+  }, [sistemas, sistemaSelecionado]);
+
   // Filtrar sistemas disponíveis baseado no tipo da operação selecionada:
   // - Se operação for raiz, remover sistema "inteiro"
   // - Se operação for conversão, permitir apenas romano, binário ou hexadecimal
@@ -403,6 +409,10 @@ const Rankings = () => {
             totalParticipantes={totalParticipantes}
             ranking={ranking}
             isVisitante={usuario?.isVisitante || false}
+            operacaoId={operacaoSelecionada}
+            limiteId={limiteSelecionado}
+            sistemaId={sistemaSelecionado}
+            sistemaTipo={sistemaAtual?.tipo || null}
           />
 
           <TabelaRanking
