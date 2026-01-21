@@ -50,12 +50,17 @@
 }
 
 .coluna-nome-header {
-  width: auto;
+  width: 200px;
 }
 
 .coluna-pontuacao-header {
   text-align: center !important;
   width: 220px;
+}
+
+.coluna-precisao-header {
+  text-align: center !important;
+  width: 120px;
 }
 
 .coluna-data-header {
@@ -214,16 +219,29 @@
   flex-shrink: 0;
 }
 
+.card-ranking-footer-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+  gap: 12px;
+}
+
 .card-ranking-tentativas-mobile {
   font-size: 0.9rem;
   color: #666;
   font-family: "Courier New", monospace;
   white-space: nowrap;
-  flex-shrink: 0;
-  width: 100%;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #e0e0e0;
+}
+
+.card-ranking-precisao-mobile {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
 }
 
 /* Responsivo: mostrar cards no mobile, tabela no desktop */

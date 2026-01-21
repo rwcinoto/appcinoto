@@ -143,7 +143,7 @@ class RankingService {
     // O índice (id_operacao, id_limite, id_sistema, total DESC) será usado para WHERE e ORDER BY
     const recordesOrdenados = await Recorde.findAll({
       where: whereRecorde,
-      attributes: ["id_usuario", "total", "quantidade", "atualizado_em"],
+      attributes: ["id_usuario", "total", "erros", "quantidade", "atualizado_em"],
       include: [
         {
           association: "usuario",
@@ -152,10 +152,13 @@ class RankingService {
           attributes: ["id", "nome", "ativo"],
         },
       ],
-      // Ordenar por total DESC, atualizado_em ASC (maior pontuação, mais antiga em caso de empate)
+      // Ordenar por total DESC, erros ASC (NULL tratado como pior), quantidade ASC, atualizado_em ASC
+      // (maior pontuação, menos erros, menos treinos, mais antiga em caso de empate)
+      // NULL em erros é tratado como 9999999 (treinos antigos sem registro de erros ficam por último no desempate)
       // O índice (id_operacao, id_limite, id_sistema, total DESC) será usado parcialmente
       order: [
         ["total", "DESC"],
+        [Sequelize.fn("COALESCE", Sequelize.col("erros"), 9999999), "ASC"], // NULL = pior
         ["quantidade", "ASC"], // Menos treinos em caso de empate
         ["atualizado_em", "ASC"], // Mais antiga em caso de empate
       ],
@@ -168,6 +171,7 @@ class RankingService {
       id_usuario: recorde.id_usuario,
       nome: recorde.usuario.nome,
       total: recorde.total,
+      erros: recorde.erros,
       quantidade: recorde.quantidade,
       data_recorde: recorde.atualizado_em,
     }));
@@ -231,7 +235,7 @@ class RankingService {
       whereUsuarioRecorde.ranking_global = true;
     }
 
-    // Buscar recorde do usuário para obter total e data
+    // Buscar recorde do usuário para obter total, erros, quantidade e data
     const recordeUsuario = await Recorde.findOne({
       where: {
         id_usuario: usuarioId,
@@ -239,7 +243,7 @@ class RankingService {
         id_limite: filtros.limite_id,
         id_sistema: filtros.sistema_id,
       },
-      attributes: ["total", "atualizado_em"],
+      attributes: ["total", "erros", "quantidade", "atualizado_em"],
       include: [
         {
           association: "usuario",
@@ -280,19 +284,57 @@ class RankingService {
       whereUsuario.ranking_global = true;
     }
 
-    // Contar quantos recordes têm total maior OU (total igual e data mais antiga)
-    // Isso dá a posição do usuário no ranking
+    // Contar quantos recordes estão à frente seguindo os critérios de ordenação:
+    // 1. Total maior, ou
+    // 2. Total igual e menos erros (tratando NULL como 9999999), ou
+    // 3. Total igual, mesmos erros e menos quantidade, ou
+    // 4. Total igual, mesmos erros, mesma quantidade e mais antigo
     // Usar índice composto (idx_recordes_ranking) para otimização
+
+    // Tratar NULL como 9999999 para comparações justas
+    const errosUsuario = recordeUsuario.erros ?? 9999999;
+
     const posicao = await Recorde.count({
       where: {
         ...whereRecorde,
         [Op.or]: [
           // Total maior
           { total: { [Op.gt]: recordeUsuario.total } },
-          // Total igual e data mais antiga (atualizado_em menor)
+          // Total igual e menos erros (comparando com COALESCE)
           {
             total: recordeUsuario.total,
-            atualizado_em: { [Op.lt]: recordeUsuario.atualizado_em },
+            [Op.and]: [
+              Sequelize.where(
+                Sequelize.fn("COALESCE", Sequelize.col("erros"), 9999999),
+                Op.lt,
+                errosUsuario
+              ),
+            ],
+          },
+          // Total igual, mesmos erros (considerando NULL) e menos quantidade
+          {
+            total: recordeUsuario.total,
+            [Op.and]: [
+              Sequelize.where(
+                Sequelize.fn("COALESCE", Sequelize.col("erros"), 9999999),
+                Op.eq,
+                errosUsuario
+              ),
+              { quantidade: { [Op.lt]: recordeUsuario.quantidade } },
+            ],
+          },
+          // Total igual, mesmos erros, mesma quantidade e data mais antiga
+          {
+            total: recordeUsuario.total,
+            [Op.and]: [
+              Sequelize.where(
+                Sequelize.fn("COALESCE", Sequelize.col("erros"), 9999999),
+                Op.eq,
+                errosUsuario
+              ),
+              { quantidade: recordeUsuario.quantidade },
+              { atualizado_em: { [Op.lt]: recordeUsuario.atualizado_em } },
+            ],
           },
         ],
       },

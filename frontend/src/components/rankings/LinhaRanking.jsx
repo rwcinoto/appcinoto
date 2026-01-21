@@ -11,7 +11,7 @@ const LinhaRanking = ({ item, tempoLimite }) => {
     return null;
   }
 
-  const { posicao, nome, total, quantidade, data_recorde, id_usuario } = item;
+  const { posicao, nome, total, erros, quantidade, data_recorde, id_usuario } = item;
 
   // Calcular tempo médio por conta
   const calcularTempoMedioPorConta = () => {
@@ -27,6 +27,28 @@ const LinhaRanking = ({ item, tempoLimite }) => {
   };
 
   const tempoMedioFormatado = calcularTempoMedioPorConta();
+
+  // Calcular precisão
+  const calcularPrecisao = () => {
+    // Se não temos informação de erros (treinos antigos), retornar null
+    if (erros === null || erros === undefined) {
+      return null;
+    }
+
+    const totalAcertos = total || 0;
+    const totalErros = erros || 0;
+    const totalRespostas = totalAcertos + totalErros;
+
+    // Se não teve nenhuma resposta, retornar null
+    if (totalRespostas === 0) {
+      return null;
+    }
+
+    const precisao = (totalAcertos / totalRespostas) * 100;
+    return precisao.toFixed(1).replace(".", ",") + "%";
+  };
+
+  const precisaoFormatada = calcularPrecisao();
 
   // Verificar se é o usuário logado
   const eUsuarioLogado = usuario && id_usuario === usuario.id;
@@ -92,14 +114,14 @@ const LinhaRanking = ({ item, tempoLimite }) => {
       <td className="coluna-nome">
         <div className="nome-container">
           {eUsuarioLogado ? (
-            <Link 
+            <Link
               to="/recordes"
               className="nome-usuario-link"
             >
               {nome}
             </Link>
           ) : (
-            <Link 
+            <Link
               to={`/recordes?usuario_id=${id_usuario}`}
               className="nome-usuario-link"
             >
@@ -112,7 +134,7 @@ const LinhaRanking = ({ item, tempoLimite }) => {
         </div>
       </td>
       <td className="coluna-pontuacao">
-        <span 
+        <span
           className="pontuacao-valor"
           style={estaNoTop3 ? { color: corPosicao } : {}}
         >
@@ -124,8 +146,16 @@ const LinhaRanking = ({ item, tempoLimite }) => {
           )}
         </span>
       </td>
+      <td className="coluna-precisao">
+        <span
+          className="precisao-valor"
+          style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
+        >
+          {precisaoFormatada || "-"}
+        </span>
+      </td>
       <td className="coluna-data">
-        <span 
+        <span
           className="data-recorde"
           style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
         >
@@ -133,7 +163,7 @@ const LinhaRanking = ({ item, tempoLimite }) => {
         </span>
       </td>
       <td className="coluna-tentativas">
-        <span 
+        <span
           className="tentativas-valor"
           style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
         >

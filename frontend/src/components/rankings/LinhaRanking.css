@@ -176,6 +176,7 @@
 
 .coluna-nome {
   padding: 12px;
+  width: 200px;
 }
 
 .nome-container {
@@ -236,6 +237,18 @@
   font-size: 0.85rem;
   color: var(--color-text-light);
   font-weight: 400;
+}
+
+.coluna-precisao {
+  padding: 12px;
+  text-align: center;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  width: 120px;
+}
+
+.precisao-valor {
+  font-family: "Courier New", monospace;
 }
 
 .coluna-data {

@@ -104,6 +104,7 @@ class RecordeService {
    * @param {number} limiteId - ID do limite
    * @param {number} sistemaId - ID do sistema
    * @param {number} total - Total de acertos
+   * @param {number|null} erros - Total de erros (null = sem informação para treinos antigos, número = quantidade real)
    * @returns {Promise<Object>} Objeto com informações sobre a operação
    */
   async verificarESalvarRecorde(
@@ -111,7 +112,8 @@ class RecordeService {
     operacaoId,
     limiteId,
     sistemaId,
-    total
+    total,
+    erros = null
   ) {
     // Validações iniciais
     if (total < 0) {
@@ -203,6 +205,7 @@ class RecordeService {
           id_limite: limiteIdNum,
           id_sistema: sistemaIdNum,
           total: total,
+          erros: erros,
           quantidade: 1, // Se foi criado aqui, é o primeiro treino
           criado_em: dataAtual,
           criado_por: usuarioIdNum,
@@ -241,6 +244,7 @@ class RecordeService {
 
               await recordeCriado.update({
                 total: total,
+                erros: erros,
                 atualizado_em: dataAtual,
                 atualizado_por: usuarioIdNum,
               });
@@ -275,6 +279,7 @@ class RecordeService {
         // Atualizar recorde
         await recordeExistente.update({
           total: total,
+          erros: erros,
           atualizado_em: dataAtual, // Data do novo recorde
           atualizado_por: usuarioIdNum,
         });
@@ -384,6 +389,7 @@ class RecordeService {
         "id_limite",
         "id_sistema",
         "total",
+        "erros",
         "quantidade",
         "criado_em",
         "atualizado_em",
@@ -420,6 +426,7 @@ class RecordeService {
         "id_limite",
         "id_sistema",
         "total",
+        "erros",
         "quantidade",
         "criado_em",
         "atualizado_em",

@@ -354,12 +354,12 @@ class TreinoController {
    */
   async finalizar(req, res) {
     try {
-      const erros = validationResult(req);
-      if (!erros.isEmpty()) {
-        return res.status(400).json({ errors: erros.array() });
+      const validationErrors = validationResult(req);
+      if (!validationErrors.isEmpty()) {
+        return res.status(400).json({ errors: validationErrors.array() });
       }
 
-      const { treino_id, total } = req.body;
+      const { treino_id, erros } = req.body;
       const usuario = req.usuario;
 
       // Buscar treino
@@ -404,7 +404,8 @@ class TreinoController {
             treino.operacao.id,
             treino.limite.id,
             treino.sistema.id,
-            treino.totalAcertos
+            treino.totalAcertos,
+            erros !== undefined ? erros : 0
           );
 
           bateuRecorde = resultado.bateuRecorde;
