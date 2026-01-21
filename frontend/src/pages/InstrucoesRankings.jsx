@@ -41,10 +41,15 @@ const InstrucoesRankings = () => {
             alt="Quadro mostrando a posição do usuário no ranking"
             className="instrucao-imagem"
           />
-          <div className="instrucao-destaque instrucao-importante">
-            <strong>Importante:</strong> visitantes não aparecem no ranking, pois seus recordes
-            não são salvos no sistema.
+          <div className="instrucao-destaque">
+            <strong>Dica:</strong> clicando no ícone de treino no canto direito,
+            você inicia um novo treino com as mesmas configurações
+              do ranking (mesma operação, limite e sistema).
           </div>
+            <div className="instrucao-destaque instrucao-importante">
+              <strong>Importante:</strong> visitantes não aparecem no ranking, pois seus recordes
+              não são salvos no sistema.
+            </div>
         </section>
 
         <section className="instrucao-secao">
