@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./ListaUsuarios.css";
 
 const formatarDataUltimoTreino = (valor) => {
@@ -9,6 +11,8 @@ const formatarDataUltimoTreino = (valor) => {
 };
 
 const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) => {
+  const { usuario: usuarioLogado } = useAuth();
+
   if (usuarios.length === 0) {
     return <div className="sem-usuarios">Nenhum usuário encontrado</div>;
   }
@@ -28,9 +32,28 @@ const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) =
           </tr>
         </thead>
         <tbody>
-          {usuarios.map((usuario) => (
+          {usuarios.map((usuario) => {
+            const eUsuarioLogado = usuarioLogado && usuario.id === usuarioLogado.id;
+
+            return (
             <tr key={usuario.id}>
-              <td>{usuario.nome}</td>
+              <td>
+                {eUsuarioLogado ? (
+                  <Link
+                    to="/recordes"
+                    className="nome-usuario-link"
+                  >
+                    {usuario.nome}
+                  </Link>
+                ) : (
+                  <Link
+                    to={`/recordes?usuario_id=${usuario.id}`}
+                    className="nome-usuario-link"
+                  >
+                    {usuario.nome}
+                  </Link>
+                )}
+              </td>
               <td>{usuario.email}</td>
               {tipoUsuarioLogado !== "profe" && (
                 <td>
@@ -73,7 +96,8 @@ const ListaUsuarios = ({ usuarios, onEditar, onDesativar, tipoUsuarioLogado }) =
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

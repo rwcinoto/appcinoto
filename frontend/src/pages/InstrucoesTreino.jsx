@@ -39,7 +39,7 @@ const InstrucoesTreino = () => {
             No primeiro nível (natural) você tem as operações soma, subtração, multiplicação e divisão. Tem também um tipo de operação aleatória que mistura todas as operações disponíveis.
           </p>
           <p>
-            Nos próximos níveis vão aparecer as operações de raiz quadrada e conversão de sistemas. Você também poderá trabalhar com números inteiros, decimais, romanos, binários e hexadecimais. Além disso, você poderá ter limite de tempo de até 10 minutos.
+            Nos próximos níveis vão aparecer as operações de raiz quadrada e conversão de sistemas. Você também poderá trabalhar com números inteiros, decimais, romanos, binários e hexadecimais. Além disso, você poderá ter limite de tempo de até 5 minutos.
           </p>
           <div className="instrucao-destaque">
             <strong>Dica:</strong> acesse <a href="https://cinoto.com.br/numix" target="_blank" rel="noopener noreferrer">cinoto.com.br/numix</a> para mais detalhes sobre os níveis e as opções disponíveis.
