@@ -41,12 +41,13 @@ function salvarRecorde(operacaoId, limiteId, sistemaId, total) {
   try {
     const recordes = obterTodosRecordes();
     const chave = gerarChaveRecorde(operacaoId, limiteId, sistemaId);
-    
+
     recordes[chave] = {
       total,
+      data_recorde: new Date().toISOString(),
       atualizado_em: new Date().toISOString(),
     };
-    
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recordes));
   } catch (error) {
     console.error("Erro ao salvar recorde do visitante:", error);
@@ -81,18 +82,19 @@ function obterRecordeAnterior(operacaoId, limiteId, sistemaId) {
  */
 export function verificarESalvarRecordeVisitante(operacaoId, limiteId, sistemaId, total) {
   const recordeAnterior = obterRecordeAnterior(operacaoId, limiteId, sistemaId);
-  
+
   // Se não há recorde anterior ou o total atual é maior, bateu recorde
   const bateuRecorde = !recordeAnterior || total > recordeAnterior.total;
-  
+
   if (bateuRecorde) {
     salvarRecorde(operacaoId, limiteId, sistemaId, total);
   }
-  
+
   return {
     bateuRecorde,
     recordeAnterior: recordeAnterior ? {
       total: recordeAnterior.total,
+      data_recorde: recordeAnterior.data_recorde || recordeAnterior.atualizado_em,
       atualizado_em: recordeAnterior.atualizado_em,
     } : null,
   };

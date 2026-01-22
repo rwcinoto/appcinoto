@@ -183,7 +183,7 @@ class RecordeService {
         id_limite: limiteIdNum, // Índice: idx_recordes_unique
         id_sistema: sistemaIdNum, // Índice: idx_recordes_unique
       },
-      attributes: ["id", "total", "quantidade", "atualizado_em"], // Selecionar apenas campos necessários
+      // Não especificar attributes para buscar todos os campos (incluindo data_recorde)
     });
 
     // Data atual no horário do Brasil (UTC-3)
@@ -207,6 +207,7 @@ class RecordeService {
           total: total,
           erros: erros,
           quantidade: 1, // Se foi criado aqui, é o primeiro treino
+          data_recorde: dataAtual, // Data em que o recorde foi batido
           criado_em: dataAtual,
           criado_por: usuarioIdNum,
           atualizado_em: dataAtual,
@@ -231,7 +232,7 @@ class RecordeService {
               id_limite: limiteIdNum,
               id_sistema: sistemaIdNum,
             },
-            attributes: ["id", "total", "quantidade", "atualizado_em"],
+            // Não especificar attributes para buscar todos os campos (incluindo data_recorde)
           });
 
           if (recordeCriado) {
@@ -245,6 +246,7 @@ class RecordeService {
               await recordeCriado.update({
                 total: total,
                 erros: erros,
+                data_recorde: dataAtual, // Data em que o novo recorde foi batido
                 atualizado_em: dataAtual,
                 atualizado_por: usuarioIdNum,
               });
@@ -277,9 +279,13 @@ class RecordeService {
         };
 
         // Atualizar recorde
+        // IMPORTANTE: Sempre salvar data_recorde quando um novo recorde é batido
+        // Isso inclui o caso especial quando o recorde anterior tinha total: 0 (criado por incrementarQuantidadeTreino)
+        // e agora temos o primeiro recorde real (total > 0)
         await recordeExistente.update({
           total: total,
           erros: erros,
+          data_recorde: dataAtual, // Data em que o novo recorde foi batido
           atualizado_em: dataAtual, // Data do novo recorde
           atualizado_por: usuarioIdNum,
         });
@@ -391,6 +397,7 @@ class RecordeService {
         "total",
         "erros",
         "quantidade",
+        "data_recorde",
         "criado_em",
         "atualizado_em",
         "criado_por",
@@ -428,6 +435,7 @@ class RecordeService {
         "total",
         "erros",
         "quantidade",
+        "data_recorde",
         "criado_em",
         "atualizado_em",
         "criado_por",
