@@ -122,11 +122,13 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
                   )}
                 </div>
                 <div className="card-ranking-data-mobile">
-                  {new Date(item.data_recorde).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                  })}
+                  {item.data_recorde
+                    ? new Date(item.data_recorde).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                      })
+                    : "-"}
                 </div>
                 <div className="card-ranking-footer-mobile">
                   <div className="card-ranking-tentativas-mobile">

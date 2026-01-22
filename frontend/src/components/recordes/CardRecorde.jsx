@@ -1,12 +1,12 @@
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ContagemRegressiva from "../treino/ContagemRegressiva";
-import ModalEscolhaFormatoResposta from "../treino/ModalEscolhaFormatoResposta";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import api from "../../services/api";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
+import ContagemRegressiva from "../treino/ContagemRegressiva";
+import ModalEscolhaFormatoResposta from "../treino/ModalEscolhaFormatoResposta";
 import "./CardRecorde.css";
 
 const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
@@ -117,7 +117,7 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       };
       return coresDark[tipo] || { background: "rgba(158, 158, 158, 0.25)", color: "#B0B0B0" };
     }
-    
+
     const cores = {
       natural: { background: "#e3f2fd", color: "#1976d2" },
       inteiro: { background: "#e0f2f1", color: "#00695c" },
@@ -230,12 +230,12 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
     setMostrarContagem(false);
     setIniciandoTreino(false);
     // Navegar para tela de treino ativo com dados do treino e formato escolhido
-    navigate("/treino-ativo", { 
-      state: { 
+    navigate("/treino-ativo", {
+      state: {
         treinoData: dadosTreino,
         formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
         sistemaTipo: tipoSistema || "natural"
-      } 
+      }
     });
   };
 
@@ -296,10 +296,10 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
 
         <div className="card-recorde-info-item">
           <span className="card-recorde-info-label">Sistema</span>
-          <span 
-            className="card-recorde-info-value" 
-            style={{ 
-              backgroundColor: coresSistema.background, 
+          <span
+            className="card-recorde-info-value"
+            style={{
+              backgroundColor: coresSistema.background,
               color: coresSistema.color,
               padding: "4px 12px",
               borderRadius: "12px",
@@ -315,7 +315,7 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
         <div className="card-recorde-info-item">
           <span className="card-recorde-info-label">Data</span>
           <span className="card-recorde-info-value">
-            {formatarData(recorde.atualizado_em)}
+            {formatarData(recorde.data_recorde || recorde.atualizado_em)}
           </span>
         </div>
       </div>

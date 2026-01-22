@@ -132,6 +132,7 @@ class RecordeController {
         id_sistema: recorde.id_sistema,
         total: recorde.total,
         quantidade: recorde.quantidade,
+        data_recorde: recorde.data_recorde || recorde.atualizado_em, // Usar data_recorde, com fallback para atualizado_em
         criado_em: recorde.criado_em,
         atualizado_em: recorde.atualizado_em,
         operacao: recorde.operacao
@@ -196,6 +197,7 @@ class RecordeController {
         id_sistema: recorde.id_sistema,
         total: recorde.total,
         quantidade: recorde.quantidade,
+        data_recorde: recorde.data_recorde || recorde.atualizado_em, // Usar data_recorde, com fallback para atualizado_em
         criado_em: recorde.criado_em,
         atualizado_em: recorde.atualizado_em,
         criado_por: recorde.criado_por,
