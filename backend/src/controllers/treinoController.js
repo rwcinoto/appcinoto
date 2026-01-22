@@ -395,6 +395,7 @@ class TreinoController {
       let bateuRecorde = false;
       let recordeAnterior = null;
       let erroRecorde = null;
+      let errosAtuais = null;
 
       // Visitantes não salvam recordes
       if (!usuario.isVisitante) {
@@ -410,6 +411,7 @@ class TreinoController {
 
           bateuRecorde = resultado.bateuRecorde;
           recordeAnterior = resultado.recordeAnterior || null;
+          errosAtuais = resultado.errosAtuais;
         } catch (error) {
           console.error("Erro ao verificar e salvar recorde:", error);
           console.error("Stack trace:", error.stack);
@@ -442,6 +444,7 @@ class TreinoController {
 
       return res.json({
         total: treino.totalAcertos,
+        erros: errosAtuais !== null ? errosAtuais : (erros !== undefined ? erros : null),
         bateuRecorde,
         recordeAnterior,
         erroRecorde: erroRecorde || undefined, // Incluir erro apenas se houver (para debug)
