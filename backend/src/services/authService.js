@@ -6,6 +6,54 @@ const { AppError } = require("../utils/errors");
 const emailService = require("./emailService");
 
 class AuthService {
+  /**
+   * Verifica o plano válido baseado na data de vencimento
+   * @param {Usuario} usuario - Instância do usuário
+   * @returns {Promise<{id_plano: number, plano: Plano}>} - ID do plano válido e objeto do plano
+   */
+  async obterPlanoValido(usuario) {
+    // Se não há data de vencimento, usa o plano do cadastro
+    if (!usuario.data_vencimento_plano) {
+      const plano = await Plano.findByPk(usuario.id_plano);
+      if (!plano) {
+        throw new AppError(`Plano com id ${usuario.id_plano} não encontrado`, 500);
+      }
+      return {
+        id_plano: usuario.id_plano,
+        plano: plano,
+      };
+    }
+
+    // Comparar apenas a data (sem hora) para evitar problemas de timezone
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    const dataVencimento = new Date(usuario.data_vencimento_plano);
+    dataVencimento.setHours(0, 0, 0, 0);
+
+    // Se a data de vencimento já passou, usar plano id = 2
+    if (dataVencimento < hoje) {
+      const plano = await Plano.findByPk(2);
+      if (!plano) {
+        throw new AppError("Plano padrão (id=2) não encontrado", 500);
+      }
+      return {
+        id_plano: 2,
+        plano: plano,
+      };
+    }
+
+    // Se a data de vencimento é hoje ou futura, usar o plano do cadastro
+    const plano = await Plano.findByPk(usuario.id_plano);
+    if (!plano) {
+      throw new AppError(`Plano com id ${usuario.id_plano} não encontrado`, 500);
+    }
+    return {
+      id_plano: usuario.id_plano,
+      plano: plano,
+    };
+  }
+
   async login(email, senha) {
     const usuario = await Usuario.findOne({
       where: { email },
@@ -26,7 +74,17 @@ class AuthService {
       throw new AppError("Email ou senha inválidos", 401);
     }
 
-    const token = this.gerarToken(usuario);
+    // Verificar plano válido baseado na data de vencimento
+    const planoValido = await this.obterPlanoValido(usuario);
+
+    // Criar objeto usuário com plano válido para o token
+    const usuarioParaToken = {
+      ...usuario.toJSON(),
+      id_plano: planoValido.id_plano,
+      plano: planoValido.plano,
+    };
+
+    const token = this.gerarToken(usuarioParaToken);
 
     return {
       token,
@@ -35,8 +93,8 @@ class AuthService {
         email: usuario.email,
         nome: usuario.nome,
         tipo: usuario.tipo,
-        id_plano: usuario.id_plano,
-        plano: usuario.plano,
+        id_plano: planoValido.id_plano,
+        plano: planoValido.plano,
         operacao_id: usuario.operacao_id,
         limite_id: usuario.limite_id,
         sistema_id: usuario.sistema_id,

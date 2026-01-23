@@ -8,18 +8,34 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false, 
     senha: "",
     tipo: "comum",
     id_plano: "",
+    data_vencimento_plano: "",
     ativo: true,
   });
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     if (usuario) {
+      // Formatar data de vencimento para input date (YYYY-MM-DD)
+      // Usar apenas a parte da data para evitar problemas de timezone
+      let dataVencimentoFormatada = "";
+      if (usuario.data_vencimento_plano) {
+        // Se a data vier como string, extrair apenas YYYY-MM-DD
+        const dataStr = usuario.data_vencimento_plano.toString();
+        if (dataStr.includes("T")) {
+          dataVencimentoFormatada = dataStr.split("T")[0];
+        } else {
+          // Se já vier só a data, usar diretamente
+          dataVencimentoFormatada = dataStr.substring(0, 10);
+        }
+      }
+
       setFormData({
         nome: usuario.nome || "",
         email: usuario.email || "",
         senha: "",
         tipo: usuario.tipo || "comum",
         id_plano: tipoUsuarioLogado === "profe" ? "2" : (usuario.id_plano?.toString() || ""),
+        data_vencimento_plano: dataVencimentoFormatada,
         ativo: usuario.ativo !== undefined ? usuario.ativo : true,
       });
     } else if (planos.length > 0) {
@@ -87,6 +103,19 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false, 
 
     if (formData.senha) {
       dados.senha = formData.senha;
+    }
+
+    // Adicionar data_vencimento_plano apenas se for admin
+    if (tipoUsuarioLogado === "admin") {
+      // Se estiver editando e o campo estiver vazio, enviar null para limpar
+      // Se estiver criando e o campo estiver vazio, não enviar nada
+      if (usuario) {
+        // Editando: sempre enviar (null se vazio, ou a data se preenchida)
+        dados.data_vencimento_plano = formData.data_vencimento_plano || null;
+      } else if (formData.data_vencimento_plano) {
+        // Criando: só enviar se tiver valor
+        dados.data_vencimento_plano = formData.data_vencimento_plano;
+      }
     }
 
     onSalvar(dados);
@@ -168,6 +197,23 @@ const FormUsuario = ({ usuario, planos, onSalvar, onCancelar, disabled = false, 
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {tipoUsuarioLogado === "admin" && (
+        <div className="form-group">
+          <label htmlFor="data_vencimento_plano">Data de vencimento do plano</label>
+          <input
+            type="date"
+            id="data_vencimento_plano"
+            name="data_vencimento_plano"
+            value={formData.data_vencimento_plano}
+            onChange={handleChange}
+            placeholder="Deixe em branco se o plano não vence"
+          />
+          <small style={{ display: "block", marginTop: "5px", color: "#666" }}>
+            Deixe em branco se o plano não vence. Se preenchido e a data passar, o usuário será automaticamente rebaixado para o plano natural.
+          </small>
         </div>
       )}
 
