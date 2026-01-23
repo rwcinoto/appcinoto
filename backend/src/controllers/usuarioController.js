@@ -4,6 +4,32 @@ const { Usuario, Plano, Operacao, Limite, Sistema } = require("../models");
 const { Op } = require("sequelize");
 
 class UsuarioController {
+  /**
+   * Converte uma string de data no formato YYYY-MM-DD para Date com horário 12:00 (meio-dia)
+   * Isso evita problemas de timezone ao salvar apenas a data
+   * @param {string} dataStr - Data no formato YYYY-MM-DD
+   * @returns {Date|null} - Date com horário 12:00 UTC-3 ou null se dataStr for vazia/null
+   */
+  converterDataVencimento(dataStr) {
+    if (!dataStr || dataStr === "") {
+      return null;
+    }
+
+    // Se já for uma Date, retornar como está
+    if (dataStr instanceof Date) {
+      return dataStr;
+    }
+
+    // Se for string no formato YYYY-MM-DD, converter para Date com horário 12:00 UTC-3
+    if (typeof dataStr === "string" && dataStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [ano, mes, dia] = dataStr.split("-").map(Number);
+      // Criar data com horário 12:00 UTC-3 (15:00 UTC) para garantir que seja salva corretamente
+      return new Date(Date.UTC(ano, mes - 1, dia, 15, 0, 0));
+    }
+
+    // Se não for nenhum dos formatos acima, tentar converter normalmente
+    return new Date(dataStr);
+  }
   async listar(req, res) {
     try {
       const erros = validationResult(req);
@@ -156,7 +182,7 @@ class UsuarioController {
         });
       }
 
-      const { email, senha, nome, tipo, id_plano, ativo } = req.body;
+      const { email, senha, nome, tipo, id_plano, ativo, data_vencimento_plano } = req.body;
 
       // Validar email único
       const usuarioExistente = await Usuario.findOne({ where: { email } });
@@ -175,7 +201,7 @@ class UsuarioController {
       }
 
       // Criar usuário (senha será hasheada automaticamente pelo hook do modelo)
-      const usuario = await Usuario.create({
+      const dadosCriacao = {
         email,
         senha,
         nome,
@@ -187,7 +213,14 @@ class UsuarioController {
         atualizado_por: req.usuario.id,
         criado_em: new Date(),
         atualizado_em: new Date(),
-      });
+      };
+
+      // Adicionar data_vencimento_plano apenas se for admin e se foi fornecida
+      if (req.usuario.tipo === "admin" && data_vencimento_plano !== undefined) {
+        dadosCriacao.data_vencimento_plano = this.converterDataVencimento(data_vencimento_plano);
+      }
+
+      const usuario = await Usuario.create(dadosCriacao);
 
       // Recarregar usuário com plano e sem senha
       const usuarioCriado = await Usuario.findByPk(usuario.id, {
@@ -229,7 +262,7 @@ class UsuarioController {
 
       // Campos que podem ser atualizados
       const camposPermitidos = isAdmin
-        ? ["email", "senha", "nome", "tipo", "id_plano", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"]
+        ? ["email", "senha", "nome", "tipo", "id_plano", "data_vencimento_plano", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"]
         : isProfe
         ? ["email", "senha", "nome", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"] // Profe não pode alterar tipo nem plano
         : ["email", "senha", "nome", "operacao_id", "limite_id", "sistema_id", "ranking_global"];
@@ -238,7 +271,12 @@ class UsuarioController {
 
       for (const campo of camposPermitidos) {
         if (req.body[campo] !== undefined) {
-          dadosAtualizacao[campo] = req.body[campo];
+          // Converter data_vencimento_plano para Date com horário 12:00
+          if (campo === "data_vencimento_plano") {
+            dadosAtualizacao[campo] = this.converterDataVencimento(req.body[campo]);
+          } else {
+            dadosAtualizacao[campo] = req.body[campo];
+          }
         }
       }
 

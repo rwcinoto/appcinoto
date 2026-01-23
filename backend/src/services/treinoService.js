@@ -122,7 +122,19 @@ class TreinoService {
       case "subtracao":
         // Gerar minuendo primeiro, depois subtraendo menor ou igual
         // Para sistema romano, garantir que parcelas não sejam zero
-        const minParcela1Subt = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
+        let minParcela1Subt = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
+        
+        // Se há 3 parcelas no sistema romano, garantir que parcela1 seja grande o suficiente
+        // para subtrair parcela2 e parcela3 e ainda ter resultado positivo
+        if (min_parcela_3 !== null && max_parcela_3 !== null && sistema === "romano") {
+          const minParcela2Subt = Math.max(1, min_parcela_2);
+          const minParcela3Subt = Math.max(1, min_parcela_3);
+          // parcela1 precisa ser pelo menos: minParcela2Subt + minParcela3Subt + 1
+          // (para poder subtrair parcela2 e parcela3 e ainda ter resultado positivo)
+          const minParcela1Necessario = minParcela2Subt + minParcela3Subt + 1;
+          minParcela1Subt = Math.max(minParcela1Subt, minParcela1Necessario);
+        }
+        
         parcela1 = this.numeroAleatorio(minParcela1Subt, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
         parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
@@ -213,8 +225,8 @@ class TreinoService {
               const parcela1Inteira = Math.abs(parcela1);
               const resultadoParcialMinimo = minParcela3Subt + 1;
               const maxParcela2Ajustado = Math.max(1, parcela1Inteira - resultadoParcialMinimo);
-              // Regerar parcela2 com limite ajustado
-              parcela2 = this.numeroAleatorio(Math.max(1, min_parcela_2), Math.min(max_parcela_2, maxParcela2Ajustado));
+              // Regerar parcela2 com limite ajustado (usar minParcela2Subt que já garante mínimo de 1 para romano)
+              parcela2 = this.numeroAleatorio(minParcela2Subt, Math.min(max_parcela_2, maxParcela2Ajustado));
               parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
               // Recalcular resultadoParcial
               resultadoParcial = parcela1 - parcela2;

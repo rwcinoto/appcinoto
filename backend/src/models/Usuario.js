@@ -101,6 +101,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      data_vencimento_plano: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
       ativo: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

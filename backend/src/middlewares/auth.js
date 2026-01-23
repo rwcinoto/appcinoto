@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const jwtConfig = require("../config/jwt");
 const { Usuario, Plano } = require("../models");
 const { AppError } = require("../utils/errors");
+const authService = require("../services/authService");
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -57,6 +58,13 @@ const authMiddleware = async (req, res, next) => {
       if (!usuario || !usuario.ativo) {
         return next(new AppError("Usuário inválido ou inativo", 401));
       }
+
+      // Verificar plano válido baseado na data de vencimento
+      const planoValido = await authService.obterPlanoValido(usuario);
+
+      // Atualizar o usuário com o plano válido
+      usuario.id_plano = planoValido.id_plano;
+      usuario.plano = planoValido.plano;
 
       req.usuario = usuario;
     }
