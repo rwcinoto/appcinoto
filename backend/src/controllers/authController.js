@@ -56,6 +56,46 @@ class AuthController {
       next(error);
     }
   }
+
+  async solicitarResetSenha(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorResponse = formatValidationErrors(errors.array());
+        return res.status(errorResponse.statusCode).json({
+          message: errorResponse.message,
+          errors: errorResponse.errors,
+        });
+      }
+
+      const { email } = req.body;
+      const resultado = await authService.solicitarResetSenha(email);
+
+      return res.json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetarSenha(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorResponse = formatValidationErrors(errors.array());
+        return res.status(errorResponse.statusCode).json({
+          message: errorResponse.message,
+          errors: errorResponse.errors,
+        });
+      }
+
+      const { token, senha } = req.body;
+      const resultado = await authService.resetarSenha(token, senha);
+
+      return res.json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();

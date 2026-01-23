@@ -6,6 +6,8 @@ import { useAuth } from "./context/AuthContext";
 
 // Lazy loading de componentes de páginas
 const Login = lazy(() => import("./pages/Login"));
+const EsqueciSenha = lazy(() => import("./pages/EsqueciSenha"));
+const ResetarSenha = lazy(() => import("./pages/ResetarSenha"));
 const Conjuntos = lazy(() => import("./pages/Conjuntos"));
 const InstrucoesConjuntos = lazy(() => import("./pages/InstrucoesConjuntos"));
 const DetalhesConjunto = lazy(() => import("./pages/DetalhesConjunto"));
@@ -39,6 +41,8 @@ const AppRoutes = () => {
     <Suspense fallback={<Loading text="Carregando..." fullScreen />}>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+        <Route path="/resetar-senha" element={<ResetarSenha />} />
         <Route
           path="/"
           element={

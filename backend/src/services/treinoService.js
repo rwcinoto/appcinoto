@@ -89,11 +89,11 @@ class TreinoService {
         // Para sistema romano, garantir que parcelas não sejam zero
         const minParcela1Soma = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
         const minParcela2Soma = sistema === "romano" ? Math.max(1, min_parcela_2) : min_parcela_2;
-        
+
         parcela1 = this.numeroAleatorio(minParcela1Soma, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
         parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
-        
+
         parcela2 = this.numeroAleatorio(minParcela2Soma, max_parcela_2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
         parcela2 = this.adicionarCasasDecimais(parcela2, sistema);
@@ -126,18 +126,35 @@ class TreinoService {
         parcela1 = this.numeroAleatorio(minParcela1Subt, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
         parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
-        
+
         // Para sistema decimal, garantir que subtraendo <= minuendo
         // Para sistema inteiro, não precisa garantir que subtraendo <= minuendo
         // Para sistema romano, garantir que subtraendo não seja zero e seja menor que minuendo
         let maxParcela2;
         const minParcela2Subt = sistema === "romano" ? Math.max(1, min_parcela_2) : min_parcela_2;
-        if (sistema === "decimal") {
+
+        // Se há 3 parcelas no sistema romano, garantir que resultadoParcial seja suficiente
+        // para subtrair a terceira parcela e ainda ter resultado positivo
+        if (min_parcela_3 !== null && max_parcela_3 !== null && sistema === "romano") {
+          const minParcela3Subt = Math.max(1, min_parcela_3);
+          // ResultadoParcial precisa ser pelo menos (minParcela3Subt + 1) para poder subtrair
+          // parcela3 e ainda ter resultado positivo (não zero)
+          // Isso significa: parcela1 - parcela2 >= minParcela3Subt + 1
+          // Ou seja: parcela2 <= parcela1 - (minParcela3Subt + 1)
+          const parcela1Inteira = Math.abs(parcela1);
+          const resultadoParcialMinimo = minParcela3Subt + 1;
+          const maxParcela2Para3Parcelas = Math.max(1, parcela1Inteira - resultadoParcialMinimo);
+          maxParcela2 = Math.min(max_parcela_2, maxParcela2Para3Parcelas);
+          // Garantir que maxParcela2 seja pelo menos 1
+          if (maxParcela2 < 1) {
+            maxParcela2 = 1;
+          }
+        } else if (sistema === "decimal") {
           // Para decimal, parcela2 pode ter parte inteira igual ou menor que parcela1
           const parcela1Inteira = Math.floor(parcela1);
           maxParcela2 = Math.min(max_parcela_2, parcela1Inteira);
         } else if (sistema === "romano") {
-          // Para romano, parcela2 deve ser menor que parcela1 (não pode ser igual para evitar zero)
+          // Para romano com 2 parcelas, parcela2 deve ser menor que parcela1 (não pode ser igual para evitar zero)
           const parcela1Inteira = Math.abs(parcela1);
           maxParcela2 = Math.min(max_parcela_2, parcela1Inteira - 1);
           // Garantir que maxParcela2 seja pelo menos 1
@@ -146,20 +163,20 @@ class TreinoService {
           }
         } else {
           const parcela1Inteira = Math.abs(parcela1);
-          maxParcela2 = permitirNegativos 
-            ? max_parcela_2 
+          maxParcela2 = permitirNegativos
+            ? max_parcela_2
             : Math.min(max_parcela_2, parcela1Inteira);
         }
-        
+
         parcela2 = this.numeroAleatorio(minParcela2Subt, maxParcela2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
         parcela2 = this.adicionarCasasDecimais(parcela2, sistema);
-        
+
         // Para sistema decimal, garantir que parcela2 realmente seja <= parcela1
         if (sistema === "decimal" && parcela2 > parcela1) {
           const parteInteiraParcela1 = Math.floor(parcela1);
           const parteInteiraParcela2 = Math.floor(parcela2);
-          
+
           if (parteInteiraParcela2 < parteInteiraParcela1) {
             // Se parte inteira de parcela2 é menor, não precisa ajustar (já está garantido)
             // Mas se chegou aqui é porque após adicionar casas decimais ficou maior, o que não deveria acontecer
@@ -184,7 +201,26 @@ class TreinoService {
           if (sistema === "decimal") {
             resultadoParcial = Math.round(resultadoParcial * 100) / 100;
           }
-          
+
+          // Para sistema romano, verificar se resultadoParcial é suficiente para subtrair parcela3
+          // Se não for, ajustar parcela2 para garantir que resultadoParcial seja adequado
+          if (sistema === "romano") {
+            const minParcela3Subt = Math.max(1, min_parcela_3);
+            const resultadoParcialInteiro = Math.abs(resultadoParcial);
+            // ResultadoParcial precisa ser pelo menos (minParcela3Subt + 1)
+            if (resultadoParcialInteiro < minParcela3Subt + 1) {
+              // Ajustar parcela2 para garantir que resultadoParcial seja suficiente
+              const parcela1Inteira = Math.abs(parcela1);
+              const resultadoParcialMinimo = minParcela3Subt + 1;
+              const maxParcela2Ajustado = Math.max(1, parcela1Inteira - resultadoParcialMinimo);
+              // Regerar parcela2 com limite ajustado
+              parcela2 = this.numeroAleatorio(Math.max(1, min_parcela_2), Math.min(max_parcela_2, maxParcela2Ajustado));
+              parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
+              // Recalcular resultadoParcial
+              resultadoParcial = parcela1 - parcela2;
+            }
+          }
+
           // Para sistema decimal, garantir que parcela3 <= resultadoParcial
           // Para sistema romano, garantir que parcela3 não seja zero e seja menor que resultadoParcial
           let maxParcela3;
@@ -202,20 +238,20 @@ class TreinoService {
             }
           } else {
             const resultadoParcialInteiro = Math.abs(resultadoParcial);
-            maxParcela3 = permitirNegativos 
-              ? max_parcela_3 
+            maxParcela3 = permitirNegativos
+              ? max_parcela_3
               : Math.min(max_parcela_3, resultadoParcialInteiro);
           }
-          
+
           parcela3 = this.numeroAleatorio(minParcela3Subt, maxParcela3);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
           parcela3 = this.adicionarCasasDecimais(parcela3, sistema);
-          
+
           // Para sistema decimal, garantir que parcela3 realmente seja <= resultadoParcial
           if (sistema === "decimal" && parcela3 > resultadoParcial) {
             const parteInteiraResultado = Math.floor(resultadoParcial);
             const parteInteiraParcela3 = Math.floor(parcela3);
-            
+
             if (parteInteiraParcela3 < parteInteiraResultado) {
               // Se parte inteira de parcela3 é menor, não precisa ajustar
             } else if (parteInteiraParcela3 === parteInteiraResultado) {
@@ -229,7 +265,7 @@ class TreinoService {
               parcela3 = resultadoParcial;
             }
           }
-          
+
           resultado = resultadoParcial - parcela3;
           // Arredondar resultado para 2 casas decimais se for sistema decimal
           if (sistema === "decimal") {
@@ -249,7 +285,7 @@ class TreinoService {
         // Para sistema romano, garantir que parcelas não sejam zero
         const minParcela1Mult = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
         const minParcela2Mult = sistema === "romano" ? Math.max(1, min_parcela_2) : min_parcela_2;
-        
+
         parcela1 = this.numeroAleatorio(minParcela1Mult, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
         // Para multiplicação com sistema decimal: parcela1 sempre é inteira (natural)
@@ -259,7 +295,7 @@ class TreinoService {
         } else {
           parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
         }
-        
+
         parcela2 = this.numeroAleatorio(minParcela2Mult, max_parcela_2);
         parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
         const temParcela3 = min_parcela_3 !== null && max_parcela_3 !== null;
@@ -328,7 +364,7 @@ class TreinoService {
           }
 
           const divisorTotalAbs = parcela2Abs * parcela3Abs;
-          
+
           // Calcular múltiplos possíveis considerando apenas valores absolutos
           const multiploMin = Math.ceil(minParcela1Ajustado / divisorTotalAbs);
           const multiploMax = Math.floor(maxParcela1Ajustado / divisorTotalAbs);
@@ -347,10 +383,10 @@ class TreinoService {
               `Impossível gerar divisão com 3 parcelas sem zero: nenhum múltiplo de ${divisorTotalAbs} está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
             );
           }
-          
+
           const multiplo = this.numeroAleatorio(multiploMinAjustado, multiploMax);
           let parcela1Abs = multiplo * divisorTotalAbs; // Garante que o resultado é inteiro
-          
+
           // Aplicar sinais aleatórios depois (se sistema inteiro)
           parcela1 = this.aplicarSinalAleatorio(parcela1Abs, sistema, permitirNegativos);
           // Para sistema decimal, dividir parcela1 por 100 para ter 2 casas decimais
@@ -359,7 +395,7 @@ class TreinoService {
           }
           parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
           parcela3 = this.aplicarSinalAleatorio(parcela3Abs, sistema, permitirNegativos);
-          
+
           // O resultado já terá o sinal correto automaticamente
           resultado = parcela1 / parcela2 / parcela3;
           // Arredondar resultado para 2 casas decimais se for sistema decimal
@@ -386,10 +422,10 @@ class TreinoService {
               `Impossível gerar divisão sem zero: nenhum múltiplo de ${parcela2Abs} está no intervalo [${min_parcela_1}, ${max_parcela_1}]`
             );
           }
-          
+
           const multiplo = this.numeroAleatorio(multiploMinAjustado2, multiploMax);
           let parcela1Abs = multiplo * parcela2Abs; // Garante que parcela1 % parcela2 == 0
-          
+
           // Aplicar sinais aleatórios depois (se sistema inteiro)
           parcela1 = this.aplicarSinalAleatorio(parcela1Abs, sistema, permitirNegativos);
           // Para sistema decimal, dividir parcela1 por 100 para ter 2 casas decimais
@@ -397,7 +433,7 @@ class TreinoService {
             parcela1 = parcela1 / 100;
           }
           parcela2 = this.aplicarSinalAleatorio(parcela2Abs, sistema, permitirNegativos);
-          
+
           // O resultado já terá o sinal correto automaticamente
           parcela3 = null;
           resultado = parcela1 / parcela2;
@@ -467,17 +503,17 @@ class TreinoService {
         // O resultado será o mesmo número (será convertido no momento de exibir/validar conforme formato_resposta)
         // Para sistema romano, garantir que não seja zero
         const minParcela1Conv = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
-        
+
         // Aplicar limites do sistema ao número gerado
         const limiteMaxSistema = sistema === "romano" ? 3999 : sistema === "binario" ? 2047 : Infinity;
         const maxParcela1AjustadoConv = Math.min(max_parcela_1, limiteMaxSistema);
-        
+
         if (minParcela1Conv > maxParcela1AjustadoConv) {
           throw new Error(
             `Impossível gerar conversão: limite mínimo ${minParcela1Conv} é maior que limite máximo ajustado ${maxParcela1AjustadoConv} para sistema ${sistema}`
           );
         }
-        
+
         parcela1 = this.numeroAleatorio(minParcela1Conv, maxParcela1AjustadoConv);
         parcela2 = null;
         parcela3 = null;
@@ -498,7 +534,7 @@ class TreinoService {
           `Sistema romano não suporta zero. Parcela gerada foi zero.`
         );
       }
-      
+
       // Verificar se resultado é zero
       if (resultado === 0) {
         throw new Error(
@@ -538,13 +574,13 @@ class TreinoService {
    */
   contasIguais(conta1, conta2) {
     if (!conta1 || !conta2) return false;
-    
+
     // Normalizar null/undefined para null
     const parcela3_1 = conta1.parcela3 ?? null;
     const parcela3_2 = conta2.parcela3 ?? null;
     const parcela2_1 = conta1.parcela2 ?? null;
     const parcela2_2 = conta2.parcela2 ?? null;
-    
+
     return (
       conta1.tipo === conta2.tipo &&
       conta1.parcela1 === conta2.parcela1 &&
@@ -613,13 +649,13 @@ class TreinoService {
       while (tentativasConta < maxTentativasPorConta && tentativasTotais < maxTentativasTotais) {
         try {
           contaGerada = this.gerarConta(operacao, sistema);
-          
+
           // Verificar se é diferente da conta anterior (se houver)
           if (contas.length === 0 || !this.contasIguais(contaGerada, contas[contas.length - 1])) {
             contas.push(contaGerada);
             break; // Conta aceita, sair do loop interno
           }
-          
+
           // Se for igual, tentar gerar outra
           tentativasConta++;
           tentativasTotais++;

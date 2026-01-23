@@ -77,6 +77,23 @@ const Login = () => {
               autoComplete="current-password"
             />
           </div>
+          <div style={{ textAlign: "right", marginBottom: "15px" }}>
+            <button
+              type="button"
+              onClick={() => navigate("/esqueci-senha")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#667eea",
+                cursor: "pointer",
+                fontSize: "14px",
+                textDecoration: "underline",
+                padding: 0,
+              }}
+            >
+              Esqueci minha senha
+            </button>
+          </div>
           {erro && (
             <ErrorMessage
               message={erro}
