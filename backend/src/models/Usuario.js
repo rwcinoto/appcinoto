@@ -80,6 +80,14 @@ module.exports = (sequelize, DataTypes) => {
           len: [6, 255],
         },
       },
+      token_reset_senha: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      data_expiracao_reset: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
       nome: {
         type: DataTypes.STRING(255),
         allowNull: false,
