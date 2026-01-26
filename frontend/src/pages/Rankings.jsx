@@ -21,6 +21,7 @@ const Rankings = () => {
   const [limites, setLimites] = useState([]);
   const [sistemas, setSistemas] = useState([]);
   const [conjuntos, setConjuntos] = useState([]);
+  const [sistemasUsuario, setSistemasUsuario] = useState([]);
   const [operacaoSelecionada, setOperacaoSelecionada] = useState("");
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
   const [sistemaSelecionado, setSistemaSelecionado] = useState("");
@@ -34,12 +35,16 @@ const Rankings = () => {
     try {
       // Usar parâmetro todos=true para carregar todas as operações, limites e sistemas
       // independentemente do plano do usuário, permitindo ver rankings de coisas que ainda não tem
-      const [operacoesRes, limitesRes, sistemasRes, conjuntosRes] =
+      // Também carregar as opções do plano do usuário para seleção aleatória quando não houver favoritos
+      const [operacoesRes, limitesRes, sistemasRes, conjuntosRes, operacoesUsuarioRes, limitesUsuarioRes, sistemasUsuarioRes] =
         await Promise.all([
           api.get("/operacoes?todos=true"),
           api.get("/limites?todos=true"),
           api.get("/sistemas?todos=true"),
           api.get("/conjuntos").catch(() => ({ data: [] })),
+          api.get("/operacoes").catch(() => ({ data: [] })),
+          api.get("/limites").catch(() => ({ data: [] })),
+          api.get("/sistemas").catch(() => ({ data: [] })),
         ]);
 
       setOperacoes(operacoesRes.data);
@@ -47,18 +52,29 @@ const Rankings = () => {
       setSistemas(sistemasRes.data);
       setConjuntos(conjuntosRes.data || []);
 
+      // Opções disponíveis para o plano do usuário (para seleção aleatória)
+      const operacoesUsuarioData = operacoesUsuarioRes.data || [];
+      const limitesUsuarioData = limitesUsuarioRes.data || [];
+      const sistemasUsuarioData = sistemasUsuarioRes.data || [];
+
+      setSistemasUsuario(sistemasUsuarioData);
+
       // Ler query params da URL
       const operacaoIdParam = searchParams.get("operacao_id");
       const limiteIdParam = searchParams.get("limite_id");
       const sistemaIdParam = searchParams.get("sistema_id");
       const conjuntoIdParam = searchParams.get("conjunto_id");
 
-      // Ordem de prioridade: 1) query params, 2) preferências do usuário (operacao_id, limite_id, sistema_id), 3) primeiro da lista
+      // Ordem de prioridade: 1) query params, 2) preferências do usuário (operacao_id, limite_id, sistema_id), 3) aleatório das opções do plano
       // Operação
       if (operacaoIdParam && operacoesRes.data.find((o) => String(o.id) === operacaoIdParam)) {
         setOperacaoSelecionada(operacaoIdParam);
       } else if (usuario?.operacao_id && operacoesRes.data.find((o) => o.id === usuario.operacao_id)) {
         setOperacaoSelecionada(String(usuario.operacao_id));
+      } else if (operacoesUsuarioData.length > 0) {
+        // Selecionar aleatoriamente das operações disponíveis para o plano do usuário
+        const indiceAleatorio = Math.floor(Math.random() * operacoesUsuarioData.length);
+        setOperacaoSelecionada(String(operacoesUsuarioData[indiceAleatorio].id));
       } else if (operacoesRes.data.length > 0) {
         setOperacaoSelecionada(String(operacoesRes.data[0].id));
       }
@@ -68,6 +84,10 @@ const Rankings = () => {
         setLimiteSelecionado(limiteIdParam);
       } else if (usuario?.limite_id && limitesRes.data.find((l) => l.id === usuario.limite_id)) {
         setLimiteSelecionado(String(usuario.limite_id));
+      } else if (limitesUsuarioData.length > 0) {
+        // Selecionar aleatoriamente dos limites disponíveis para o plano do usuário
+        const indiceAleatorio = Math.floor(Math.random() * limitesUsuarioData.length);
+        setLimiteSelecionado(String(limitesUsuarioData[indiceAleatorio].id));
       } else {
         const limitePadrao =
           limitesRes.data.find((l) => l.id === 1) || limitesRes.data[0];
@@ -81,14 +101,21 @@ const Rankings = () => {
         ? operacoesRes.data.find((o) => String(o.id) === operacaoIdParam)
         : usuario?.operacao_id && operacoesRes.data.find((o) => o.id === usuario.operacao_id)
         ? operacoesRes.data.find((o) => o.id === usuario.operacao_id)
+        : operacoesUsuarioData.length > 0
+        ? operacoesUsuarioData[0]
         : operacoesRes.data[0];
 
       let sistemasValidos = sistemasRes.data;
+      let sistemasUsuarioValidos = sistemasUsuarioData;
       if (operacaoParaSistema) {
         if (operacaoParaSistema.tipo === "raiz") {
           sistemasValidos = sistemasRes.data.filter((s) => s.tipo !== "inteiro");
+          sistemasUsuarioValidos = sistemasUsuarioData.filter((s) => s.tipo !== "inteiro");
         } else if (operacaoParaSistema.tipo === "conversao") {
           sistemasValidos = sistemasRes.data.filter((s) =>
+            s.tipo === "romano" || s.tipo === "binario" || s.tipo === "hexadecimal"
+          );
+          sistemasUsuarioValidos = sistemasUsuarioData.filter((s) =>
             s.tipo === "romano" || s.tipo === "binario" || s.tipo === "hexadecimal"
           );
         }
@@ -98,6 +125,10 @@ const Rankings = () => {
         setSistemaSelecionado(sistemaIdParam);
       } else if (usuario?.sistema_id && sistemasValidos.find((s) => s.id === usuario.sistema_id)) {
         setSistemaSelecionado(String(usuario.sistema_id));
+      } else if (sistemasUsuarioValidos.length > 0) {
+        // Selecionar aleatoriamente dos sistemas disponíveis para o plano do usuário
+        const indiceAleatorio = Math.floor(Math.random() * sistemasUsuarioValidos.length);
+        setSistemaSelecionado(String(sistemasUsuarioValidos[indiceAleatorio].id));
       } else {
         const sistemaPadrao =
           sistemasValidos.find((s) => s.id === 1) || sistemasValidos[0];
@@ -252,14 +283,31 @@ const Rankings = () => {
         (s) => String(s.id) === sistemaSelecionado
       );
       if (!sistemaAtual) {
-        // Sistema selecionado não está mais disponível, selecionar o primeiro disponível
-        setSistemaSelecionado(String(sistemasDisponiveis[0].id));
+        // Sistema selecionado não está mais disponível
+        // Se o usuário tem favorito e está disponível, usar favorito
+        // Senão, selecionar aleatoriamente dos sistemas do plano do usuário que estão disponíveis
+        const sistemaFavorito = usuario?.sistema_id && sistemasDisponiveis.find((s) => s.id === usuario.sistema_id);
+        if (sistemaFavorito) {
+          setSistemaSelecionado(String(sistemaFavorito.id));
+        } else {
+          // Filtrar sistemas do plano do usuário que estão disponíveis
+          const sistemasUsuarioDisponiveis = sistemasDisponiveis.filter((s) =>
+            sistemasUsuario.some((su) => su.id === s.id)
+          );
+          if (sistemasUsuarioDisponiveis.length > 0) {
+            const indiceAleatorio = Math.floor(Math.random() * sistemasUsuarioDisponiveis.length);
+            setSistemaSelecionado(String(sistemasUsuarioDisponiveis[indiceAleatorio].id));
+          } else {
+            // Se não houver sistemas do plano disponíveis, usar o primeiro disponível
+            setSistemaSelecionado(String(sistemasDisponiveis[0].id));
+          }
+        }
       }
     } else if (sistemaSelecionado && sistemasDisponiveis.length === 0) {
       // Não há sistemas disponíveis, limpar seleção
       setSistemaSelecionado("");
     }
-  }, [sistemasDisponiveis, sistemaSelecionado]);
+  }, [sistemasDisponiveis, sistemaSelecionado, usuario, sistemasUsuario]);
 
   if (!usuario) {
     return (
