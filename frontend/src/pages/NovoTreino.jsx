@@ -89,17 +89,16 @@ const NovoTreino = () => {
     return operacoes.filter((operacao) => operacao.tipo === tipoOperacaoSelecionado);
   }, [operacoes, tipoOperacaoSelecionado]);
 
-  // Definir operação padrão: preferência do usuário (operacao_id) se estiver em operacoesFiltradas, senão id=1 ou primeira
+  // Definir operação padrão: preferência do usuário (operacao_id) se estiver em operacoesFiltradas, senão aleatória
   useEffect(() => {
     if (operacoesFiltradas.length > 0 && !operacaoSelecionada) {
       const operacaoFavorita = usuario?.operacao_id && operacoesFiltradas.find((o) => o.id === usuario.operacao_id);
       if (operacaoFavorita) {
         setOperacaoSelecionada(operacaoFavorita);
-      } else if (!tipoOperacaoSelecionado) {
-        const operacaoPadrao = operacoesFiltradas.find((o) => o.id === 1) || operacoesFiltradas[0];
-        setOperacaoSelecionada(operacaoPadrao);
       } else {
-        setOperacaoSelecionada(operacoesFiltradas[0]);
+        // Selecionar uma operação aleatória da lista
+        const indiceAleatorio = Math.floor(Math.random() * operacoesFiltradas.length);
+        setOperacaoSelecionada(operacoesFiltradas[indiceAleatorio]);
       }
     }
   }, [operacoesFiltradas, operacaoSelecionada, tipoOperacaoSelecionado, usuario]);
@@ -160,21 +159,28 @@ const NovoTreino = () => {
     }
   }, [sistemasDisponiveis, sistemaSelecionado]);
 
-  // Se a operação selecionada não está mais disponível após filtrar, selecionar a primeira disponível
+  // Se a operação selecionada não está mais disponível após filtrar, selecionar aleatoriamente uma disponível
   useEffect(() => {
     if (operacaoSelecionada && operacoesFiltradas.length > 0) {
       const operacaoAtual = operacoesFiltradas.find(
         (op) => op.id === operacaoSelecionada.id
       );
       if (!operacaoAtual) {
-        // Operação selecionada não está mais disponível, selecionar a primeira disponível
-        setOperacaoSelecionada(operacoesFiltradas[0]);
+        // Operação selecionada não está mais disponível, selecionar aleatoriamente uma disponível
+        // Mas só se o usuário não tiver uma operação favorita
+        const operacaoFavorita = usuario?.operacao_id && operacoesFiltradas.find((o) => o.id === usuario.operacao_id);
+        if (operacaoFavorita) {
+          setOperacaoSelecionada(operacaoFavorita);
+        } else {
+          const indiceAleatorio = Math.floor(Math.random() * operacoesFiltradas.length);
+          setOperacaoSelecionada(operacoesFiltradas[indiceAleatorio]);
+        }
       }
     } else if (operacaoSelecionada && operacoesFiltradas.length === 0) {
       // Não há operações disponíveis, limpar seleção
       setOperacaoSelecionada(null);
     }
-  }, [operacoesFiltradas, operacaoSelecionada]);
+  }, [operacoesFiltradas, operacaoSelecionada, usuario]);
 
   const formatarTipoOperacao = (tipo) => {
     const tipos = {
