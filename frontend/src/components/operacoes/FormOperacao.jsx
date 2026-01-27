@@ -31,12 +31,12 @@ const FormOperacao = ({
       const isRaiz = operacao.tipo === "raiz";
       const isAleatorio = operacao.tipo === "aleatorio";
       const isConversao = operacao.tipo === "conversao";
-      
+
       // Extrair IDs das operações incluídas se houver
-      const operacoesIncluidas = operacao.operacoes_incluidas 
+      const operacoesIncluidas = operacao.operacoes_incluidas
         ? operacao.operacoes_incluidas.map(op => op.id)
         : [];
-      
+
       setFormData({
         nome: operacao.nome || "",
         descricao: operacao.descricao || "",
@@ -291,11 +291,24 @@ const FormOperacao = ({
 
     // Parcela 3 é sempre opcional (apenas se não for raiz, aleatorio nem conversao)
     if (formData.tipo !== "raiz" && formData.tipo !== "aleatorio" && formData.tipo !== "conversao") {
-      if (formData.min_parcela_3 !== "") {
-        dados.min_parcela_3 = parseInt(formData.min_parcela_3);
-      }
-      if (formData.max_parcela_3 !== "") {
-        dados.max_parcela_3 = parseInt(formData.max_parcela_3);
+      // Se estamos editando uma operação, sempre enviar os campos da parcela 3
+      // Se estiverem vazios, enviar null para remover os valores existentes
+      if (operacao) {
+        // Estamos editando - enviar null se vazio, ou o valor se preenchido
+        dados.min_parcela_3 = formData.min_parcela_3 !== "" && formData.min_parcela_3 !== null && formData.min_parcela_3 !== undefined
+          ? parseInt(formData.min_parcela_3)
+          : null;
+        dados.max_parcela_3 = formData.max_parcela_3 !== "" && formData.max_parcela_3 !== null && formData.max_parcela_3 !== undefined
+          ? parseInt(formData.max_parcela_3)
+          : null;
+      } else {
+        // Estamos criando - só enviar se preenchido
+        if (formData.min_parcela_3 !== "") {
+          dados.min_parcela_3 = parseInt(formData.min_parcela_3);
+        }
+        if (formData.max_parcela_3 !== "") {
+          dados.max_parcela_3 = parseInt(formData.max_parcela_3);
+        }
       }
     }
 
@@ -314,8 +327,8 @@ const FormOperacao = ({
   // Filtrar operações disponíveis para incluir em aleatório
   // Excluir operações aleatórias e a própria operação sendo editada
   const operacoesDisponiveis = operacoes
-    ? operacoes.filter(op => 
-        op.tipo !== "aleatorio" && 
+    ? operacoes.filter(op =>
+        op.tipo !== "aleatorio" &&
         (!operacao || op.id !== operacao.id)
       )
     : [];

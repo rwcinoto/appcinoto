@@ -408,30 +408,37 @@ class TreinoService {
         break;
 
       case "multiplicacao":
-        // Para sistema romano, garantir que parcelas não sejam zero
+        // Para sistema romano, garantir que parcelas não sejam zero (binário permite zero)
         const minParcela1Mult = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
         const minParcela2Mult = sistema === "romano" ? Math.max(1, min_parcela_2) : min_parcela_2;
 
-        // Para sistema romano, limitar parcela1 para garantir que o resultado não ultrapasse 3999
+        // Para sistema romano e binário, limitar parcela1 para garantir que o resultado não ultrapasse o limite do sistema
         let maxParcela1MultAjustado = max_parcela_1;
-        if (sistema === "romano") {
-          // Se há 3 parcelas, precisamos considerar que parcela1 * parcela2 * parcela3 <= 3999
+        if (sistema === "romano" || sistema === "binario") {
+          const limiteMaximo = sistema === "romano" ? 3999 : 2047;
+          // Se há 3 parcelas, precisamos considerar que parcela1 * parcela2 * parcela3 <= limiteMaximo
           // Para garantir isso, limitamos parcela1 considerando os mínimos das outras parcelas
           const temParcela3 = min_parcela_3 !== null && max_parcela_3 !== null;
           if (temParcela3) {
-            const minParcela2 = Math.max(1, min_parcela_2);
-            const minParcela3 = Math.max(1, min_parcela_3);
-            // parcela1 <= 3999 / (minParcela2 * minParcela3)
-            maxParcela1MultAjustado = Math.min(max_parcela_1, Math.floor(3999 / (minParcela2 * minParcela3)));
+            // Para binário, min pode ser 0, então usar Math.max(1, min) apenas para evitar divisão por zero no cálculo
+            // Mas não forçar que seja pelo menos 1 na geração
+            const minParcela2ParaCalc = Math.max(1, min_parcela_2);
+            const minParcela3ParaCalc = Math.max(1, min_parcela_3);
+            // parcela1 <= limiteMaximo / (minParcela2 * minParcela3)
+            maxParcela1MultAjustado = Math.min(max_parcela_1, Math.floor(limiteMaximo / (minParcela2ParaCalc * minParcela3ParaCalc)));
           } else {
-            // Para 2 parcelas: parcela1 <= 3999 / minParcela2
-            const minParcela2 = Math.max(1, min_parcela_2);
-            maxParcela1MultAjustado = Math.min(max_parcela_1, Math.floor(3999 / minParcela2));
+            // Para 2 parcelas: parcela1 <= limiteMaximo / minParcela2
+            // Para binário, se min_parcela_2 for 0, não há limite superior (resultado será 0 se parcela2 for 0)
+            const minParcela2ParaCalc = Math.max(1, min_parcela_2);
+            if (minParcela2ParaCalc > 0) {
+              maxParcela1MultAjustado = Math.min(max_parcela_1, Math.floor(limiteMaximo / minParcela2ParaCalc));
+            }
+            // Se min_parcela_2 for 0, não há necessidade de limitar parcela1 (resultado será 0 se parcela2 for 0)
           }
           // Garantir que maxParcela1MultAjustado seja pelo menos minParcela1Mult
           if (maxParcela1MultAjustado < minParcela1Mult) {
             throw new Error(
-              `Impossível gerar multiplicação: limite mínimo ${minParcela1Mult} é maior que limite máximo ajustado ${maxParcela1MultAjustado} para sistema romano (resultado não pode ultrapassar 3999)`
+              `Impossível gerar multiplicação: limite mínimo ${minParcela1Mult} é maior que limite máximo ajustado ${maxParcela1MultAjustado} para sistema ${sistema} (resultado não pode ultrapassar ${limiteMaximo})`
             );
           }
         }
@@ -446,23 +453,28 @@ class TreinoService {
           parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
         }
 
-        // Para sistema romano, ajustar limite de parcela2 baseado em parcela1
+        // Para sistema romano e binário, ajustar limite de parcela2 baseado em parcela1
         let maxParcela2Ajustado = max_parcela_2;
         const temParcela3 = min_parcela_3 !== null && max_parcela_3 !== null;
-        if (sistema === "romano") {
+        if (sistema === "romano" || sistema === "binario") {
+          const limiteMaximo = sistema === "romano" ? 3999 : 2047;
           const parcela1Abs = Math.abs(parcela1);
-          if (temParcela3) {
-            // Para 3 parcelas: parcela2 <= 3999 / (parcela1 * minParcela3)
-            const minParcela3 = Math.max(1, min_parcela_3);
-            maxParcela2Ajustado = Math.min(max_parcela_2, Math.floor(3999 / (parcela1Abs * minParcela3)));
+          if (parcela1Abs === 0) {
+            // Se parcela1 for 0, resultado será 0 (dentro do limite), então não precisa limitar parcela2
+            maxParcela2Ajustado = max_parcela_2;
+          } else if (temParcela3) {
+            // Para 3 parcelas: parcela2 <= limiteMaximo / (parcela1 * minParcela3)
+            // Para binário, usar Math.max(1, min) apenas para evitar divisão por zero no cálculo
+            const minParcela3ParaCalc = Math.max(1, min_parcela_3);
+            maxParcela2Ajustado = Math.min(max_parcela_2, Math.floor(limiteMaximo / (parcela1Abs * minParcela3ParaCalc)));
           } else {
-            // Para 2 parcelas: parcela2 <= 3999 / parcela1
-            maxParcela2Ajustado = Math.min(max_parcela_2, Math.floor(3999 / parcela1Abs));
+            // Para 2 parcelas: parcela2 <= limiteMaximo / parcela1
+            maxParcela2Ajustado = Math.min(max_parcela_2, Math.floor(limiteMaximo / parcela1Abs));
           }
           // Garantir que maxParcela2Ajustado seja pelo menos minParcela2Mult
           if (maxParcela2Ajustado < minParcela2Mult) {
             throw new Error(
-              `Impossível gerar multiplicação: limite mínimo ${minParcela2Mult} é maior que limite máximo ajustado ${maxParcela2Ajustado} para sistema romano (resultado não pode ultrapassar 3999)`
+              `Impossível gerar multiplicação: limite mínimo ${minParcela2Mult} é maior que limite máximo ajustado ${maxParcela2Ajustado} para sistema ${sistema} (resultado não pode ultrapassar ${limiteMaximo})`
             );
           }
         }
@@ -483,19 +495,26 @@ class TreinoService {
         }
 
         if (temParcela3) {
+          // Para sistema romano, garantir que parcela3 não seja zero (binário permite zero)
           const minParcela3Mult = sistema === "romano" ? Math.max(1, min_parcela_3) : min_parcela_3;
-          
-          // Para sistema romano, ajustar limite de parcela3 baseado em parcela1 * parcela2
+
+          // Para sistema romano e binário, ajustar limite de parcela3 baseado em parcela1 * parcela2
           let maxParcela3Ajustado = max_parcela_3;
-          if (sistema === "romano") {
+          if (sistema === "romano" || sistema === "binario") {
+            const limiteMaximo = sistema === "romano" ? 3999 : 2047;
             const parcela1Abs = Math.abs(parcela1);
             const parcela2Abs = Math.abs(parcela2);
-            // parcela3 <= 3999 / (parcela1 * parcela2)
-            maxParcela3Ajustado = Math.min(max_parcela_3, Math.floor(3999 / (parcela1Abs * parcela2Abs)));
+            // Se parcela1 ou parcela2 for 0, resultado será 0 (dentro do limite), então não precisa limitar parcela3
+            if (parcela1Abs === 0 || parcela2Abs === 0) {
+              maxParcela3Ajustado = max_parcela_3;
+            } else {
+              // parcela3 <= limiteMaximo / (parcela1 * parcela2)
+              maxParcela3Ajustado = Math.min(max_parcela_3, Math.floor(limiteMaximo / (parcela1Abs * parcela2Abs)));
+            }
             // Garantir que maxParcela3Ajustado seja pelo menos minParcela3Mult
             if (maxParcela3Ajustado < minParcela3Mult) {
               throw new Error(
-                `Impossível gerar multiplicação: limite mínimo ${minParcela3Mult} é maior que limite máximo ajustado ${maxParcela3Ajustado} para sistema romano (resultado não pode ultrapassar 3999)`
+                `Impossível gerar multiplicação: limite mínimo ${minParcela3Mult} é maior que limite máximo ajustado ${maxParcela3Ajustado} para sistema ${sistema} (resultado não pode ultrapassar ${limiteMaximo})`
               );
             }
           }
@@ -662,6 +681,27 @@ class TreinoService {
           if (baseMin > baseMax) {
             throw new Error(
               `Impossível gerar raiz: nenhuma base² está no intervalo [${min_parcela_1}, ${max_parcela_1}] respeitando o limite do sistema romano (máximo: ${limiteMaxBaseRomano}² = ${limiteMaxBaseRomano * limiteMaxBaseRomano})`
+            );
+          }
+
+          const base = this.numeroAleatorio(baseMin, baseMax);
+          parcela1 = base * base; // resultado da raiz
+          parcela2 = null;
+          parcela3 = null;
+          resultado = base; // a raiz quadrada
+        } else if (sistema === "binario") {
+          // Para sistema binário: garantir que base² não ultrapasse 2047
+          // O maior número que pode ser elevado ao quadrado sem ultrapassar 2047 é 45 (45² = 2025)
+          const limiteMaxBaseBinario = 45;
+          const baseMin = Math.ceil(Math.sqrt(min_parcela_1));
+          let baseMax = Math.floor(Math.sqrt(max_parcela_1));
+
+          // Limitar baseMax ao máximo permitido para sistema binário
+          baseMax = Math.min(baseMax, limiteMaxBaseBinario);
+
+          if (baseMin > baseMax) {
+            throw new Error(
+              `Impossível gerar raiz: nenhuma base² está no intervalo [${min_parcela_1}, ${max_parcela_1}] respeitando o limite do sistema binário (máximo: ${limiteMaxBaseBinario}² = ${limiteMaxBaseBinario * limiteMaxBaseBinario})`
             );
           }
 
