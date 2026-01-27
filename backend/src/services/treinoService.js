@@ -123,7 +123,7 @@ class TreinoService {
         // Gerar minuendo primeiro, depois subtraendo menor ou igual
         // Para sistema romano, garantir que parcelas não sejam zero
         let minParcela1Subt = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
-        
+
         // Se há 3 parcelas, garantir que parcela1 seja grande o suficiente
         // para subtrair parcela2 e parcela3 e ainda ter resultado >= 0 (ou > 0 para romanos)
         if (min_parcela_3 !== null && max_parcela_3 !== null) {
@@ -142,7 +142,7 @@ class TreinoService {
             minParcela1Subt = Math.max(minParcela1Subt, minParcela1Necessario);
           }
         }
-        
+
         parcela1 = this.numeroAleatorio(minParcela1Subt, max_parcela_1);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
         parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
@@ -323,7 +323,7 @@ class TreinoService {
           if (minParcela3Subt > maxParcela3) {
             maxParcela3 = minParcela3Subt;
           }
-          
+
           parcela3 = this.numeroAleatorio(minParcela3Subt, maxParcela3);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
           parcela3 = this.adicionarCasasDecimais(parcela3, sistema);
@@ -352,7 +352,7 @@ class TreinoService {
           if (sistema === "decimal") {
             resultado = Math.round(resultado * 100) / 100;
           }
-          
+
           // Para sistemas que não permitem negativos, garantir que resultado >= 0
           // Se resultado for negativo, ajustar parcela3 para garantir resultado >= 0
           if (!permitirNegativos && resultado < 0) {
@@ -412,7 +412,31 @@ class TreinoService {
         const minParcela1Mult = sistema === "romano" ? Math.max(1, min_parcela_1) : min_parcela_1;
         const minParcela2Mult = sistema === "romano" ? Math.max(1, min_parcela_2) : min_parcela_2;
 
-        parcela1 = this.numeroAleatorio(minParcela1Mult, max_parcela_1);
+        // Para sistema romano, limitar parcela1 para garantir que o resultado não ultrapasse 3999
+        let maxParcela1MultAjustado = max_parcela_1;
+        if (sistema === "romano") {
+          // Se há 3 parcelas, precisamos considerar que parcela1 * parcela2 * parcela3 <= 3999
+          // Para garantir isso, limitamos parcela1 considerando os mínimos das outras parcelas
+          const temParcela3 = min_parcela_3 !== null && max_parcela_3 !== null;
+          if (temParcela3) {
+            const minParcela2 = Math.max(1, min_parcela_2);
+            const minParcela3 = Math.max(1, min_parcela_3);
+            // parcela1 <= 3999 / (minParcela2 * minParcela3)
+            maxParcela1MultAjustado = Math.min(max_parcela_1, Math.floor(3999 / (minParcela2 * minParcela3)));
+          } else {
+            // Para 2 parcelas: parcela1 <= 3999 / minParcela2
+            const minParcela2 = Math.max(1, min_parcela_2);
+            maxParcela1MultAjustado = Math.min(max_parcela_1, Math.floor(3999 / minParcela2));
+          }
+          // Garantir que maxParcela1MultAjustado seja pelo menos minParcela1Mult
+          if (maxParcela1MultAjustado < minParcela1Mult) {
+            throw new Error(
+              `Impossível gerar multiplicação: limite mínimo ${minParcela1Mult} é maior que limite máximo ajustado ${maxParcela1MultAjustado} para sistema romano (resultado não pode ultrapassar 3999)`
+            );
+          }
+        }
+
+        parcela1 = this.numeroAleatorio(minParcela1Mult, maxParcela1MultAjustado);
         parcela1 = this.aplicarSinalAleatorio(parcela1, sistema, permitirNegativos);
         // Para multiplicação com sistema decimal: parcela1 sempre é inteira (natural)
         if (sistema === "decimal") {
@@ -422,9 +446,29 @@ class TreinoService {
           parcela1 = this.adicionarCasasDecimais(parcela1, sistema);
         }
 
-        parcela2 = this.numeroAleatorio(minParcela2Mult, max_parcela_2);
-        parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
+        // Para sistema romano, ajustar limite de parcela2 baseado em parcela1
+        let maxParcela2Ajustado = max_parcela_2;
         const temParcela3 = min_parcela_3 !== null && max_parcela_3 !== null;
+        if (sistema === "romano") {
+          const parcela1Abs = Math.abs(parcela1);
+          if (temParcela3) {
+            // Para 3 parcelas: parcela2 <= 3999 / (parcela1 * minParcela3)
+            const minParcela3 = Math.max(1, min_parcela_3);
+            maxParcela2Ajustado = Math.min(max_parcela_2, Math.floor(3999 / (parcela1Abs * minParcela3)));
+          } else {
+            // Para 2 parcelas: parcela2 <= 3999 / parcela1
+            maxParcela2Ajustado = Math.min(max_parcela_2, Math.floor(3999 / parcela1Abs));
+          }
+          // Garantir que maxParcela2Ajustado seja pelo menos minParcela2Mult
+          if (maxParcela2Ajustado < minParcela2Mult) {
+            throw new Error(
+              `Impossível gerar multiplicação: limite mínimo ${minParcela2Mult} é maior que limite máximo ajustado ${maxParcela2Ajustado} para sistema romano (resultado não pode ultrapassar 3999)`
+            );
+          }
+        }
+
+        parcela2 = this.numeroAleatorio(minParcela2Mult, maxParcela2Ajustado);
+        parcela2 = this.aplicarSinalAleatorio(parcela2, sistema, permitirNegativos);
         if (sistema === "decimal") {
           if (temParcela3) {
             // Se há 3 parcelas: parcela2 é inteira (natural)
@@ -440,7 +484,23 @@ class TreinoService {
 
         if (temParcela3) {
           const minParcela3Mult = sistema === "romano" ? Math.max(1, min_parcela_3) : min_parcela_3;
-          parcela3 = this.numeroAleatorio(minParcela3Mult, max_parcela_3);
+          
+          // Para sistema romano, ajustar limite de parcela3 baseado em parcela1 * parcela2
+          let maxParcela3Ajustado = max_parcela_3;
+          if (sistema === "romano") {
+            const parcela1Abs = Math.abs(parcela1);
+            const parcela2Abs = Math.abs(parcela2);
+            // parcela3 <= 3999 / (parcela1 * parcela2)
+            maxParcela3Ajustado = Math.min(max_parcela_3, Math.floor(3999 / (parcela1Abs * parcela2Abs)));
+            // Garantir que maxParcela3Ajustado seja pelo menos minParcela3Mult
+            if (maxParcela3Ajustado < minParcela3Mult) {
+              throw new Error(
+                `Impossível gerar multiplicação: limite mínimo ${minParcela3Mult} é maior que limite máximo ajustado ${maxParcela3Ajustado} para sistema romano (resultado não pode ultrapassar 3999)`
+              );
+            }
+          }
+
+          parcela3 = this.numeroAleatorio(minParcela3Mult, maxParcela3Ajustado);
           parcela3 = this.aplicarSinalAleatorio(parcela3, sistema, permitirNegativos);
           if (sistema === "decimal") {
             // Para multiplicação com 3 parcelas: parcela3 tem 2 casas decimais
@@ -589,6 +649,27 @@ class TreinoService {
           parcela2 = null;
           parcela3 = null;
           resultado = Math.round(base * 10) / 10; // a raiz quadrada (com 1 casa decimal, arredondado)
+        } else if (sistema === "romano") {
+          // Para sistema romano: garantir que base² não ultrapasse 3999
+          // O maior número que pode ser elevado ao quadrado sem ultrapassar 3999 é 63 (63² = 3969)
+          const limiteMaxBaseRomano = 63;
+          const baseMin = Math.ceil(Math.sqrt(min_parcela_1));
+          let baseMax = Math.floor(Math.sqrt(max_parcela_1));
+
+          // Limitar baseMax ao máximo permitido para sistema romano
+          baseMax = Math.min(baseMax, limiteMaxBaseRomano);
+
+          if (baseMin > baseMax) {
+            throw new Error(
+              `Impossível gerar raiz: nenhuma base² está no intervalo [${min_parcela_1}, ${max_parcela_1}] respeitando o limite do sistema romano (máximo: ${limiteMaxBaseRomano}² = ${limiteMaxBaseRomano * limiteMaxBaseRomano})`
+            );
+          }
+
+          const base = this.numeroAleatorio(baseMin, baseMax);
+          parcela1 = base * base; // resultado da raiz
+          parcela2 = null;
+          parcela3 = null;
+          resultado = base; // a raiz quadrada
         } else {
           // Para raiz: gerar base aleatória, calcular base²
           // O resultado será base², e base² deve estar nos limites de parcela_1
