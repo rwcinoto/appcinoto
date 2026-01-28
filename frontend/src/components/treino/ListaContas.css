@@ -19,8 +19,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 0;
-  margin: 8px 0;
+  padding: 4px 0;
+  margin: 4px 0;
 }
 
 .divisor-texto {
@@ -33,7 +33,9 @@
   padding: 0 16px;
   background: var(--color-background-dark);
   border-radius: 4px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .conta-item {
@@ -41,7 +43,10 @@
   border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 20px 24px;
-  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  transition:
+    all 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
   opacity: 0.6;
   transform: translateY(0);
 }
@@ -115,7 +120,9 @@
   font-family: "Courier New", monospace;
   display: inline-block;
   color: var(--color-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .parcela {
@@ -125,7 +132,9 @@
   min-width: 60px;
   text-align: center;
   color: var(--color-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   font-family: "Courier New", monospace;
 }
 
@@ -185,7 +194,11 @@
   min-width: 80px;
   max-width: 150px;
   outline: none;
-  transition: all 0.2s ease-in-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition:
+    all 0.2s ease-in-out,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
   background-color: var(--color-background);
   caret-color: var(--color-text);
 }
@@ -196,7 +209,7 @@
 }
 
 .conta-input-resultado:focus {
-  border-color: #2196F3;
+  border-color: #2196f3;
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
   background-color: rgba(33, 150, 243, 0.1);
 }
@@ -214,9 +227,9 @@
 
 /* Estado de erro (vermelho) - tema do cubo mágico */
 .conta-input-resultado.errado {
-  border-color: #F44336 !important;
+  border-color: #f44336 !important;
   background: rgba(244, 67, 54, 0.1) !important;
-  color: #D32F2F !important;
+  color: #d32f2f !important;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
   animation: wrongShake 0.3s ease;
 }
@@ -235,7 +248,7 @@
 }
 
 .conta-item.atual .conta-input-resultado {
-  border-color: #2196F3;
+  border-color: #2196f3;
   background-color: rgba(33, 150, 243, 0.1);
 }
 
@@ -244,10 +257,10 @@
 }
 
 .conta-item.atual .conta-input-resultado.errado {
-  border-color: #F44336 !important;
+  border-color: #f44336 !important;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
   background: rgba(244, 67, 54, 0.1) !important;
-  color: #D32F2F !important;
+  color: #d32f2f !important;
 }
 
 .conta-input-resultado::placeholder {

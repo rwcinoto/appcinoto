@@ -845,76 +845,82 @@ const ListaContas = ({
                       )}
                     </>
                   )}
-                  <span className="igual">=</span>
-                  <input
-                    key={
-                      index === contaAtualIndex ? "input-atual-fixo" : contaKey
-                    }
-                    ref={(el) => {
-                      if (el) {
-                        inputRefs.current[index] = el;
-                        // Focar automaticamente se este é o input atual
-                        if (index === contaAtualIndex && !disabled) {
-                          setTimeout(() => {
-                            el.focus();
-                          }, 50);
+                  {index !== 1 && (
+                    <>
+                      <span className="igual">=</span>
+                      <input
+                        key={
+                          index === contaAtualIndex
+                            ? "input-atual-fixo"
+                            : contaKey
                         }
-                        // Adicionar classe errado se a conta teve erro
-                        if (contaTeveErroRender) {
-                          el.classList.add("errado");
+                        ref={(el) => {
+                          if (el) {
+                            inputRefs.current[index] = el;
+                            // Focar automaticamente se este é o input atual
+                            if (index === contaAtualIndex && !disabled) {
+                              setTimeout(() => {
+                                el.focus();
+                              }, 50);
+                            }
+                            // Adicionar classe errado se a conta teve erro
+                            if (contaTeveErroRender) {
+                              el.classList.add("errado");
+                            }
+                          } else {
+                            // Limpar ref quando o componente é desmontado
+                            delete inputRefs.current[index];
+                          }
+                        }}
+                        autoFocus={
+                          index === contaAtualIndex && !disabled && !isMobile
                         }
-                      } else {
-                        // Limpar ref quando o componente é desmontado
-                        delete inputRefs.current[index];
-                      }
-                    }}
-                    autoFocus={
-                      index === contaAtualIndex && !disabled && !isMobile
-                    }
-                    type="text"
-                    inputMode={
-                      isMobile
-                        ? "none"
-                        : sistemaEntrada === "romano" ||
-                            sistemaEntrada === "hexadecimal"
-                          ? "text"
-                          : "numeric"
-                    }
-                    pattern={
-                      sistemaEntrada === "natural"
-                        ? "[0-9]*"
-                        : sistemaEntrada === "inteiro"
-                          ? "-?[0-9]*"
-                          : sistemaEntrada === "decimal"
-                            ? "[0-9]*[.,]?[0-9]*"
-                            : sistemaEntrada === "binario"
-                              ? "[01]*"
-                              : sistemaEntrada === "hexadecimal"
-                                ? "[0-9A-Fa-f]*"
-                                : undefined
-                    }
-                    className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
-                    disabled={disabled || index !== contaAtualIndex}
-                    onFocus={(e) => {
-                      // Prevenir foco no mobile para evitar teclado nativo
-                      if (isMobile && index === contaAtualIndex) {
-                        setTimeout(() => e.target.blur(), 0);
-                      }
-                    }}
-                    onTouchStart={(e) => {
-                      // Prevenir teclado nativo ao tocar no input no mobile
-                      if (isMobile && index === contaAtualIndex) {
-                        e.preventDefault();
-                        e.target.blur();
-                      }
-                    }}
-                    onChange={(e) => handleChange(conta, index, e)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="?"
-                    autoComplete="off"
-                    defaultValue=""
-                    aria-label={`Resultado da conta ${index + 1}`}
-                  />
+                        type="text"
+                        inputMode={
+                          isMobile
+                            ? "none"
+                            : sistemaEntrada === "romano" ||
+                                sistemaEntrada === "hexadecimal"
+                              ? "text"
+                              : "numeric"
+                        }
+                        pattern={
+                          sistemaEntrada === "natural"
+                            ? "[0-9]*"
+                            : sistemaEntrada === "inteiro"
+                              ? "-?[0-9]*"
+                              : sistemaEntrada === "decimal"
+                                ? "[0-9]*[.,]?[0-9]*"
+                                : sistemaEntrada === "binario"
+                                  ? "[01]*"
+                                  : sistemaEntrada === "hexadecimal"
+                                    ? "[0-9A-Fa-f]*"
+                                    : undefined
+                        }
+                        className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
+                        disabled={disabled || index !== contaAtualIndex}
+                        onFocus={(e) => {
+                          // Prevenir foco no mobile para evitar teclado nativo
+                          if (isMobile && index === contaAtualIndex) {
+                            setTimeout(() => e.target.blur(), 0);
+                          }
+                        }}
+                        onTouchStart={(e) => {
+                          // Prevenir teclado nativo ao tocar no input no mobile
+                          if (isMobile && index === contaAtualIndex) {
+                            e.preventDefault();
+                            e.target.blur();
+                          }
+                        }}
+                        onChange={(e) => handleChange(conta, index, e)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="?"
+                        autoComplete="off"
+                        defaultValue=""
+                        aria-label={`Resultado da conta ${index + 1}`}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
               {index === 1 && isMobile && contas.length >= 2 && (
