@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Numix - Treino de cálculos</title>
     <link rel="icon" type="image/x-icon" href="imagens/favicon.ico">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cinoto.com.br/numix/">
     <meta property="og:title" content="Numix - Treino de cálculos">
     <meta property="og:description" content="Sistema de treino de cálculos matemáticos para melhorar sua agilidade mental e raciocínio">
     <meta property="og:image" content="https://cinoto.com.br/numix/imagens/logo512.png">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cinoto.com.br/numix/">
@@ -44,7 +44,7 @@
             background: white;
             text-align: center;
             padding: 40px 20px;
-            border-radius: 20px;
+            border-radius: 20px 20px 0 0;
             margin-bottom: 0;
         }
 
@@ -52,6 +52,36 @@
             max-width: 100%;
             max-height: 120px;
             height: auto;
+        }
+
+        .menu {
+            background: #2A2A3A;
+            padding: 15px 20px;
+            border-radius: 0 0 20px 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .menu a {
+            color: #E0E0E0;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .menu a.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
         .access-button {
@@ -215,6 +245,25 @@
         .feature-card p {
             font-size: 1em;
             text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .feature-card .saiba-mais {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .feature-card .saiba-mais:hover {
+            background: #764ba2;
+            transform: scale(1.05);
         }
 
         .highlight-box {
@@ -377,6 +426,26 @@
             opacity: 0.9;
         }
 
+        .btn-voltar-topo {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: 500;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-voltar-topo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+
         @media (max-width: 768px) {
             .logo-section {
                 padding: 30px 20px;
@@ -405,6 +474,16 @@
 
             .features-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .menu {
+                padding: 10px;
+                gap: 5px;
+            }
+
+            .menu a {
+                padding: 8px 12px;
+                font-size: 0.9em;
             }
 
             .image-placeholder > div {
@@ -443,6 +522,16 @@
         <div class="logo-section">
             <img src="imagens/logo-numix.svg" alt="Numix - Sistema de treino de cálculos matemáticos">
         </div>
+
+        <nav class="menu">
+            <a href="index.html" class="active">Início</a>
+            <a href="instrucoes-novo-treino.html">Novo treino</a>
+            <a href="instrucoes-recordes.html">Recordes</a>
+            <a href="instrucoes-rankings.html">Rankings</a>
+            <a href="instrucoes-conjuntos.html">Conjuntos</a>
+            <a href="instrucoes-perfil.html">Perfil</a>
+        </nav>
+
         <div class="content">
             <section class="section">
                 <h2>Sobre o sistema</h2>
@@ -458,7 +547,7 @@
                 <p>
                     Ao acessar o sistema, você pode criar um novo treino escolhendo a operação matemática que deseja praticar.
                 </p>
-                
+
                 <div class="image-placeholder">
                     <img src="imagens/novoTreinoEscuro.png" alt="Tela de novo treino do Numix">
                 </div>
@@ -470,30 +559,34 @@
 
             <section class="section">
                 <h2>Funcionalidades principais</h2>
-                
+
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="icon">🏃</div>
                         <h4>Novo treino</h4>
                         <p>Comece um novo treino escolhendo uma operação</p>
+                        <a href="instrucoes-novo-treino.html" class="saiba-mais">Saiba mais</a>
                     </div>
 
                     <div class="feature-card">
                         <div class="icon">🏆</div>
                         <h4>Recordes</h4>
                         <p>Acompanhe seus recordes em cada tipo de operação</p>
+                        <a href="instrucoes-recordes.html" class="saiba-mais">Saiba mais</a>
                     </div>
 
                     <div class="feature-card">
                         <div class="icon">📊</div>
                         <h4>Rankings</h4>
                         <p>Veja como você está em relação a outros usuários do sistema</p>
+                        <a href="instrucoes-rankings.html" class="saiba-mais">Saiba mais</a>
                     </div>
 
                     <div class="feature-card">
                         <div class="icon">👥</div>
                         <h4>Conjuntos</h4>
                         <p>Crie conjuntos de amigos para comparar seus resultados</p>
+                        <a href="instrucoes-conjuntos.html" class="saiba-mais">Saiba mais</a>
                     </div>
                 </div>
 
@@ -503,7 +596,7 @@
                 <div class="highlight-box">
                     <h3>Conjuntos</h3>
                     <p>
-                        Uma das funcionalidades mais interessantes do Numix é o sistema de conjuntos. Você pode criar 
+                        Uma das funcionalidades mais interessantes do Numix é o sistema de conjuntos. Você pode criar
                         conjuntos de usuários e convidar pessoas que conhece para participar.
                     </p>
                     <p>
@@ -511,8 +604,8 @@
                         de operação com seus amigos, familiares ou colegas.
                     </p>
                     <p>
-                        Isso torna a prática de cálculos mais motivadora, pois pode ver quanto ainda pode 
-                        melhorar no desempenho comparando-se com pessoas próximas. É uma forma divertida de 
+                        Isso torna a prática de cálculos mais motivadora, pois pode ver quanto ainda pode
+                        melhorar no desempenho comparando-se com pessoas próximas. É uma forma divertida de
                         manter a motivação e continuar praticando!
                     </p>
                 </div>
@@ -524,7 +617,7 @@
                     Cada nível inclui todas as funcionalidades dos níveis anteriores, além de novas operações e recursos.
                     Todo nível possui um modo aleatório com todas as operações até aquele nível.
                 </p>
-                
+
                 <div class="levels-grid">
                     <div class="level-card">
                         <h3>Nível natural</h3>
@@ -558,7 +651,7 @@
                                 <strong>Sistemas numéricos:</strong> Números inteiros e números romanos
                             </div>
                             <div class="level-info">
-                                <strong>Limite de tempo:</strong> 2 ou 3 minutos
+                                <strong>Limite de tempo:</strong> 2 minutos
                             </div>
                             <div class="level-info">
                                 <strong>Conjuntos:</strong> Criar até 4, participar de 6
@@ -583,7 +676,7 @@
                                 <strong>Sistemas numéricos:</strong> Números decimais (duas casas)
                             </div>
                             <div class="level-info">
-                                <strong>Limite de tempo:</strong> 4 ou 5 minutos
+                                <strong>Limite de tempo:</strong> 3 minutos
                             </div>
                             <div class="level-info">
                                 <strong>Conjuntos:</strong> Criar até 8, participar de 12
@@ -608,7 +701,7 @@
                                 <strong>Sistemas numéricos:</strong> Números binários
                             </div>
                             <div class="level-info">
-                                <strong>Limite de tempo:</strong> 6 ou 7 minutos
+                                <strong>Limite de tempo:</strong> 4 minutos
                             </div>
                             <div class="level-info">
                                 <strong>Conjuntos:</strong> Criar até 16, participar de 24
@@ -633,7 +726,7 @@
                                 <strong>Sistemas numéricos:</strong> Números hexadecimais
                             </div>
                             <div class="level-info">
-                                <strong>Limite de tempo:</strong> 8, 9 ou 10 minutos
+                                <strong>Limite de tempo:</strong> 5 minutos
                             </div>
                             <div class="level-info">
                                 <strong>Conjuntos:</strong> Criar até 32, participar de 48
@@ -685,6 +778,7 @@
         </div>
 
         <footer>
+            <a href="#" class="btn-voltar-topo">↑ Voltar ao topo</a>
             <p>Numix - Sistema de treino de cálculos matemáticos</p>
             <p style="margin-top: 10px; font-size: 0.9em;">Desenvolvido por Rafael Cinoto</p>
         </footer>

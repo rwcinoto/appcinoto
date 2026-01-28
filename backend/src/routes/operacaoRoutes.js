@@ -26,21 +26,33 @@ const validarCriarOperacao = [
     .isInt()
     .withMessage("max_parcela_1 deve ser um número inteiro"),
   body("min_parcela_2")
-    .optional()
-    .isInt()
-    .withMessage("min_parcela_2 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("min_parcela_2 deve ser um número inteiro ou null"),
   body("max_parcela_2")
-    .optional()
-    .isInt()
-    .withMessage("max_parcela_2 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("max_parcela_2 deve ser um número inteiro ou null"),
   body("min_parcela_3")
-    .optional()
-    .isInt()
-    .withMessage("min_parcela_3 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("min_parcela_3 deve ser um número inteiro ou null"),
   body("max_parcela_3")
-    .optional()
-    .isInt()
-    .withMessage("max_parcela_3 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("max_parcela_3 deve ser um número inteiro ou null"),
   body("id_plano")
     .isInt({ min: 1 })
     .withMessage("ID do plano deve ser um número inteiro válido"),
@@ -72,21 +84,33 @@ const validarAtualizarOperacao = [
     .isInt()
     .withMessage("max_parcela_1 deve ser um número inteiro"),
   body("min_parcela_2")
-    .optional()
-    .isInt()
-    .withMessage("min_parcela_2 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("min_parcela_2 deve ser um número inteiro ou null"),
   body("max_parcela_2")
-    .optional()
-    .isInt()
-    .withMessage("max_parcela_2 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("max_parcela_2 deve ser um número inteiro ou null"),
   body("min_parcela_3")
-    .optional()
-    .isInt()
-    .withMessage("min_parcela_3 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("min_parcela_3 deve ser um número inteiro ou null"),
   body("max_parcela_3")
-    .optional()
-    .isInt()
-    .withMessage("max_parcela_3 deve ser um número inteiro"),
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === undefined) return true;
+      return Number.isInteger(Number(value));
+    })
+    .withMessage("max_parcela_3 deve ser um número inteiro ou null"),
   body("id_plano")
     .optional()
     .isInt({ min: 1 })

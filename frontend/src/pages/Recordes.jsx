@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import ListaRecordes from "../components/recordes/ListaRecordes";
-import Loading from "../components/common/Loading";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
+import Loading from "../components/common/Loading";
+import ListaRecordes from "../components/recordes/ListaRecordes";
 import { useAuth } from "../context/AuthContext";
-import { getErrorMessage, logError } from "../utils/errorHandler";
 import api from "../services/api";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Recordes.css";
 
 const Recordes = () => {
   const { usuario } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const usuarioIdParam = searchParams.get("usuario_id");
   const [usuarioVisualizado, setUsuarioVisualizado] = useState(null);
@@ -19,14 +20,14 @@ const Recordes = () => {
   const [limites, setLimites] = useState([]);
   const [sistemas, setSistemas] = useState([]);
   const [planos, setPlanos] = useState([]);
-  
+
   // Filtros opcionais
   const [operacaoSelecionada, setOperacaoSelecionada] = useState("");
   const [tipoOperacaoSelecionado, setTipoOperacaoSelecionado] = useState("");
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
   const [sistemaSelecionado, setSistemaSelecionado] = useState("");
   const [planoSelecionado, setPlanoSelecionado] = useState("");
-  
+
   const [erro, setErro] = useState("");
 
   const carregarDados = useCallback(async () => {
@@ -96,27 +97,27 @@ const Recordes = () => {
     try {
       // Construir query string com filtros opcionais
       const params = new URLSearchParams();
-      
+
       if (operacaoSelecionada) {
         params.append("operacao_id", operacaoSelecionada);
       }
-      
+
       if (tipoOperacaoSelecionado) {
         params.append("tipo_operacao", tipoOperacaoSelecionado);
       }
-      
+
       if (limiteSelecionado) {
         params.append("limite_id", limiteSelecionado);
       }
-      
+
       if (sistemaSelecionado) {
         params.append("sistema_id", sistemaSelecionado);
       }
-      
+
       if (planoSelecionado) {
         params.append("plano_id", planoSelecionado);
       }
-      
+
       // Adicionar usuario_id se estiver visualizando outro usuário
       if (usuarioIdParam) {
         const usuarioId = parseInt(usuarioIdParam);
@@ -195,9 +196,15 @@ const Recordes = () => {
     return formatarTipoSistema(sistema.tipo);
   };
 
-  const titulo = usuarioVisualizado 
-    ? `Recordes de ${usuarioVisualizado.nome}` 
+  const titulo = usuarioVisualizado
+    ? `Recordes de ${usuarioVisualizado.nome}`
     : "Meus recordes";
+
+  // Limitar recordes exibidos a 60
+  const LIMITE_EXIBICAO = 60;
+  const totalRecordes = recordes.length;
+  const recordesExibidos = recordes.slice(0, LIMITE_EXIBICAO);
+  const temMaisRecordes = totalRecordes > LIMITE_EXIBICAO;
 
   // Obter tipos únicos de operação para o filtro
   const tiposOperacao = Array.from(
@@ -207,7 +214,37 @@ const Recordes = () => {
   return (
     <div className="recordes-container">
       <div className="recordes-header">
-        <h1>{titulo}</h1>
+        <div className="recordes-titulo-container">
+          <div className="titulo-com-ajuda">
+            <h1>{titulo}</h1>
+            <button
+              className="btn-ajuda"
+              onClick={() => navigate("/instrucoes/recordes")}
+              title="Ver instruções sobre recordes"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
+          </div>
+          {temMaisRecordes && (
+            <span className="recordes-contador">
+              (mostrando {LIMITE_EXIBICAO} de {totalRecordes})
+            </span>
+          )}
+        </div>
         <div className="filtros-header">
           {/* Tipo de operação */}
           <div className="select-group-filtro">
@@ -305,9 +342,9 @@ const Recordes = () => {
         />
       )}
 
-      <ListaRecordes 
-        recordes={recordes} 
-        loading={loading} 
+      <ListaRecordes
+        recordes={recordesExibidos}
+        loading={loading}
         usuarioIdVisualizado={usuarioIdParam ? parseInt(usuarioIdParam) : null}
         isVisitante={usuario?.isVisitante || false}
       />

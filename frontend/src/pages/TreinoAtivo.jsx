@@ -1,18 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import ErrorMessage from "../components/common/ErrorMessage";
+import Loading from "../components/common/Loading";
 import ContadorPontos from "../components/treino/ContadorPontos";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
-import ModalEscolhaFormatoResposta from "../components/treino/ModalEscolhaFormatoResposta";
 import ListaContas from "../components/treino/ListaContas";
+import ModalEscolhaFormatoResposta from "../components/treino/ModalEscolhaFormatoResposta";
 import ResultadoTreino from "../components/treino/ResultadoTreino";
 import Timer from "../components/treino/Timer";
-import Loading from "../components/common/Loading";
-import ErrorMessage from "../components/common/ErrorMessage";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import api from "../services/api";
 import { getErrorMessage, logError } from "../utils/errorHandler";
 import { verificarESalvarRecordeVisitante } from "../utils/recordesVisitante";
-import api from "../services/api";
 import "./TreinoAtivo.css";
 
 const TreinoAtivo = () => {
@@ -58,6 +58,7 @@ const TreinoAtivo = () => {
   const [contaAtualIndex, setContaAtualIndex] = useState(0);
   const [totalAcertos, setTotalAcertos] = useState(0);
   const totalAcertosRef = useRef(0); // Ref para rastrear acertos de forma mais confiável
+  const totalErrosRef = useRef(0); // Ref para rastrear erros de forma mais confiável
   const [tempoLimite, setTempoLimite] = useState(0);
   const [inicioTreino, setInicioTreino] = useState(null); // Timestamp do início do treino
   const [sistemaTipo, setSistemaTipo] = useState("natural");
@@ -80,7 +81,6 @@ const TreinoAtivo = () => {
         timestamp: Date.now()
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dadosParaSalvar));
-      console.log("Dados salvos no sessionStorage:", dadosParaSalvar);
     } catch (error) {
       logError("TreinoAtivo - salvarTreinoNoStorage", error);
     }
@@ -122,6 +122,7 @@ const TreinoAtivo = () => {
       setSistemaTipo(sistema.tipo);
       setTotalAcertos(0);
       totalAcertosRef.current = 0;
+      totalErrosRef.current = 0;
       setContaAtualIndex(0);
       setInicioTreino(Date.now()); // Registrar início do treino
       setProcessando(false);
@@ -166,8 +167,6 @@ const TreinoAtivo = () => {
     const navigationEntry = performance.getEntriesByType("navigation")[0];
     const navigationType = navigationEntry?.type;
     const isPageReload = navigationType === "reload";
-    
-    console.log("Navigation type:", navigationType, "isPageReload:", isPageReload);
 
     // Verificar se é um refresh
     // Um refresh acontece quando:
@@ -196,17 +195,12 @@ const TreinoAtivo = () => {
       dadosTreinoParaUsar = dadosDoStorage.treinoData;
       formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
       isRefresh = true;
-      console.log("Refresh detectado via performance.navigation - usando dados do sessionStorage");
     }
     // Se não tem location.state mas tem dados no storage, também é refresh
     else if (!dadosTreinoParaUsar && dadosDoStorage) {
       dadosTreinoParaUsar = dadosDoStorage.treinoData;
       formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
       isRefresh = true;
-      console.log("Refresh detectado - dados recuperados do sessionStorage (sem location.state)");
-    } else if (dadosTreinoParaUsar) {
-      // Tem location.state e não é reload, não é refresh
-      console.log("Treino iniciado normalmente - dados do location.state");
     }
 
     // Atualizar ref de refresh
@@ -221,7 +215,7 @@ const TreinoAtivo = () => {
 
     // Salvar treinoData no estado local
     setTreinoData(dadosTreinoParaUsar);
-    
+
     // Salvar formatoResposta se fornecido
     if (formatoParaUsar) {
       setFormatoResposta(formatoParaUsar);
@@ -232,12 +226,6 @@ const TreinoAtivo = () => {
     // Também salvar quando for refresh para garantir que os dados estão atualizados
     try {
       salvarTreinoNoStorage(dadosTreinoParaUsar, formatoParaUsar || "sistema");
-      console.log("Dados salvos no sessionStorage:", {
-        operacao: dadosTreinoParaUsar?.operacao?.id,
-        limite: dadosTreinoParaUsar?.limite?.id,
-        sistema: dadosTreinoParaUsar?.sistema?.id,
-        isRefresh: isRefresh
-      });
     } catch (error) {
       logError("TreinoAtivo - useEffect salvarTreinoNoStorage", error);
     }
@@ -247,7 +235,6 @@ const TreinoAtivo = () => {
 
     // Se for refresh, mostrar contagem regressiva sem criar treino ainda
     if (isRefresh) {
-      console.log("Mostrando contagem regressiva após refresh");
       setLoading(false);
       // Definir sistemaTipo no estado para usar depois
       const sistemaTipoDetectado = dadosTreinoParaUsar?.sistema?.tipo || dadosTreinoParaUsar?.sistemaTipo || "natural";
@@ -255,17 +242,14 @@ const TreinoAtivo = () => {
       // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
       if (sistemaTipoDetectado === "romano" || sistemaTipoDetectado === "hexadecimal" || sistemaTipoDetectado === "binario") {
         // Mostrar modal de escolha de formato
-        console.log("Mostrando modal de escolha de formato (refresh)");
         setMostrarModalFormato(true);
       } else {
         // Sistema não requer escolha, ir direto para contagem
         setFormatoResposta(formatoParaUsar || "sistema");
-        console.log("Mostrando contagem regressiva diretamente (refresh)");
         setMostrarContagem(true);
       }
     } else {
       // Se não for refresh, iniciar treino normalmente
-      console.log("Iniciando treino normalmente (não é refresh)");
       iniciarTreino(dadosTreinoParaUsar, false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -295,13 +279,14 @@ const TreinoAtivo = () => {
         return;
       }
 
-      // Incrementar contador IMEDIATAMENTE quando acerta
+      // Incrementar contador quando acerta
       // Usar ref + setState para garantir sincronização perfeita
       if (correto) {
         const novoTotal = totalAcertosRef.current + 1;
         totalAcertosRef.current = novoTotal;
         setTotalAcertos(novoTotal);
       }
+      // NOTA: Erros são contabilizados em handleErro, chamado pelo ListaContas quando detecta erro
 
       // Sempre manter o índice em 0 (primeira conta da lista)
       setContaAtualIndex(0);
@@ -329,6 +314,13 @@ const TreinoAtivo = () => {
     }
   };
 
+  const handleErro = () => {
+    // Incrementar contador de erros quando o usuário digita uma resposta errada
+    if (!treinoId || treinoFinalizado) return;
+
+    totalErrosRef.current = totalErrosRef.current + 1;
+  };
+
   const finalizarTreino = async () => {
     // Prevenir múltiplas finalizações
     if (!treinoId || finalizadoRef.current) return;
@@ -346,6 +338,7 @@ const TreinoAtivo = () => {
       const response = await api.post("/treinos/finalizar", {
         treino_id: treinoId,
         total: totalAcertosRef.current, // Usar ref para garantir valor mais atualizado
+        erros: totalErrosRef.current, // Enviar quantidade de erros
       });
 
       // IMPORTANTE: Usar o valor retornado pelo backend como fonte da verdade
@@ -370,13 +363,13 @@ const TreinoAtivo = () => {
 
       setResultado(resultadoFinal);
       setMostrarResultado(true);
-      
+
       // Atualizar o estado visual com o valor correto do backend
       setTotalAcertos(response.data.total);
-      
+
       // Limpar sessionStorage ao finalizar
       limparTreinoDoStorage();
-      
+
       // Toast será mostrado se houver recorde (tanto para usuários normais quanto visitantes)
       if (resultadoFinal.bateuRecorde) {
         showSuccess("Parabéns! Você bateu um novo recorde!");
@@ -456,11 +449,9 @@ const TreinoAtivo = () => {
   const handleContagemTerminar = async () => {
     setMostrarContagem(false);
     const isRefresh = isRefreshRef.current;
-    console.log("Contagem terminou - isRefresh:", isRefresh);
     // Se for refresh, criar treino e incrementar quantidade
     // Se não for refresh, criar treino normalmente e confirmar depois
     const novoTreinoId = await iniciarTreino(treinoData, isRefresh);
-    console.log("Treino criado após contagem - treinoId:", novoTreinoId, "isRefresh:", isRefresh);
     // Confirmar início do treino (incrementar quantidade) após criar novo treino
     // Só confirmar se não foi refresh (refresh já confirmou dentro de iniciarTreino)
     if (novoTreinoId && !isRefresh) {
@@ -468,13 +459,10 @@ const TreinoAtivo = () => {
         await api.post("/treinos/confirmar-inicio", {
           treino_id: novoTreinoId,
         });
-        console.log("Quantidade incrementada (não refresh)");
       } catch (error) {
         // Não bloquear se houver erro
         logError("TreinoAtivo - handleContagemTerminar confirmarInicio", error);
       }
-    } else if (isRefresh) {
-      console.log("Quantidade incrementada durante refresh (dentro de iniciarTreino)");
     }
     // Resetar flag de refresh após processar
     isRefreshRef.current = false;
@@ -495,6 +483,7 @@ const TreinoAtivo = () => {
         await api.post("/treinos/finalizar", {
           treino_id: treinoId,
           total: totalAcertosRef.current,
+          erros: totalErrosRef.current,
         });
       } catch (error) {
         logError("TreinoAtivo - handleRecomecarDuranteTreino", error);
@@ -593,6 +582,7 @@ const TreinoAtivo = () => {
               formatoResposta={formatoResposta}
               contaAtualIndex={contaAtualIndex}
               onAcerto={handleAcerto}
+              onErro={handleErro}
               disabled={processando || treinoFinalizado}
             />
 

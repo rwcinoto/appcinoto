@@ -53,6 +53,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      erros: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      data_recorde: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
       quantidade: {
         type: DataTypes.INTEGER,
         allowNull: false,

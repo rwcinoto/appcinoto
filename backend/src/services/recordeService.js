@@ -96,6 +96,42 @@ class RecordeService {
   }
 
   /**
+   * Verifica se bateu recorde considerando total e erros
+   * @param {number} total - Total de acertos do treino atual
+   * @param {number|null} erros - Total de erros do treino atual
+   * @param {number} recordeTotal - Total de acertos do recorde existente
+   * @param {number|null} recordeErros - Total de erros do recorde existente
+   * @returns {boolean} true se bateu recorde, false caso contrário
+   */
+  verificarSeBateuRecorde(total, erros, recordeTotal, recordeErros) {
+    // Primeiro critério: total maior sempre bate recorde
+    if (total > recordeTotal) {
+      return true;
+    }
+
+    // Segundo critério: se total é igual, verificar erros
+    if (total === recordeTotal) {
+      // Se o recorde antigo não tem informação de erros (NULL), significa que bateu o recorde com menos erros
+      if (recordeErros === null || recordeErros === undefined) {
+        return true;
+      }
+
+      // Se o treino atual não tem informação de erros (NULL), não bateu recorde
+      if (erros === null || erros === undefined) {
+        return false;
+      }
+
+      // Se tem menos erros, bateu recorde
+      if (erros < recordeErros) {
+        return true;
+      }
+    }
+
+    // Caso contrário, não bateu recorde
+    return false;
+  }
+
+  /**
    * Verifica se existe recorde e salva/atualiza conforme necessário
    * ATENÇÃO: Este método assume que o registro já existe (criado por incrementarQuantidadeTreino)
    * Se não existir, será criado (para compatibilidade), mas o ideal é que já exista
@@ -104,6 +140,7 @@ class RecordeService {
    * @param {number} limiteId - ID do limite
    * @param {number} sistemaId - ID do sistema
    * @param {number} total - Total de acertos
+   * @param {number|null} erros - Total de erros (null = sem informação para treinos antigos, número = quantidade real)
    * @returns {Promise<Object>} Objeto com informações sobre a operação
    */
   async verificarESalvarRecorde(
@@ -111,7 +148,8 @@ class RecordeService {
     operacaoId,
     limiteId,
     sistemaId,
-    total
+    total,
+    erros = null
   ) {
     // Validações iniciais
     if (total < 0) {
@@ -181,7 +219,7 @@ class RecordeService {
         id_limite: limiteIdNum, // Índice: idx_recordes_unique
         id_sistema: sistemaIdNum, // Índice: idx_recordes_unique
       },
-      attributes: ["id", "total", "quantidade", "atualizado_em"], // Selecionar apenas campos necessários
+      // Não especificar attributes para buscar todos os campos (incluindo data_recorde)
     });
 
     // Data atual no horário do Brasil (UTC-3)
@@ -203,7 +241,9 @@ class RecordeService {
           id_limite: limiteIdNum,
           id_sistema: sistemaIdNum,
           total: total,
+          erros: erros,
           quantidade: 1, // Se foi criado aqui, é o primeiro treino
+          data_recorde: dataAtual, // Data em que o recorde foi batido
           criado_em: dataAtual,
           criado_por: usuarioIdNum,
           atualizado_em: dataAtual,
@@ -228,31 +268,34 @@ class RecordeService {
               id_limite: limiteIdNum,
               id_sistema: sistemaIdNum,
             },
-            attributes: ["id", "total", "quantidade", "atualizado_em"],
+            // Não especificar attributes para buscar todos os campos (incluindo data_recorde)
           });
 
           if (recordeCriado) {
-            // Verificar se bateu recorde
-            if (total > recordeCriado.total) {
-              recordeAnterior = {
-                total: recordeCriado.total,
-                atualizado_em: recordeCriado.atualizado_em,
-              };
+            // Verificar se bateu recorde (considerando total e erros)
+            bateuRecorde = this.verificarSeBateuRecorde(
+              total,
+              erros,
+              recordeCriado.total,
+              recordeCriado.erros
+            );
 
+            recordeAnterior = {
+              total: recordeCriado.total,
+              erros: recordeCriado.erros,
+              atualizado_em: recordeCriado.atualizado_em,
+            };
+
+            if (bateuRecorde) {
               await recordeCriado.update({
                 total: total,
+                erros: erros,
+                data_recorde: dataAtual, // Data em que o novo recorde foi batido
                 atualizado_em: dataAtual,
                 atualizado_por: usuarioIdNum,
               });
 
               atualizado = true;
-              bateuRecorde = true;
-            } else {
-              recordeAnterior = {
-                total: recordeCriado.total,
-                atualizado_em: recordeCriado.atualizado_em,
-              };
-              bateuRecorde = false;
             }
           } else {
             // Se não encontrou, relançar o erro original
@@ -264,30 +307,36 @@ class RecordeService {
         }
       }
     } else {
-      // Verificar se bateu recorde
-      if (total > recordeExistente.total) {
-        // Salvar recorde anterior antes de atualizar
-        recordeAnterior = {
-          total: recordeExistente.total,
-          atualizado_em: recordeExistente.atualizado_em,
-        };
+      // Verificar se bateu recorde (considerando total e erros)
+      bateuRecorde = this.verificarSeBateuRecorde(
+        total,
+        erros,
+        recordeExistente.total,
+        recordeExistente.erros
+      );
 
+      // Salvar recorde anterior antes de atualizar
+      recordeAnterior = {
+        total: recordeExistente.total,
+        erros: recordeExistente.erros,
+        atualizado_em: recordeExistente.atualizado_em,
+      };
+
+      if (bateuRecorde) {
         // Atualizar recorde
+        // IMPORTANTE: Sempre salvar data_recorde quando um novo recorde é batido
+        // Isso inclui o caso especial quando o recorde anterior tinha total: 0 (criado por incrementarQuantidadeTreino)
+        // e agora temos o primeiro recorde real (total > 0)
+        // Também inclui o caso onde total é igual mas erros é menor
         await recordeExistente.update({
           total: total,
+          erros: erros,
+          data_recorde: dataAtual, // Data em que o novo recorde foi batido
           atualizado_em: dataAtual, // Data do novo recorde
           atualizado_por: usuarioIdNum,
         });
 
         atualizado = true;
-        bateuRecorde = true;
-      } else {
-        // Não bateu recorde, não fazer nada
-        recordeAnterior = {
-          total: recordeExistente.total,
-          atualizado_em: recordeExistente.atualizado_em,
-        };
-        bateuRecorde = false;
       }
     }
 
@@ -296,6 +345,7 @@ class RecordeService {
       atualizado,
       bateuRecorde,
       recordeAnterior: recordeAnterior ? recordeAnterior : null,
+      errosAtuais: erros, // Incluir erros do treino atual para exibição
     };
   }
 
@@ -384,7 +434,9 @@ class RecordeService {
         "id_limite",
         "id_sistema",
         "total",
+        "erros",
         "quantidade",
+        "data_recorde",
         "criado_em",
         "atualizado_em",
         "criado_por",
@@ -420,7 +472,9 @@ class RecordeService {
         "id_limite",
         "id_sistema",
         "total",
+        "erros",
         "quantidade",
+        "data_recorde",
         "criado_em",
         "atualizado_em",
         "criado_por",

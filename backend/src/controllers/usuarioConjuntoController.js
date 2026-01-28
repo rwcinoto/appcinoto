@@ -57,7 +57,7 @@ class UsuarioConjuntoController {
           {
             model: Usuario,
             as: "usuario",
-            attributes: ["id", "nome", "email"],
+            attributes: ["id", "nome"],
           },
         ],
         order: [
@@ -77,7 +77,6 @@ class UsuarioConjuntoController {
       const usuarios = usuariosConjuntos.map((uc) => ({
         id: uc.usuario.id,
         nome: uc.usuario.nome,
-        email: uc.usuario.email,
         tipo: uc.tipo,
         status: uc.status,
       }));
@@ -234,7 +233,6 @@ class UsuarioConjuntoController {
         usuario: {
           id: usuarioConvidado.id,
           nome: usuarioConvidado.nome,
-          email: usuarioConvidado.email,
         },
       });
     } catch (error) {
@@ -309,7 +307,7 @@ class UsuarioConjuntoController {
           {
             model: Usuario,
             as: "usuario",
-            attributes: ["id", "nome", "email"],
+            attributes: ["id", "nome"],
           },
         ],
       });
@@ -343,7 +341,6 @@ class UsuarioConjuntoController {
         usuario: {
           id: usuarioConjunto.usuario.id,
           nome: usuarioConjunto.usuario.nome,
-          email: usuarioConjunto.usuario.email,
         },
       });
     } catch (error) {
@@ -820,13 +817,12 @@ class UsuarioConjuntoController {
           if (convite.criado_por && !isNaN(convite.criado_por) && convite.criado_por > 0) {
             try {
               const usuarioConvidou = await Usuario.findByPk(Number(convite.criado_por), {
-                attributes: ["id", "nome", "email"],
+                attributes: ["id", "nome"],
               });
               if (usuarioConvidou) {
                 quemConvidou = {
                   id: usuarioConvidou.id,
                   nome: usuarioConvidou.nome,
-                  email: usuarioConvidou.email,
                 };
               }
             } catch (error) {

@@ -11,6 +11,7 @@ const ListaContas = ({
   formatoResposta = "sistema",
   contaAtualIndex = 0,
   onAcerto,
+  onErro,
   disabled = false,
 }) => {
   // Determinar sistema de entrada baseado no formato escolhido
@@ -223,7 +224,7 @@ const ListaContas = ({
         // Verificar se resultado é negativo
         const resultadoNegativo = resultadoEsperado < 0;
         const esperado = String(resultadoEsperado);
-        
+
         // Se campo está vazio
         if (respostaNormalizada === "") {
           if (contaTeveErro) {
@@ -249,7 +250,7 @@ const ListaContas = ({
           // Validar caractere por caractere - qualquer caractere errado detecta erro imediato
           const tamanhoDigitado = respostaNormalizada.length;
           const tamanhoEsperado = esperado.length;
-          
+
           // Se resultado é negativo e usuário não digitou "-" no início, erro
           if (resultadoNegativo && !respostaNormalizada.startsWith("-")) {
             detectouErro = true;
@@ -271,7 +272,7 @@ const ListaContas = ({
                 break;
               }
             }
-            
+
             if (caractereErrado) {
               detectouErro = true;
             } else if (tamanhoDigitado === tamanhoEsperado) {
@@ -321,7 +322,7 @@ const ListaContas = ({
           // respostaEsperadaFormatada já vem com vírgula da função formatarNumero
           const tamanhoDigitado = respostaNormalizada.length;
           const tamanhoEsperado = respostaEsperadaFormatada.length;
-          
+
           if (tamanhoDigitado > tamanhoEsperado) {
             detectouErro = true;
           } else {
@@ -332,7 +333,7 @@ const ListaContas = ({
                 break;
               }
             }
-            
+
             if (caractereErrado) {
               detectouErro = true;
             } else if (tamanhoDigitado === tamanhoEsperado) {
@@ -378,7 +379,7 @@ const ListaContas = ({
           // Comparar caractere por caractere
           const tamanhoDigitado = respostaNormalizada.length;
           const tamanhoEsperado = esperadoUpper.length;
-          
+
           if (tamanhoDigitado > tamanhoEsperado) {
             detectouErro = true;
           } else {
@@ -389,7 +390,7 @@ const ListaContas = ({
                 break;
               }
             }
-            
+
             if (caractereErrado) {
               detectouErro = true;
             } else if (tamanhoDigitado === tamanhoEsperado) {
@@ -425,7 +426,7 @@ const ListaContas = ({
           // Comparar caractere por caractere
           const tamanhoDigitado = respostaNormalizada.length;
           const tamanhoEsperado = respostaEsperadaFormatada.length;
-          
+
           if (tamanhoDigitado > tamanhoEsperado) {
             detectouErro = true;
           } else {
@@ -436,7 +437,7 @@ const ListaContas = ({
                 break;
               }
             }
-            
+
             if (caractereErrado) {
               detectouErro = true;
             } else if (tamanhoDigitado === tamanhoEsperado) {
@@ -473,7 +474,7 @@ const ListaContas = ({
           // Comparar caractere por caractere
           const tamanhoDigitado = respostaNormalizada.length;
           const tamanhoEsperado = esperadoUpper.length;
-          
+
           if (tamanhoDigitado > tamanhoEsperado) {
             detectouErro = true;
           } else {
@@ -484,7 +485,7 @@ const ListaContas = ({
                 break;
               }
             }
-            
+
             if (caractereErrado) {
               detectouErro = true;
             } else if (tamanhoDigitado === tamanhoEsperado) {
@@ -509,11 +510,16 @@ const ListaContas = ({
       if (detectouErro) {
         estadoValidacaoRef.current[index] = "errado";
         contaComErroRef.current = contaId;
-        
+
+        // Incrementar contador de erros
+        if (onErro) {
+          onErro();
+        }
+
         // Limpar o campo mas manter a caixa vermelha
         e.target.value = "";
         e.target.classList.add("errado");
-        
+
         // Manter o foco no input
         const inputElement = e.target;
         requestAnimationFrame(() => {
@@ -521,7 +527,7 @@ const ListaContas = ({
             inputElement.focus();
           }
         });
-        
+
         return; // Não processar mais, aguardar nova tentativa
       }
     } catch (error) {
@@ -543,13 +549,13 @@ const ListaContas = ({
       estadoValidacaoRef.current[index] = null;
       contaComErroRef.current = null; // Limpar estado de erro ao acertar
       e.target.classList.remove("errado");
-      
+
       // Manter o foco antes de limpar o input
       const inputElement = e.target;
-      
+
       // Limpar input mas manter foco imediatamente
       inputElement.value = "";
-      
+
       // Chamar callback - o backend fará a validação final
       // Chamar diretamente (o handleAcerto já tem proteção contra múltiplas chamadas)
       if (onAcerto) {
@@ -594,7 +600,7 @@ const ListaContas = ({
       <div className="lista-contas">
         {contasParaExibir.map((conta, index) => {
           const isAtual = index === contaAtualIndex;
-          
+
           // Para conversão, ajustar formato de parcela1 baseado em formatoResposta
           // Se formato_resposta = "natural": mostrar número no sistema escolhido
           // Se formato_resposta = "sistema": mostrar número em natural
@@ -615,7 +621,7 @@ const ListaContas = ({
           } else {
             parcela1Formatada = formatarNumero(conta.parcela1, sistema);
           }
-          
+
           // Na operação de raiz, parcela2 pode ser null
           // Para divisão com sistema decimal, divisores (parcela2 e parcela3) devem aparecer como inteiros
           const formatarParcelaDivisao = (valor, sistema, tipo) => {
@@ -624,7 +630,7 @@ const ListaContas = ({
             }
             return formatarNumero(valor, sistema);
           };
-          
+
           // Para multiplicação com sistema decimal:
           // - Se 2 parcelas: primeira é natural, segunda é decimal
           // - Se 3 parcelas: primeira e segunda são naturais, terceira é decimal
@@ -651,7 +657,7 @@ const ListaContas = ({
             // Para outros casos, usar formatação normal (divisão ou outros sistemas)
             return formatarParcelaDivisao(valor, sistema, tipo);
           };
-          
+
           const temParcela3 = conta.parcela3 !== null && conta.parcela3 !== undefined;
           const parcela2Formatada =
             conta.parcela2 !== null && conta.parcela2 !== undefined
@@ -671,7 +677,7 @@ const ListaContas = ({
 
           // Criar uma chave única baseada no conteúdo da conta para ajudar o React a detectar mudanças
           // Para a conta atual (index 0), usar key fixa para evitar remontagem do input
-          const contaKey = index === contaAtualIndex 
+          const contaKey = index === contaAtualIndex
             ? "conta-atual-fixa"
             : `${conta.parcela1}-${conta.parcela2}-${
                 conta.parcela3 || "null"

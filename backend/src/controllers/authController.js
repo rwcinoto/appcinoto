@@ -34,19 +34,80 @@ class AuthController {
 
   async me(req, res, next) {
     try {
+      // Se for visitante, não precisa fazer reload
+      if (req.usuario.isVisitante) {
+        return res.json({
+          id: req.usuario.id,
+          email: req.usuario.email,
+          nome: req.usuario.nome,
+          tipo: req.usuario.tipo,
+          id_plano: req.usuario.id_plano,
+          plano: req.usuario.plano,
+          isVisitante: true,
+        });
+      }
+
       const usuario = await req.usuario.reload({
         include: [{ association: "plano" }],
       });
+
+      // Verificar plano válido baseado na data de vencimento
+      const planoValido = await authService.obterPlanoValido(usuario);
 
       return res.json({
         id: usuario.id,
         email: usuario.email,
         nome: usuario.nome,
         tipo: usuario.tipo,
-        id_plano: usuario.id_plano,
-        plano: usuario.plano,
-        isVisitante: usuario.isVisitante || false,
+        id_plano: planoValido.id_plano,
+        plano: planoValido.plano,
+        operacao_id: usuario.operacao_id,
+        limite_id: usuario.limite_id,
+        sistema_id: usuario.sistema_id,
+        ranking_global: usuario.ranking_global,
+        data_ultimo_treino: usuario.data_ultimo_treino,
+        isVisitante: false,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async solicitarResetSenha(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorResponse = formatValidationErrors(errors.array());
+        return res.status(errorResponse.statusCode).json({
+          message: errorResponse.message,
+          errors: errorResponse.errors,
+        });
+      }
+
+      const { email } = req.body;
+      const resultado = await authService.solicitarResetSenha(email);
+
+      return res.json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetarSenha(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorResponse = formatValidationErrors(errors.array());
+        return res.status(errorResponse.statusCode).json({
+          message: errorResponse.message,
+          errors: errorResponse.errors,
+        });
+      }
+
+      const { token, senha } = req.body;
+      const resultado = await authService.resetarSenha(token, senha);
+
+      return res.json(resultado);
     } catch (error) {
       next(error);
     }

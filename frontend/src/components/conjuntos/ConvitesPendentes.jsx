@@ -87,7 +87,7 @@ const ConvitesPendentes = ({ onConviteAceito }) => {
                 <div className="convite-detalhe-item">
                   <span className="label">Convidado por: </span>
                   <span className="valor">
-                    {convite.quem_convidou.nome || convite.quem_convidou.email || "Usuário"}
+                    {convite.quem_convidou.nome || "Usuário"}
                   </span>
                 </div>
               )}

@@ -15,12 +15,56 @@
   flex-wrap: wrap;
 }
 
+.recordes-titulo-container {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.titulo-com-ajuda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .recordes-header h1 {
   margin: 0;
   font-size: 28px;
   font-weight: 600;
   color: var(--color-text);
-  flex: 0 0 auto;
+}
+
+.btn-ajuda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: transparent;
+  color: var(--color-text-light);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.btn-ajuda:hover {
+  background: var(--color-card);
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.btn-ajuda:active {
+  transform: scale(1);
+}
+
+.recordes-contador {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-text-light);
+  white-space: nowrap;
 }
 
 .filtros-header {
@@ -131,8 +175,18 @@
     align-items: flex-start;
   }
 
+  .recordes-titulo-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
   .recordes-header h1 {
     font-size: 1.5rem;
+  }
+
+  .recordes-contador {
+    font-size: 14px;
   }
 
   .filtros-header {
@@ -154,6 +208,10 @@
 
   .recordes-header h1 {
     font-size: 1.3rem;
+  }
+
+  .recordes-contador {
+    font-size: 13px;
   }
 
   .filtros-header {
