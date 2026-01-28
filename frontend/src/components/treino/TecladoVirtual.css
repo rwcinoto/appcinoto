@@ -1,0 +1,194 @@
+.teclado-virtual-container {
+  width: 100%;
+  padding: 16px 12px;
+  margin-top: 16px;
+  background: var(--color-background-dark);
+  border-radius: 8px;
+}
+
+.teclado-virtual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.teclado-linha {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.tecla-virtual {
+  flex: 1;
+  min-width: 50px;
+  min-height: 50px;
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.tecla-virtual:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.tecla-virtual:active:not(:disabled) {
+  transform: scale(0.95);
+  background: var(--color-primary-dark);
+}
+
+.tecla-virtual:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tecla-backspace {
+  background: var(--color-background-dark);
+  border-color: var(--color-border-dark);
+}
+
+.tecla-backspace:hover:not(:disabled) {
+  background: #f44336;
+  border-color: #f44336;
+  color: #fff;
+}
+
+.tecla-backspace svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tecla-vazia {
+  background: transparent;
+  border: none;
+  cursor: default;
+  pointer-events: none;
+}
+
+.tecla-vazia:hover {
+  transform: none;
+}
+
+.tecla-sinal-menos {
+  font-size: 28px;
+}
+
+/* Layout especial para hexadecimal (4 colunas) */
+.teclado-hexadecimal .teclado-linha {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.teclado-hexadecimal .tecla-virtual {
+  min-width: 60px;
+}
+
+/* A linha 2 já tem 4 colunas (4, 5, 6, backspace), não precisa de ajuste especial */
+
+/* Layout especial para binário (2 teclas + backspace) */
+.teclado-virtual:has(.teclado-linha:only-child) .teclado-linha {
+  display: flex;
+  gap: 12px;
+}
+
+/* Layout especial para romano (7 letras + backspace) */
+.teclado-virtual:has(.teclado-linha:only-child) .teclado-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .teclado-virtual-container {
+    padding: 12px 8px;
+    margin-top: 12px;
+  }
+
+  .tecla-virtual {
+    min-width: 45px;
+    min-height: 45px;
+    font-size: 22px;
+    border-radius: 6px;
+  }
+
+  .tecla-backspace svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .teclado-linha {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teclado-virtual-container {
+    padding: 10px 6px;
+    margin-top: 10px;
+  }
+
+  .tecla-virtual {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 20px;
+    border-radius: 6px;
+  }
+
+  .tecla-backspace svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .teclado-linha {
+    gap: 5px;
+  }
+
+  .teclado-hexadecimal .tecla-virtual {
+    min-width: 50px;
+  }
+}
+
+/* Tema escuro */
+.dark .teclado-virtual-container {
+  background: rgba(30, 30, 30, 0.8);
+}
+
+.dark .tecla-virtual {
+  background: rgba(50, 50, 50, 0.8);
+  border-color: rgba(100, 100, 100, 0.3);
+  color: var(--color-text-dark);
+}
+
+.dark .tecla-backspace {
+  background: rgba(40, 40, 40, 0.8);
+  border-color: rgba(80, 80, 80, 0.3);
+}
+
+.dark .tecla-virtual:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.dark .tecla-backspace:hover:not(:disabled) {
+  background: #f44336;
+  border-color: #f44336;
+  color: #fff;
+}
