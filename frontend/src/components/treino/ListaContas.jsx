@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   formatarNumero,
   obterSimboloOperacao,
 } from "../../utils/conversaoNumerica";
 import "./ListaContas.css";
+import TecladoVirtual from "./TecladoVirtual";
 
 const ListaContas = ({
   contas,
@@ -37,6 +38,20 @@ const ListaContas = ({
   // Ref para manter o foco ativo durante o treino
   const manterFocoRef = useRef(false);
 
+  // Detectar se está em mobile
+  const [isMobile, setIsMobile] = useState(() => {
+    return window.innerWidth <= 768;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Limpar input quando a conta atual mudar (para input fixo)
   useEffect(() => {
     if (contas.length > 0 && contas[0] && contaAtualIndex === 0) {
@@ -45,7 +60,10 @@ const ListaContas = ({
       }-${contas[0].resultado}-${contas[0].tipo}`;
 
       // Se a conta mudou, limpar o input (similar ao que fazemos quando há erro)
-      if (ultimaPrimeiraContaRef.current !== primeiraContaId && ultimaPrimeiraContaRef.current !== null) {
+      if (
+        ultimaPrimeiraContaRef.current !== primeiraContaId &&
+        ultimaPrimeiraContaRef.current !== null
+      ) {
         const inputRef = inputRefs.current[0];
         if (inputRef && !disabled) {
           // Limpar valor do input e remover classe de erro
@@ -101,7 +119,6 @@ const ListaContas = ({
     return () => clearTimeout(timer);
   }, [contaAtualIndex, disabled, contas]);
 
-
   // Função para validar resposta
   const validarResposta = (conta, respostaDigitada) => {
     if (!conta || !respostaDigitada) {
@@ -119,7 +136,10 @@ const ListaContas = ({
         if (isNaN(respostaNumero)) return false;
         return respostaNumero === resultadoEsperado;
       } else if (sistemaEntrada === "decimal") {
-        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
+        respostaEsperadaFormatada = formatarNumero(
+          resultadoEsperado,
+          "decimal",
+        );
         const respostaComPonto = respostaDigitada.trim().replace(",", ".");
         const respostaNumero = parseFloat(respostaComPonto);
         if (isNaN(respostaNumero)) return false;
@@ -133,14 +153,14 @@ const ListaContas = ({
       } else if (sistemaEntrada === "binario") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
-          "binario"
+          "binario",
         );
         if (!/^[01]+$/.test(respostaDigitada.trim())) return false;
         return respostaDigitada.trim() === respostaEsperadaFormatada;
       } else if (sistemaEntrada === "hexadecimal") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
-          "hexadecimal"
+          "hexadecimal",
         );
         const respostaUpper = respostaDigitada.trim().toUpperCase();
         if (!/^[0-9A-F]+$/.test(respostaUpper)) return false;
@@ -262,8 +282,7 @@ const ListaContas = ({
           // Se digitou mais caracteres que o esperado, erro
           else if (tamanhoDigitado > tamanhoEsperado) {
             detectouErro = true;
-          }
-          else {
+          } else {
             // Comparar caractere por caractere - qualquer diferença é erro imediato
             let caractereErrado = false;
             for (let i = 0; i < tamanhoDigitado; i++) {
@@ -282,7 +301,9 @@ const ListaContas = ({
               contaComErroRef.current = null;
             } else {
               // Ainda está digitando e tudo certo até agora
-              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              estadoValidacaoRef.current[index] = contaTeveErro
+                ? "errado"
+                : null;
               if (contaTeveErro) {
                 e.target.classList.add("errado");
               } else {
@@ -292,7 +313,10 @@ const ListaContas = ({
           }
         }
       } else if (sistemaEntrada === "decimal") {
-        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
+        respostaEsperadaFormatada = formatarNumero(
+          resultadoEsperado,
+          "decimal",
+        );
         const respostaNormalizada = valorFiltrado.trim();
 
         // Se campo está vazio, limpar estado
@@ -328,7 +352,10 @@ const ListaContas = ({
           } else {
             let caractereErrado = false;
             for (let i = 0; i < tamanhoDigitado; i++) {
-              if (respostaNormalizada.charAt(i) !== respostaEsperadaFormatada.charAt(i)) {
+              if (
+                respostaNormalizada.charAt(i) !==
+                respostaEsperadaFormatada.charAt(i)
+              ) {
                 caractereErrado = true;
                 break;
               }
@@ -355,7 +382,9 @@ const ListaContas = ({
               }
             } else {
               // Ainda digitando
-              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              estadoValidacaoRef.current[index] = contaTeveErro
+                ? "errado"
+                : null;
               if (contaTeveErro) {
                 e.target.classList.add("errado");
               } else {
@@ -400,7 +429,9 @@ const ListaContas = ({
               contaComErroRef.current = null;
             } else {
               // Ainda digitando
-              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              estadoValidacaoRef.current[index] = contaTeveErro
+                ? "errado"
+                : null;
               if (contaTeveErro) {
                 e.target.classList.add("errado");
               } else {
@@ -412,7 +443,7 @@ const ListaContas = ({
       } else if (sistemaEntrada === "binario") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
-          "binario"
+          "binario",
         );
         const respostaNormalizada = valorFiltrado.trim();
 
@@ -432,7 +463,10 @@ const ListaContas = ({
           } else {
             let caractereErrado = false;
             for (let i = 0; i < tamanhoDigitado; i++) {
-              if (respostaNormalizada.charAt(i) !== respostaEsperadaFormatada.charAt(i)) {
+              if (
+                respostaNormalizada.charAt(i) !==
+                respostaEsperadaFormatada.charAt(i)
+              ) {
                 caractereErrado = true;
                 break;
               }
@@ -447,7 +481,9 @@ const ListaContas = ({
               contaComErroRef.current = null;
             } else {
               // Ainda digitando
-              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              estadoValidacaoRef.current[index] = contaTeveErro
+                ? "errado"
+                : null;
               if (contaTeveErro) {
                 e.target.classList.add("errado");
               } else {
@@ -459,7 +495,7 @@ const ListaContas = ({
       } else if (sistemaEntrada === "hexadecimal") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
-          "hexadecimal"
+          "hexadecimal",
         );
         const esperadoUpper = respostaEsperadaFormatada.toUpperCase();
         const respostaNormalizada = valorFiltrado.trim().toUpperCase();
@@ -495,7 +531,9 @@ const ListaContas = ({
               contaComErroRef.current = null;
             } else {
               // Ainda digitando
-              estadoValidacaoRef.current[index] = contaTeveErro ? "errado" : null;
+              estadoValidacaoRef.current[index] = contaTeveErro
+                ? "errado"
+                : null;
               if (contaTeveErro) {
                 e.target.classList.add("errado");
               } else {
@@ -584,6 +622,64 @@ const ListaContas = ({
     }
   };
 
+  // Handler para teclado virtual
+  const handleTecladoVirtualKeyPress = (evento) => {
+    const inputAtual = inputRefs.current[contaAtualIndex];
+    if (!inputAtual || disabled || contaAtualIndex >= contas.length) {
+      return;
+    }
+
+    const conta = contas[contaAtualIndex];
+    if (!conta) return;
+
+    // Simular evento de digitação
+    if (evento.key === "Backspace") {
+      // Simular backspace: remover último caractere
+      const valorAtual = inputAtual.value;
+      const novoValor = valorAtual.slice(0, -1);
+
+      // Atualizar valor diretamente no input
+      inputAtual.value = novoValor;
+
+      // Criar evento sintético de mudança que será tratado pelo handleChange
+      const eventoChange = {
+        ...evento,
+        target: inputAtual,
+        isTrusted: true,
+      };
+
+      // Disparar evento de mudança manualmente
+      Object.defineProperty(eventoChange, "target", {
+        value: inputAtual,
+        writable: false,
+      });
+
+      handleChange(conta, contaAtualIndex, eventoChange);
+    } else {
+      // Simular digitação de caractere: adicionar ao valor atual
+      const valorAtual = inputAtual.value;
+      const novoValor = valorAtual + evento.key;
+
+      // Atualizar valor diretamente no input
+      inputAtual.value = novoValor;
+
+      // Criar evento sintético de mudança que será tratado pelo handleChange
+      const eventoChange = {
+        ...evento,
+        target: inputAtual,
+        isTrusted: true,
+      };
+
+      // Disparar evento de mudança manualmente
+      Object.defineProperty(eventoChange, "target", {
+        value: inputAtual,
+        writable: false,
+      });
+
+      handleChange(conta, contaAtualIndex, eventoChange);
+    }
+  };
+
   if (!contas || contas.length === 0) {
     return (
       <div className="lista-contas-container">
@@ -625,7 +721,11 @@ const ListaContas = ({
           // Na operação de raiz, parcela2 pode ser null
           // Para divisão com sistema decimal, divisores (parcela2 e parcela3) devem aparecer como inteiros
           const formatarParcelaDivisao = (valor, sistema, tipo) => {
-            if (tipo === "divisao" && sistema === "decimal" && Number.isInteger(valor)) {
+            if (
+              tipo === "divisao" &&
+              sistema === "decimal" &&
+              Number.isInteger(valor)
+            ) {
               return valor.toString();
             }
             return formatarNumero(valor, sistema);
@@ -634,7 +734,13 @@ const ListaContas = ({
           // Para multiplicação com sistema decimal:
           // - Se 2 parcelas: primeira é natural, segunda é decimal
           // - Se 3 parcelas: primeira e segunda são naturais, terceira é decimal
-          const formatarParcelaMultiplicacao = (valor, sistema, tipo, numeroParcela, temParcela3) => {
+          const formatarParcelaMultiplicacao = (
+            valor,
+            sistema,
+            tipo,
+            numeroParcela,
+            temParcela3,
+          ) => {
             if (tipo === "multiplicacao" && sistema === "decimal") {
               if (temParcela3) {
                 // 3 parcelas: parcela1 e parcela2 são naturais, parcela3 é decimal
@@ -658,36 +764,52 @@ const ListaContas = ({
             return formatarParcelaDivisao(valor, sistema, tipo);
           };
 
-          const temParcela3 = conta.parcela3 !== null && conta.parcela3 !== undefined;
+          const temParcela3 =
+            conta.parcela3 !== null && conta.parcela3 !== undefined;
           const parcela2Formatada =
             conta.parcela2 !== null && conta.parcela2 !== undefined
               ? formatarParcelaComParenteses(
                   conta.parcela2,
-                  formatarParcelaMultiplicacao(conta.parcela2, sistema, conta.tipo, 2, temParcela3)
+                  formatarParcelaMultiplicacao(
+                    conta.parcela2,
+                    sistema,
+                    conta.tipo,
+                    2,
+                    temParcela3,
+                  ),
                 )
               : "";
           const parcela3Formatada =
             conta.parcela3 !== null && conta.parcela3 !== undefined
               ? formatarParcelaComParenteses(
                   conta.parcela3,
-                  formatarParcelaMultiplicacao(conta.parcela3, sistema, conta.tipo, 3, temParcela3)
+                  formatarParcelaMultiplicacao(
+                    conta.parcela3,
+                    sistema,
+                    conta.tipo,
+                    3,
+                    temParcela3,
+                  ),
                 )
               : null;
           const simbolo = obterSimboloOperacao(conta.tipo);
 
           // Criar uma chave única baseada no conteúdo da conta para ajudar o React a detectar mudanças
           // Para a conta atual (index 0), usar key fixa para evitar remontagem do input
-          const contaKey = index === contaAtualIndex
-            ? "conta-atual-fixa"
-            : `${conta.parcela1}-${conta.parcela2}-${
-                conta.parcela3 || "null"
-              }-${conta.resultado}-${conta.tipo}-${index}`;
+          const contaKey =
+            index === contaAtualIndex
+              ? "conta-atual-fixa"
+              : `${conta.parcela1}-${conta.parcela2}-${
+                  conta.parcela3 || "null"
+                }-${conta.resultado}-${conta.tipo}-${index}`;
 
           // Verificar se esta conta teve erro (para manter caixa vermelha)
           const contaIdRender = `${conta.parcela1}-${conta.parcela2}-${
             conta.parcela3 || "null"
           }-${conta.resultado}-${conta.tipo}`;
-          const contaTeveErroRender = contaComErroRef.current === contaIdRender && index === contaAtualIndex;
+          const contaTeveErroRender =
+            contaComErroRef.current === contaIdRender &&
+            index === contaAtualIndex;
 
           return (
             <React.Fragment key={contaKey}>
@@ -725,7 +847,9 @@ const ListaContas = ({
                   )}
                   <span className="igual">=</span>
                   <input
-                    key={index === contaAtualIndex ? "input-atual-fixo" : contaKey}
+                    key={
+                      index === contaAtualIndex ? "input-atual-fixo" : contaKey
+                    }
                     ref={(el) => {
                       if (el) {
                         inputRefs.current[index] = el;
@@ -744,12 +868,46 @@ const ListaContas = ({
                         delete inputRefs.current[index];
                       }
                     }}
-                    autoFocus={index === contaAtualIndex && !disabled}
+                    autoFocus={
+                      index === contaAtualIndex && !disabled && !isMobile
+                    }
                     type="text"
-                    inputMode={sistemaEntrada === "romano" || sistemaEntrada === "hexadecimal" ? "text" : "numeric"}
-                    pattern={sistemaEntrada === "natural" ? "[0-9]*" : sistemaEntrada === "inteiro" ? "-?[0-9]*" : sistemaEntrada === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistemaEntrada === "binario" ? "[01]*" : sistemaEntrada === "hexadecimal" ? "[0-9A-Fa-f]*" : undefined}
+                    inputMode={
+                      isMobile
+                        ? "none"
+                        : sistemaEntrada === "romano" ||
+                            sistemaEntrada === "hexadecimal"
+                          ? "text"
+                          : "numeric"
+                    }
+                    pattern={
+                      sistemaEntrada === "natural"
+                        ? "[0-9]*"
+                        : sistemaEntrada === "inteiro"
+                          ? "-?[0-9]*"
+                          : sistemaEntrada === "decimal"
+                            ? "[0-9]*[.,]?[0-9]*"
+                            : sistemaEntrada === "binario"
+                              ? "[01]*"
+                              : sistemaEntrada === "hexadecimal"
+                                ? "[0-9A-Fa-f]*"
+                                : undefined
+                    }
                     className={`conta-input-resultado${contaTeveErroRender ? " errado" : ""}`}
                     disabled={disabled || index !== contaAtualIndex}
+                    onFocus={(e) => {
+                      // Prevenir foco no mobile para evitar teclado nativo
+                      if (isMobile && index === contaAtualIndex) {
+                        setTimeout(() => e.target.blur(), 0);
+                      }
+                    }}
+                    onTouchStart={(e) => {
+                      // Prevenir teclado nativo ao tocar no input no mobile
+                      if (isMobile && index === contaAtualIndex) {
+                        e.preventDefault();
+                        e.target.blur();
+                      }
+                    }}
                     onChange={(e) => handleChange(conta, index, e)}
                     onKeyDown={handleKeyDown}
                     placeholder="?"
@@ -759,6 +917,14 @@ const ListaContas = ({
                   />
                 </div>
               </div>
+              {index === 1 && isMobile && contas.length >= 2 && (
+                <TecladoVirtual
+                  sistema={sistema}
+                  formatoResposta={formatoResposta}
+                  onKeyPress={handleTecladoVirtualKeyPress}
+                  disabled={disabled}
+                />
+              )}
             </React.Fragment>
           );
         })}
