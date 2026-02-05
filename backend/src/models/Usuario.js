@@ -42,6 +42,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "sistema_id",
         as: "sistema",
       });
+
+      // Um usuário foi criado por outro usuário
+      Usuario.belongsTo(models.Usuario, {
+        foreignKey: "criado_por",
+        as: "criador",
+      });
     }
 
     // Método para verificar senha

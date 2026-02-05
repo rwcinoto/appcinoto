@@ -10,12 +10,49 @@ class ConjuntoController {
    * Retorna apenas conjuntos onde o usuário participa com status 'aceito'
    * Inclui quantidade de elementos
    * Retorna apenas conjuntos ativos
+   * Se todos=true, retorna todos os conjuntos ativos do banco de dados
    */
   async listar(req, res) {
     try {
       const erros = validationResult(req);
       if (!erros.isEmpty()) {
         return res.status(400).json({ errors: erros.array() });
+      }
+
+      // Se o parâmetro todos=true estiver presente, retornar todos os conjuntos ativos
+      if (req.query.todos === "true") {
+        const conjuntos = await Conjunto.findAll({
+          where: {
+            ativo: true,
+          },
+          order: [["nome", "ASC"]],
+        });
+
+        // Preparar resposta com quantidade de elementos
+        const conjuntosComQuantidade = await Promise.all(
+          conjuntos.map(async (conjunto) => {
+            // Contar elementos com status 'aceito'
+            const quantidadeElementos = await UsuarioConjunto.count({
+              where: {
+                id_conjunto: conjunto.id,
+                status: "aceito",
+              },
+            });
+
+            return {
+              id: conjunto.id,
+              nome: conjunto.nome,
+              ativo: conjunto.ativo,
+              criado_em: conjunto.criado_em,
+              criado_por: conjunto.criado_por,
+              atualizado_em: conjunto.atualizado_em,
+              atualizado_por: conjunto.atualizado_por,
+              quantidade_elementos: quantidadeElementos,
+            };
+          })
+        );
+
+        return res.json(conjuntosComQuantidade);
       }
 
       const usuarioId = req.usuario.id;

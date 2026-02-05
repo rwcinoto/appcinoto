@@ -16,9 +16,10 @@ class RankingService {
    * Obtém ranking unificado (global ou por conjunto)
    * @param {Object} filtros - Filtros: operacao_id, limite_id, sistema_id, conjunto_id (opcional)
    * @param {number} usuarioId - ID do usuário logado
+   * @param {string} usuarioTipo - Tipo do usuário logado (admin, comum, profe)
    * @returns {Promise<Object>} Objeto com ranking, posição do usuário e total de participantes
    */
-  async obterRanking(filtros, usuarioId) {
+  async obterRanking(filtros, usuarioId, usuarioTipo) {
     // Validar filtros obrigatórios
     if (!filtros.operacao_id || !filtros.limite_id || !filtros.sistema_id) {
       throw new Error(
@@ -68,19 +69,22 @@ class RankingService {
       }
 
       // Validar que usuário pertence ao conjunto com status 'aceito'
-      const usuarioConjunto = await UsuarioConjunto.findOne({
-        where: {
-          id_conjunto: filtros.conjunto_id,
-          id_usuario: usuarioId,
-          status: "aceito",
-        },
-        attributes: ["id"],
-      });
+      // Admin pode ver rankings de qualquer conjunto, mesmo sem participar
+      if (usuarioTipo !== "admin") {
+        const usuarioConjunto = await UsuarioConjunto.findOne({
+          where: {
+            id_conjunto: filtros.conjunto_id,
+            id_usuario: usuarioId,
+            status: "aceito",
+          },
+          attributes: ["id"],
+        });
 
-      if (!usuarioConjunto) {
-        throw new Error(
-          "Usuário não pertence ao conjunto ou convite não foi aceito"
-        );
+        if (!usuarioConjunto) {
+          throw new Error(
+            "Usuário não pertence ao conjunto ou convite não foi aceito"
+          );
+        }
       }
 
       // Buscar IDs de todos os usuários do conjunto com status 'aceito'
@@ -178,7 +182,7 @@ class RankingService {
     }));
 
     // Calcular posição do usuário logado (mesmo se não estiver nos 100)
-    const posicaoUsuario = await this.obterPosicaoUsuario(filtros, usuarioId);
+    const posicaoUsuario = await this.obterPosicaoUsuario(filtros, usuarioId, usuarioTipo);
 
     return {
       ranking,
@@ -191,9 +195,10 @@ class RankingService {
    * Calcula posição exata do usuário no ranking filtrado
    * @param {Object} filtros - Filtros: operacao_id, limite_id, sistema_id, conjunto_id (opcional)
    * @param {number} usuarioId - ID do usuário
+   * @param {string} usuarioTipo - Tipo do usuário logado (admin, comum, profe)
    * @returns {Promise<number|null>} Posição (1-based) ou null se não tem recorde
    */
-  async obterPosicaoUsuario(filtros, usuarioId) {
+  async obterPosicaoUsuario(filtros, usuarioId, usuarioTipo) {
     // Validar filtros obrigatórios
     if (!filtros.operacao_id || !filtros.limite_id || !filtros.sistema_id) {
       throw new Error(

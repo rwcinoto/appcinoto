@@ -189,6 +189,9 @@ const Sidebar = ({ aberto = true, onFechar }) => {
         <div className="sidebar-user">
           <span className="sidebar-user-name">{usuario?.nome}</span>
           <span className="sidebar-user-email">{usuario?.email}</span>
+          {usuario?.plano?.nome && (
+            <span className="sidebar-user-plano">{usuario.plano.nome}</span>
+          )}
         </div>
         <button
           className="sidebar-logout"

@@ -6,6 +6,10 @@
   transition: background-color 0.3s ease;
 }
 
+.lista-usuarios-cards {
+  display: none;
+}
+
 .lista-usuarios table {
   width: 100%;
   border-collapse: collapse;
@@ -23,6 +27,14 @@
   color: var(--color-text-light);
   border-bottom: 2px solid var(--color-border);
   transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.lista-usuarios th.col-email,
+.lista-usuarios td.col-email {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lista-usuarios td {
@@ -176,5 +188,103 @@
 .nome-usuario-link:hover {
   color: #1565c0;
   text-decoration: underline;
+}
+
+/* Layout em cartões para mobile */
+@media (max-width: 768px) {
+  .lista-usuarios-table {
+    display: none;
+  }
+
+  .lista-usuarios-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .usuario-card {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .usuario-card:hover {
+    background: var(--color-background-light);
+  }
+
+  .usuario-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .usuario-card-nome {
+    min-width: 0;
+  }
+
+  .usuario-card-nome .nome-usuario-link {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .usuario-card-acoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .usuario-card-acoes .btn-editar,
+  .usuario-card-acoes .btn-desativar {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    background: var(--color-background-dark) !important;
+    color: var(--color-text) !important;
+  }
+
+  .usuario-card-acoes .btn-editar:hover,
+  .usuario-card-acoes .btn-desativar:hover {
+    background: var(--color-background-light) !important;
+  }
+
+  .usuario-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .usuario-card-item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: baseline;
+  }
+
+  .usuario-card-label {
+    font-size: 12px;
+    color: var(--color-text-light);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .usuario-card-valor {
+    font-size: 14px;
+    color: var(--color-text);
+    word-break: break-all;
+  }
+
+  .usuario-card .texto-inativo {
+    font-size: 14px;
+  }
 }
 

@@ -36,12 +36,14 @@ const Rankings = () => {
       // Usar parâmetro todos=true para carregar todas as operações, limites e sistemas
       // independentemente do plano do usuário, permitindo ver rankings de coisas que ainda não tem
       // Também carregar as opções do plano do usuário para seleção aleatória quando não houver favoritos
+      // Se usuário for admin, carregar todos os conjuntos do banco de dados
+      const conjuntosUrl = usuario?.tipo === "admin" ? "/conjuntos?todos=true" : "/conjuntos";
       const [operacoesRes, limitesRes, sistemasRes, conjuntosRes, operacoesUsuarioRes, limitesUsuarioRes, sistemasUsuarioRes] =
         await Promise.all([
           api.get("/operacoes?todos=true"),
           api.get("/limites?todos=true"),
           api.get("/sistemas?todos=true"),
-          api.get("/conjuntos").catch(() => ({ data: [] })),
+          api.get(conjuntosUrl).catch(() => ({ data: [] })),
           api.get("/operacoes").catch(() => ({ data: [] })),
           api.get("/limites").catch(() => ({ data: [] })),
           api.get("/sistemas").catch(() => ({ data: [] })),

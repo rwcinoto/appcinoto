@@ -70,7 +70,8 @@ class RankingController {
       // Chamar service para obter ranking
       const resultado = await rankingService.obterRanking(
         filtros,
-        usuario.id
+        usuario.id,
+        usuario.tipo
       );
 
       // Formatar resposta
@@ -209,7 +210,8 @@ class RankingController {
       // Chamar service para obter posição
       const posicao = await rankingService.obterPosicaoUsuario(
         filtros,
-        usuarioIdParaBuscar
+        usuarioIdParaBuscar,
+        usuario.tipo
       );
 
       return res.json({ posicao });
