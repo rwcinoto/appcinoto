@@ -96,6 +96,10 @@ const validarListarUsuarios = [
     .trim()
     .isLength({ min: 1 })
     .withMessage("Busca não pode estar vazia"),
+  query("criado_por")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("criado_por deve ser um número inteiro válido"),
 ];
 
 // Validações para obter/excluir usuário
@@ -122,6 +126,14 @@ router.get(
   require("../controllers/usuarioConjuntoController").listarConvitesPendentes.bind(
     require("../controllers/usuarioConjuntoController")
   )
+);
+
+// Rota para listar criadores únicos (apenas para admin)
+router.get(
+  "/criadores",
+  authMiddleware,
+  autorizarAdmin,
+  usuarioController.listarCriadores.bind(usuarioController)
 );
 
 // Rota pública para buscar apenas nome do usuário (para visualizar recordes)

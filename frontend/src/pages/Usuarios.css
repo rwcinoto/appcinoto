@@ -14,6 +14,23 @@
   margin-bottom: 30px;
 }
 
+@media (max-width: 768px) {
+  .usuarios-container {
+    padding: 20px 16px;
+  }
+
+  .usuarios-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .usuarios-header .btn-criar {
+    width: 100%;
+  }
+}
+
 .usuarios-header h1 {
   margin: 0;
   color: var(--color-text);

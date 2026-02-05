@@ -62,6 +62,11 @@ class UsuarioController {
         where.id_plano = parseInt(req.query.id_plano);
       }
 
+      // Filtro por criador (apenas para admin)
+      if (req.usuario.tipo === "admin" && req.query.criado_por) {
+        where.criado_por = parseInt(req.query.criado_por);
+      }
+
       // Busca por nome ou email
       if (req.query.busca) {
         where[Op.or] = [
@@ -70,12 +75,23 @@ class UsuarioController {
         ];
       }
 
+      const includes = [{ association: "plano" }];
+
+      // Se for admin, incluir informações do criador
+      if (req.usuario.tipo === "admin") {
+        includes.push({
+          association: "criador",
+          attributes: ["id", "nome"],
+          required: false, // LEFT JOIN para incluir usuários mesmo sem criador
+        });
+      }
+
       const { count, rows } = await Usuario.findAndCountAll({
         where,
         limit,
         offset,
         attributes: { exclude: ["senha"] },
-        include: [{ association: "plano" }],
+        include: includes,
         order: [["nome", "ASC"]],
       });
 
@@ -182,7 +198,15 @@ class UsuarioController {
         });
       }
 
-      const { email, senha, nome, tipo, id_plano, ativo, data_vencimento_plano } = req.body;
+      const {
+        email,
+        senha,
+        nome,
+        tipo,
+        id_plano,
+        ativo,
+        data_vencimento_plano,
+      } = req.body;
 
       // Validar email único
       const usuarioExistente = await Usuario.findOne({ where: { email } });
@@ -192,7 +216,8 @@ class UsuarioController {
 
       // Se for profe, sempre usar plano id=2 e tipo "comum"
       const idPlanoUsuario = req.usuario.tipo === "profe" ? 2 : id_plano;
-      const tipoUsuario = req.usuario.tipo === "profe" ? "comum" : (tipo || "comum");
+      const tipoUsuario =
+        req.usuario.tipo === "profe" ? "comum" : tipo || "comum";
 
       // Validar plano existe
       const plano = await Plano.findByPk(idPlanoUsuario);
@@ -217,7 +242,9 @@ class UsuarioController {
 
       // Adicionar data_vencimento_plano apenas se for admin e se foi fornecida
       if (req.usuario.tipo === "admin" && data_vencimento_plano !== undefined) {
-        dadosCriacao.data_vencimento_plano = this.converterDataVencimento(data_vencimento_plano);
+        dadosCriacao.data_vencimento_plano = this.converterDataVencimento(
+          data_vencimento_plano,
+        );
       }
 
       const usuario = await Usuario.create(dadosCriacao);
@@ -252,20 +279,53 @@ class UsuarioController {
       }
 
       // Verifica se o usuário pode atualizar este perfil
-      const podeAtualizar = isAdmin || isProprioUsuario || (isProfe && usuario.criado_por === req.usuario.id);
+      const podeAtualizar =
+        isAdmin ||
+        isProprioUsuario ||
+        (isProfe && usuario.criado_por === req.usuario.id);
 
       if (!podeAtualizar) {
         return res.status(403).json({
-          message: "Acesso negado. Você só pode atualizar seu próprio perfil ou usuários criados por você.",
+          message:
+            "Acesso negado. Você só pode atualizar seu próprio perfil ou usuários criados por você.",
         });
       }
 
       // Campos que podem ser atualizados
       const camposPermitidos = isAdmin
-        ? ["email", "senha", "nome", "tipo", "id_plano", "data_vencimento_plano", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"]
+        ? [
+            "email",
+            "senha",
+            "nome",
+            "tipo",
+            "id_plano",
+            "data_vencimento_plano",
+            "ativo",
+            "operacao_id",
+            "limite_id",
+            "sistema_id",
+            "ranking_global",
+          ]
         : isProfe
-        ? ["email", "senha", "nome", "ativo", "operacao_id", "limite_id", "sistema_id", "ranking_global"] // Profe não pode alterar tipo nem plano
-        : ["email", "senha", "nome", "operacao_id", "limite_id", "sistema_id", "ranking_global"];
+          ? [
+              "email",
+              "senha",
+              "nome",
+              "ativo",
+              "operacao_id",
+              "limite_id",
+              "sistema_id",
+              "ranking_global",
+            ] // Profe não pode alterar tipo nem plano
+          : [
+              "email",
+              "senha",
+              "nome",
+              "operacao_id",
+              "limite_id",
+              "sistema_id",
+              "ranking_global",
+            ];
 
       const dadosAtualizacao = {};
 
@@ -273,7 +333,9 @@ class UsuarioController {
         if (req.body[campo] !== undefined) {
           // Converter data_vencimento_plano para Date com horário 12:00
           if (campo === "data_vencimento_plano") {
-            dadosAtualizacao[campo] = this.converterDataVencimento(req.body[campo]);
+            dadosAtualizacao[campo] = this.converterDataVencimento(
+              req.body[campo],
+            );
           } else {
             dadosAtualizacao[campo] = req.body[campo];
           }
@@ -316,7 +378,9 @@ class UsuarioController {
       // Carregar plano do usuário para validação
       const planoUsuario = await Plano.findByPk(usuario.id_plano);
       if (!planoUsuario) {
-        return res.status(400).json({ message: "Plano do usuário não encontrado" });
+        return res
+          .status(400)
+          .json({ message: "Plano do usuário não encontrado" });
       }
 
       // Validar que operacao_id pertence ao plano do usuário (se fornecido)
@@ -345,7 +409,8 @@ class UsuarioController {
 
           if (!operacao) {
             return res.status(400).json({
-              message: "Operação não encontrada ou não disponível para seu plano",
+              message:
+                "Operação não encontrada ou não disponível para seu plano",
             });
           }
         }
@@ -409,7 +474,8 @@ class UsuarioController {
 
           if (!sistema) {
             return res.status(400).json({
-              message: "Sistema não encontrado ou não disponível para seu plano",
+              message:
+                "Sistema não encontrado ou não disponível para seu plano",
             });
           }
         }
@@ -461,6 +527,57 @@ class UsuarioController {
       console.error("Erro ao excluir usuário:", error);
       return res.status(500).json({
         message: "Erro ao excluir usuário",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Lista usuários únicos que criaram outros usuários (criadores)
+   * Apenas para admin
+   */
+  async listarCriadores(req, res) {
+    try {
+      if (req.usuario.tipo !== "admin") {
+        return res.status(403).json({
+          message: "Acesso negado. Apenas administradores.",
+        });
+      }
+
+      // Buscar todos os usuários que têm criado_por não nulo
+      const usuariosComCriador = await Usuario.findAll({
+        attributes: ["criado_por"],
+        where: {
+          criado_por: {
+            [Op.ne]: null,
+          },
+        },
+        raw: true,
+      });
+
+      // Extrair IDs únicos de criadores
+      const idsUnicos = [...new Set(usuariosComCriador.map((u) => u.criado_por))];
+
+      if (idsUnicos.length === 0) {
+        return res.json([]);
+      }
+
+      // Buscar informações dos criadores
+      const criadores = await Usuario.findAll({
+        attributes: ["id", "nome"],
+        where: {
+          id: {
+            [Op.in]: idsUnicos,
+          },
+        },
+        order: [["nome", "ASC"]],
+      });
+
+      return res.json(criadores);
+    } catch (error) {
+      console.error("Erro ao listar criadores:", error);
+      return res.status(500).json({
+        message: "Erro ao listar criadores",
         error: error.message,
       });
     }

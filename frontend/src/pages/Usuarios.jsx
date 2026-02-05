@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
+import Loading from "../components/common/Loading";
 import ListaUsuarios from "../components/usuarios/ListaUsuarios";
 import ModalUsuario from "../components/usuarios/ModalUsuario";
-import Loading from "../components/common/Loading";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 import { debounce } from "../utils/debounce";
 import { logError } from "../utils/errorHandler";
-import api from "../services/api";
 import "./Usuarios.css";
 
 const Usuarios = () => {
@@ -17,12 +17,14 @@ const Usuarios = () => {
     tipo: "",
     ativo: "",
     id_plano: "",
+    criado_por: "",
     busca: "",
   });
   const [filtrosDebounced, setFiltrosDebounced] = useState({
     tipo: "",
     ativo: "",
     id_plano: "",
+    criado_por: "",
     busca: "",
   });
   const [paginacao, setPaginacao] = useState({
@@ -34,13 +36,14 @@ const Usuarios = () => {
   const [modalAberto, setModalAberto] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [planos, setPlanos] = useState([]);
+  const [criadores, setCriadores] = useState([]);
 
   // Debounce para busca
   const debouncedBusca = useRef(
     debounce((valor) => {
       setFiltrosDebounced((prev) => ({ ...prev, busca: valor }));
       setPaginacao((prev) => ({ ...prev, pagina: 1 }));
-    }, 300)
+    }, 300),
   ).current;
 
   const carregarPlanos = useCallback(async () => {
@@ -52,6 +55,17 @@ const Usuarios = () => {
     }
   }, []);
 
+  const carregarCriadores = useCallback(async () => {
+    if (usuario?.tipo !== "admin") return;
+
+    try {
+      const response = await api.get("/usuarios/criadores");
+      setCriadores(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar criadores:", error);
+    }
+  }, [usuario]);
+
   const carregarUsuarios = useCallback(async () => {
     setLoading(true);
     try {
@@ -61,9 +75,14 @@ const Usuarios = () => {
       });
 
       if (filtrosDebounced.tipo) params.append("tipo", filtrosDebounced.tipo);
-      if (filtrosDebounced.ativo !== "") params.append("ativo", filtrosDebounced.ativo);
-      if (filtrosDebounced.id_plano) params.append("id_plano", filtrosDebounced.id_plano);
-      if (filtrosDebounced.busca) params.append("busca", filtrosDebounced.busca);
+      if (filtrosDebounced.ativo !== "")
+        params.append("ativo", filtrosDebounced.ativo);
+      if (filtrosDebounced.id_plano)
+        params.append("id_plano", filtrosDebounced.id_plano);
+      if (filtrosDebounced.criado_por)
+        params.append("criado_por", filtrosDebounced.criado_por);
+      if (filtrosDebounced.busca)
+        params.append("busca", filtrosDebounced.busca);
 
       const response = await api.get(`/usuarios?${params.toString()}`);
       setUsuarios(response.data.usuarios);
@@ -82,9 +101,10 @@ const Usuarios = () => {
   useEffect(() => {
     if (usuario && (usuario.tipo === "admin" || usuario.tipo === "profe")) {
       carregarPlanos();
+      carregarCriadores();
       carregarUsuarios();
     }
-  }, [usuario, carregarPlanos, carregarUsuarios]);
+  }, [usuario, carregarPlanos, carregarCriadores, carregarUsuarios]);
 
   // Redirecionar se não for admin ou profe
   if (!usuario || (usuario.tipo !== "admin" && usuario.tipo !== "profe")) {
@@ -93,7 +113,7 @@ const Usuarios = () => {
 
   const handleFiltroChange = (campo, valor) => {
     setFiltros((prev) => ({ ...prev, [campo]: valor }));
-    
+
     // Para busca, usar debounce; para outros filtros, aplicar imediatamente
     if (campo === "busca") {
       debouncedBusca(valor);
@@ -202,6 +222,23 @@ const Usuarios = () => {
             ))}
           </select>
         </div>
+
+        {usuario.tipo === "admin" && (
+          <div className="filtro-group">
+            <label>Criado por</label>
+            <select
+              value={filtros.criado_por}
+              onChange={(e) => handleFiltroChange("criado_por", e.target.value)}
+            >
+              <option value="">Todos</option>
+              {criadores.map((criador) => (
+                <option key={criador.id} value={criador.id}>
+                  {criador.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {loading ? (
