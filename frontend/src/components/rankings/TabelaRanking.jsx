@@ -4,7 +4,12 @@ import { useAuth } from "../../context/AuthContext";
 import LinhaRanking from "./LinhaRanking";
 import "./TabelaRanking.css";
 
-const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
+const TabelaRanking = ({
+  ranking,
+  posicaoUsuario,
+  tempoLimite,
+  recordesBasePath = "/recordes",
+}) => {
   const { usuario } = useAuth();
   if (!ranking || ranking.length === 0) {
     return (
@@ -37,6 +42,7 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
                 key={`${item.id_usuario}-${item.posicao}`}
                 item={item}
                 tempoLimite={tempoLimite}
+                recordesBasePath={recordesBasePath}
               />
             ))}
           </tbody>
@@ -104,14 +110,14 @@ const TabelaRanking = ({ ranking, posicaoUsuario, tempoLimite }) => {
                 <div className="card-ranking-nome-mobile">
                   {eUsuarioLogado ? (
                     <Link
-                      to="/recordes"
+                      to={recordesBasePath}
                       className="nome-usuario-link-mobile"
                     >
                       {item.nome}
                     </Link>
                   ) : (
                     <Link
-                      to={`/recordes?usuario_id=${item.id_usuario}`}
+                      to={`${recordesBasePath}?usuario_id=${item.id_usuario}`}
                       className="nome-usuario-link-mobile"
                     >
                       {item.nome}

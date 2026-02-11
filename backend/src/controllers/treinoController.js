@@ -25,7 +25,7 @@ function limparTreinosAntigos() {
   const umaHoraAtras = agora - 60 * 60 * 1000;
 
   for (const [id, treino] of treinosAtivos.entries()) {
-    if (treino.inicio < umaHoraAtras) {
+    if (treino.inicio != null && treino.inicio < umaHoraAtras) {
       treinosAtivos.delete(id);
     }
   }
@@ -195,7 +195,7 @@ class TreinoController {
           tipo: sistema.tipo,
         },
         contas: contasIniciais,
-        inicio: Date.now(),
+        inicio: null, // definido em confirmar-inicio quando a contagem terminar
         totalAcertos: 0,
         totalRespondido: 0,
         tempoLimite: limite.tempo * 1000, // Converter para milissegundos
@@ -260,6 +260,11 @@ class TreinoController {
         });
       }
 
+      if (treino.inicio == null) {
+        return res.status(400).json({
+          message: "Treino ainda não foi iniciado (aguardando fim da contagem)",
+        });
+      }
       // Verificar se o tempo do treino já esgotou
       const tempoDecorrido = Date.now() - treino.inicio;
       if (tempoDecorrido > treino.tempoLimite) {
@@ -376,6 +381,11 @@ class TreinoController {
         });
       }
 
+      if (treino.inicio == null) {
+        return res.status(400).json({
+          message: "Treino ainda não foi iniciado",
+        });
+      }
       // Não validar tempo ultrapassado - permitir finalização quando o tempo esgota
       // O timer do frontend controla quando o tempo acaba
       // Se o tempo passou muito (mais de 5 minutos além), pode ser um treino abandonado
@@ -485,6 +495,9 @@ class TreinoController {
           message: "Este treino não pertence a você",
         });
       }
+
+      // Iniciar o cronômetro quando o usuário confirma (após a contagem regressiva)
+      treino.inicio = Date.now();
 
       // Incrementar quantidade de treinos (ou criar registro se não existir)
       // Isso deve ser feito quando a contagem regressiva começar

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./LinhaRanking.css";
 
-const LinhaRanking = ({ item, tempoLimite }) => {
+const LinhaRanking = ({ item, tempoLimite, recordesBasePath = "/recordes" }) => {
   const { usuario } = useAuth();
 
   if (!item) {
@@ -115,14 +115,14 @@ const LinhaRanking = ({ item, tempoLimite }) => {
         <div className="nome-container">
           {eUsuarioLogado ? (
             <Link
-              to="/recordes"
+              to={recordesBasePath}
               className="nome-usuario-link"
             >
               {nome}
             </Link>
           ) : (
             <Link
-              to={`/recordes?usuario_id=${id_usuario}`}
+              to={`${recordesBasePath}?usuario_id=${id_usuario}`}
               className="nome-usuario-link"
             >
               {nome}

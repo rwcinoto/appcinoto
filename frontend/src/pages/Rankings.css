@@ -128,6 +128,24 @@
   font-weight: 600;
 }
 
+.btn-meus-recordes {
+  padding: 10px 16px;
+  background: var(--color-background);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-meus-recordes:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
 .mensagem-erro {
   background: rgba(244, 67, 54, 0.1);
   color: var(--color-error);

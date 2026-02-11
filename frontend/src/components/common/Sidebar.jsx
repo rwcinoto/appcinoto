@@ -31,6 +31,11 @@ const Sidebar = ({ aberto = true, onFechar }) => {
       icon: "📊",
     },
     {
+      path: "/calendario",
+      label: "Calendário",
+      icon: "📅",
+    },
+    {
       path: "/conjuntos",
       label: "Conjuntos",
       icon: "👥",

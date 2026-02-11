@@ -110,10 +110,13 @@ const Rankings = () => {
       let sistemasValidos = sistemasRes.data;
       let sistemasUsuarioValidos = sistemasUsuarioData;
       if (operacaoParaSistema) {
+        const ehConversao =
+          operacaoParaSistema.tipo === "conversao" ||
+          (operacaoParaSistema.descricao && operacaoParaSistema.descricao.toLowerCase().includes("conversão"));
         if (operacaoParaSistema.tipo === "raiz") {
           sistemasValidos = sistemasRes.data.filter((s) => s.tipo !== "inteiro");
           sistemasUsuarioValidos = sistemasUsuarioData.filter((s) => s.tipo !== "inteiro");
-        } else if (operacaoParaSistema.tipo === "conversao") {
+        } else if (ehConversao) {
           sistemasValidos = sistemasRes.data.filter((s) =>
             s.tipo === "romano" || s.tipo === "binario" || s.tipo === "hexadecimal"
           );
@@ -250,6 +253,14 @@ const Rankings = () => {
     return operacoes.find((op) => String(op.id) === operacaoSelecionada);
   }, [operacoes, operacaoSelecionada]);
 
+  // Indica se a operação exige apenas sistemas de conversão (romano, binário, hexadecimal):
+  // tipo "conversao" ou descrição contendo "Conversão" (ex.: operação aleatória de conversão)
+  const ehOperacaoConversao = useCallback((op) => {
+    if (!op) return false;
+    if (op.tipo === "conversao") return true;
+    return op.descricao && op.descricao.toLowerCase().includes("conversão");
+  }, []);
+
   // Encontrar o sistema selecionado
   const sistemaAtual = useMemo(() => {
     if (!sistemaSelecionado) return null;
@@ -258,7 +269,7 @@ const Rankings = () => {
 
   // Filtrar sistemas disponíveis baseado no tipo da operação selecionada:
   // - Se operação for raiz, remover sistema "inteiro"
-  // - Se operação for conversão, permitir apenas romano, binário ou hexadecimal
+  // - Se operação for conversão (ou descrição com "Conversão"), permitir apenas romano, binário ou hexadecimal
   // - Em todos os outros casos, mostrar todos os sistemas
   const sistemasDisponiveis = useMemo(() => {
     if (!operacaoAtual) {
@@ -269,14 +280,14 @@ const Rankings = () => {
       return sistemas.filter((sistema) => sistema.tipo !== "inteiro");
     }
 
-    if (operacaoAtual.tipo === "conversao") {
+    if (ehOperacaoConversao(operacaoAtual)) {
       return sistemas.filter((sistema) =>
         sistema.tipo === "romano" || sistema.tipo === "binario" || sistema.tipo === "hexadecimal"
       );
     }
 
     return sistemas;
-  }, [sistemas, operacaoAtual]);
+  }, [sistemas, operacaoAtual, ehOperacaoConversao]);
 
   // Se o sistema selecionado atual não está mais disponível, ajustar seleção
   useEffect(() => {

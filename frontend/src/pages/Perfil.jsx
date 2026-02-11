@@ -19,6 +19,7 @@ const Perfil = () => {
     limite_id: "",
     sistema_id: "",
     ranking_global: true,
+    calendario_tipo_treino: "",
   });
   const [operacoes, setOperacoes] = useState([]);
   const [limites, setLimites] = useState([]);
@@ -36,7 +37,9 @@ const Perfil = () => {
         operacao_id: usuario.operacao_id || "",
         limite_id: usuario.limite_id || "",
         sistema_id: usuario.sistema_id || "",
-        ranking_global: usuario.ranking_global !== undefined ? usuario.ranking_global : true,
+        ranking_global:
+          usuario.ranking_global !== undefined ? usuario.ranking_global : true,
+        calendario_tipo_treino: usuario.calendario_tipo_treino || "",
       });
     }
   }, [usuario]);
@@ -110,10 +113,13 @@ const Perfil = () => {
       const dadosAtualizacao = {
         email: formData.email.trim(),
         nome: formData.nome.trim(),
-        operacao_id: formData.operacao_id ? parseInt(formData.operacao_id) : null,
+        operacao_id: formData.operacao_id
+          ? parseInt(formData.operacao_id)
+          : null,
         limite_id: formData.limite_id ? parseInt(formData.limite_id) : null,
         sistema_id: formData.sistema_id ? parseInt(formData.sistema_id) : null,
         ranking_global: formData.ranking_global,
+        calendario_tipo_treino: formData.calendario_tipo_treino || null,
       };
 
       // Só enviar senha se foi preenchida
@@ -174,7 +180,10 @@ const Perfil = () => {
 
         {isVisitante && (
           <div className="mensagem-visitante">
-            <p>Visitantes não podem editar o perfil. Faça login para personalizar suas informações.</p>
+            <p>
+              Visitantes não podem editar o perfil. Faça login para personalizar
+              suas informações.
+            </p>
           </div>
         )}
 
@@ -276,6 +285,26 @@ const Perfil = () => {
                   {sistema.descricao || sistema.tipo}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="calendario_tipo_treino">
+              Treino de calendário favorito
+            </label>
+            <select
+              id="calendario_tipo_treino"
+              name="calendario_tipo_treino"
+              value={formData.calendario_tipo_treino}
+              onChange={handleChange}
+              disabled={isVisitante}
+            >
+              <option value="">Nenhum</option>
+              <option value="data_geral">Data 1582-2399</option>
+              <option value="mes">Mês</option>
+              <option value="ano">Ano</option>
+              <option value="seculo">Século</option>
+              <option value="data_21">Data século XXI</option>
             </select>
           </div>
 

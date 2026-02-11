@@ -100,6 +100,7 @@ class AuthService {
         sistema_id: usuario.sistema_id,
         ranking_global: usuario.ranking_global,
         data_ultimo_treino: usuario.data_ultimo_treino,
+        calendario_tipo_treino: usuario.calendario_tipo_treino,
       },
     };
   }
