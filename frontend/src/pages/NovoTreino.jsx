@@ -103,9 +103,17 @@ const NovoTreino = () => {
     }
   }, [operacoesFiltradas, operacaoSelecionada, tipoOperacaoSelecionado, usuario]);
 
+  // Indica se a operação exige apenas sistemas de conversão (romano, binário, hexadecimal):
+  // tipo "conversao" ou descrição contendo "Conversão" (ex.: operação aleatória de conversão)
+  const ehOperacaoConversao = useCallback((op) => {
+    if (!op) return false;
+    if (op.tipo === "conversao") return true;
+    return op.descricao && op.descricao.toLowerCase().includes("conversão");
+  }, []);
+
   // Filtrar sistemas disponíveis baseado no tipo da operação selecionada:
   // - Se operação for raiz, remover sistema "inteiro"
-  // - Se operação for conversão, permitir apenas romano, binário ou hexadecimal
+  // - Se operação for conversão (ou descrição com "Conversão"), permitir apenas romano, binário ou hexadecimal
   // - Caso contrário, mostrar todos os sistemas
   const sistemasDisponiveis = useMemo(() => {
     // Se não há operação selecionada (caso raro: durante carregamento ou sem operações disponíveis),
@@ -118,13 +126,13 @@ const NovoTreino = () => {
     if (operacaoSelecionada.tipo === "raiz") {
       return sistemas.filter((sistema) => sistema.tipo !== "inteiro");
     }
-    if (operacaoSelecionada.tipo === "conversao") {
+    if (ehOperacaoConversao(operacaoSelecionada)) {
       return sistemas.filter((sistema) =>
         sistema.tipo === "romano" || sistema.tipo === "binario" || sistema.tipo === "hexadecimal"
       );
     }
     return sistemas;
-  }, [sistemas, operacaoSelecionada]);
+  }, [sistemas, operacaoSelecionada, ehOperacaoConversao]);
 
   // Definir valor padrão para sistema: preferência do usuário (sistema_id) se estiver em sistemasDisponiveis, senão primeiro da lista
   useEffect(() => {
@@ -233,9 +241,9 @@ const NovoTreino = () => {
       }
     }
 
-    // Se a operação for conversão e o sistema selecionado não for válido,
+    // Se a operação for de conversão e o sistema selecionado não for válido,
     // limpar a seleção do sistema
-    if (operacao.tipo === "conversao" && sistemaSelecionado) {
+    if (ehOperacaoConversao(operacao) && sistemaSelecionado) {
       const sistemaAtual = sistemas.find(
         (s) => s.id.toString() === sistemaSelecionado
       );
@@ -275,15 +283,7 @@ const NovoTreino = () => {
       } else {
         // Sistema não requer escolha, ir direto para contagem
         setFormatoResposta("sistema"); // Padrão: usar o sistema escolhido
-        // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
-        try {
-          await api.post("/treinos/confirmar-inicio", {
-            treino_id: response.data.treino_id,
-          });
-        } catch (error) {
-          // Não bloquear a contagem regressiva se houver erro
-          logError("NovoTreino - handleIniciarTreino confirmarInicio", error);
-        }
+        // confirmar-inicio será chamado em TreinoAtivo quando a contagem terminar
         setMostrarContagem(true);
       }
     } catch (error) {
@@ -293,27 +293,10 @@ const NovoTreino = () => {
     }
   };
 
-  const confirmarInicioTreino = async () => {
-    if (!dadosTreino?.treino_id) {
-      return;
-    }
-
-    try {
-      await api.post("/treinos/confirmar-inicio", {
-        treino_id: dadosTreino.treino_id,
-      });
-    } catch (error) {
-      // Não bloquear a contagem regressiva se houver erro
-      logError("NovoTreino - confirmarInicioTreino", error);
-    }
-  };
-
   const handleEscolherFormato = async (formato) => {
     setFormatoResposta(formato);
     setMostrarModalFormato(false);
-    // Confirmar início do treino (incrementar quantidade) antes de mostrar contagem
-    await confirmarInicioTreino();
-    // Após escolher formato, mostrar contagem regressiva
+    // confirmar-inicio será chamado em TreinoAtivo quando a contagem terminar
     setMostrarContagem(true);
   };
 

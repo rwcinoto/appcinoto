@@ -128,6 +128,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      calendario_tipo_treino: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
       ranking_global: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -170,7 +174,7 @@ module.exports = (sequelize, DataTypes) => {
           await Usuario.beforeSave(usuario);
         },
       },
-    }
+    },
   );
 
   return Usuario;

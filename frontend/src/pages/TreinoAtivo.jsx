@@ -5,7 +5,9 @@ import Loading from "../components/common/Loading";
 import ContadorPontos from "../components/treino/ContadorPontos";
 import ContagemRegressiva from "../components/treino/ContagemRegressiva";
 import ListaContas from "../components/treino/ListaContas";
+import ListaDatas from "../components/treino/ListaDatas";
 import ModalEscolhaFormatoResposta from "../components/treino/ModalEscolhaFormatoResposta";
+import ModalOpcoesCalendario from "../components/treino/ModalOpcoesCalendario";
 import ResultadoTreino from "../components/treino/ResultadoTreino";
 import Timer from "../components/treino/Timer";
 import { useAuth } from "../context/AuthContext";
@@ -28,14 +30,17 @@ const TreinoAtivo = () => {
   // Salvar em estado local para manter disponível mesmo após recomeçar
   const [treinoData, setTreinoData] = useState(() => {
     // Primeiro tenta do location.state, depois do sessionStorage
-    return location.state?.treinoData || (() => {
-      try {
-        const stored = sessionStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored)?.treinoData : null;
-      } catch {
-        return null;
-      }
-    })();
+    return (
+      location.state?.treinoData ||
+      (() => {
+        try {
+          const stored = sessionStorage.getItem(STORAGE_KEY);
+          return stored ? JSON.parse(stored)?.treinoData : null;
+        } catch {
+          return null;
+        }
+      })()
+    );
   });
   const [formatoResposta, setFormatoResposta] = useState(() => {
     // Primeiro tenta do location.state, depois do sessionStorage
@@ -43,14 +48,28 @@ const TreinoAtivo = () => {
     if (fromState) return fromState;
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored)?.formatoResposta || "sistema" : "sistema";
+      return stored
+        ? JSON.parse(stored)?.formatoResposta || "sistema"
+        : "sistema";
     } catch {
       return "sistema";
     }
   });
-  const inicializadoRef = useRef(false); // Ref para controlar se já foi inicializado
-  const finalizadoRef = useRef(false); // Ref para controlar se o treino já foi finalizado
-  const isRefreshRef = useRef(false); // Ref para identificar se é um refresh
+  const inicializadoRef = useRef(false);
+  const finalizadoRef = useRef(false);
+  const isRefreshRef = useRef(false);
+  const calendarioTreinoPendenteRef = useRef(null);
+  const recomecarCalendarioDuranteRef = useRef(false);
+  const processandoCalendarioRef = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia?.("(max-width: 768px)");
+    if (!mq) return;
+    const atualizar = () => setIsMobile(mq.matches);
+    atualizar();
+    mq.addEventListener("change", atualizar);
+    return () => mq.removeEventListener("change", atualizar);
+  }, []);
 
   // Estado do treino
   const [treinoId, setTreinoId] = useState(null);
@@ -69,17 +88,35 @@ const TreinoAtivo = () => {
   const [erro, setErro] = useState("");
   const [mostrarContagem, setMostrarContagem] = useState(false);
   const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
+  const [mostrarModalOpcoesCalendario, setMostrarModalOpcoesCalendario] = useState(false);
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
+  const [inputCalendarioComErro, setInputCalendarioComErro] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 768);
+
+  const modoCalendario =
+    location.state?.modo === "calendario" ||
+    (treinoData?.tipo != null && Array.isArray(treinoData?.datas_iniciais));
 
   // Função para salvar dados do treino no sessionStorage
-  const salvarTreinoNoStorage = (dadosTreino, formato) => {
+  const salvarTreinoNoStorage = (
+    dadosTreino,
+    formato,
+    opcoesCalendario = null,
+  ) => {
     try {
-      const formatoParaSalvar = formato !== undefined ? formato : formatoResposta;
       const dadosParaSalvar = {
         treinoData: dadosTreino,
-        formatoResposta: formatoParaSalvar || "sistema",
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
+      if (opcoesCalendario) {
+        dadosParaSalvar.modo = "calendario";
+        dadosParaSalvar.visualizacao = opcoesCalendario.visualizacao || "texto";
+        dadosParaSalvar.tipoResposta =
+          opcoesCalendario.tipoResposta || "numeros";
+      } else {
+        dadosParaSalvar.formatoResposta =
+          formato !== undefined ? formato : formatoResposta || "sistema";
+      }
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dadosParaSalvar));
     } catch (error) {
       logError("TreinoAtivo - salvarTreinoNoStorage", error);
@@ -130,16 +167,14 @@ const TreinoAtivo = () => {
       finalizadoRef.current = false; // Resetar flag de finalizado
       setTreinoFinalizado(false); // Resetar flag de treino finalizado
 
-      // Se for refresh, incrementar contagem de tentativas imediatamente
-      if (isRefresh) {
-        try {
-          await api.post("/treinos/confirmar-inicio", {
-            treino_id: treino_id,
-          });
-        } catch (error) {
-          // Não bloquear se houver erro
-          logError("TreinoAtivo - iniciarTreino refresh confirmarInicio", error);
-        }
+      // Confirmar início: inicia o cronômetro no backend (após contagem ou ao criar)
+      // Para refresh: contagem foi mostrada aqui; para fluxo normal: contagem foi em NovoTreino/InfoUsuario
+      try {
+        await api.post("/treinos/confirmar-inicio", {
+          treino_id: treino_id,
+        });
+      } catch (error) {
+        logError("TreinoAtivo - iniciarTreino confirmarInicio", error);
       }
 
       // Salvar no sessionStorage
@@ -158,20 +193,46 @@ const TreinoAtivo = () => {
 
   // Inicializar treino apenas na primeira montagem
   useEffect(() => {
-    // Evitar múltiplas inicializações
     if (inicializadoRef.current) {
       return;
     }
 
-    // Detectar se a página foi recarregada usando Performance Navigation API
+    // Calendário: chegar com seleção (tipo, limiteId) sem treinoData - criar treino e mostrar contagem aqui
+    const calendarioSelecao =
+      location.state?.modo === "calendario" &&
+      location.state?.tipo &&
+      location.state?.limiteId;
+    if (calendarioSelecao && !location.state?.treinoData) {
+      const criarETreino = async () => {
+        try {
+          const response = await api.post("/calendario/treinos/iniciar", {
+            tipo: location.state.tipo,
+            limite_id: parseInt(location.state.limiteId, 10),
+          });
+          // confirmar-inicio será chamado quando a contagem terminar (handleContagemTerminar)
+          calendarioTreinoPendenteRef.current = {
+            treinoData: response.data,
+            visualizacao: location.state.visualizacao || "texto",
+            tipoResposta: location.state.tipoResposta || "numeros",
+          };
+          setTreinoData(response.data);
+          setMostrarContagem(true);
+        } catch (error) {
+          logError("TreinoAtivo - calendario iniciar", error);
+          setErro(getErrorMessage(error));
+          navigate("/calendario");
+        } finally {
+          setLoading(false);
+        }
+      };
+      criarETreino();
+      return;
+    }
+
     const navigationEntry = performance.getEntriesByType("navigation")[0];
     const navigationType = navigationEntry?.type;
     const isPageReload = navigationType === "reload";
 
-    // Verificar se é um refresh
-    // Um refresh acontece quando:
-    // 1. A página foi recarregada (F5/Ctrl+R) OU
-    // 2. Não há location.state mas tem dados no sessionStorage
     let dadosTreinoParaUsar = location.state?.treinoData;
     let formatoParaUsar = location.state?.formatoResposta;
     let isRefresh = false;
@@ -192,12 +253,23 @@ const TreinoAtivo = () => {
 
     // Se a página foi recarregada E há dados no storage, é refresh
     if (isPageReload && dadosDoStorage) {
-      dadosTreinoParaUsar = dadosDoStorage.treinoData;
-      formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
+      if (dadosDoStorage.modo === "calendario") {
+        limparTreinoDoStorage();
+        navigate("/calendario");
+        return;
+      }
+      if (!dadosTreinoParaUsar) {
+        dadosTreinoParaUsar = dadosDoStorage.treinoData;
+        formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
+      }
       isRefresh = true;
     }
-    // Se não tem location.state mas tem dados no storage, também é refresh
     else if (!dadosTreinoParaUsar && dadosDoStorage) {
+      if (dadosDoStorage.modo === "calendario") {
+        limparTreinoDoStorage();
+        navigate("/calendario");
+        return;
+      }
       dadosTreinoParaUsar = dadosDoStorage.treinoData;
       formatoParaUsar = dadosDoStorage.formatoResposta || "sistema";
       isRefresh = true;
@@ -215,6 +287,51 @@ const TreinoAtivo = () => {
 
     // Salvar treinoData no estado local
     setTreinoData(dadosTreinoParaUsar);
+
+    // Treino de calendário: já foi iniciado em InfoUsuarioCalendario, apenas configurar estado local
+    const ehCalendario =
+      location.state?.modo === "calendario" ||
+      (dadosTreinoParaUsar?.tipo &&
+        Array.isArray(dadosTreinoParaUsar?.datas_iniciais));
+    if (ehCalendario) {
+      const dt = dadosTreinoParaUsar;
+      // Contagem já ocorreu em CardRecordeCalendario/InfoUsuarioCalendario; confirmar início agora
+      ;(async () => {
+        try {
+          await api.post("/calendario/treinos/confirmar-inicio", {
+            treino_id: dt.treino_id,
+          });
+        } catch (e) {
+          logError("TreinoAtivo - calendario confirmar-inicio ao carregar", e);
+        }
+      })();
+      const viz =
+        location.state?.visualizacao || dadosDoStorage?.visualizacao || "texto";
+      const tipResp =
+        location.state?.tipoResposta ||
+        dadosDoStorage?.tipoResposta ||
+        "numeros";
+      setTreinoId(dt.treino_id);
+      setContas(dt.datas_iniciais || []);
+      setTempoLimite(dt.limite?.tempo || 60);
+      setInicioTreino(Date.now());
+      setTotalAcertos(0);
+      totalAcertosRef.current = 0;
+      totalErrosRef.current = 0;
+      setContaAtualIndex(0);
+      setProcessando(false);
+      setMostrarResultado(false);
+      finalizadoRef.current = false;
+      setTreinoFinalizado(false);
+      setInputCalendarioComErro(false);
+      inicializadoRef.current = true;
+      salvarTreinoNoStorage(dt, null, {
+        visualizacao: viz,
+        tipoResposta: tipResp,
+      });
+      setLoading(false);
+      return;
+    }
 
     // Salvar formatoResposta se fornecido
     if (formatoParaUsar) {
@@ -237,10 +354,17 @@ const TreinoAtivo = () => {
     if (isRefresh) {
       setLoading(false);
       // Definir sistemaTipo no estado para usar depois
-      const sistemaTipoDetectado = dadosTreinoParaUsar?.sistema?.tipo || dadosTreinoParaUsar?.sistemaTipo || "natural";
+      const sistemaTipoDetectado =
+        dadosTreinoParaUsar?.sistema?.tipo ||
+        dadosTreinoParaUsar?.sistemaTipo ||
+        "natural";
       setSistemaTipo(sistemaTipoDetectado);
       // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
-      if (sistemaTipoDetectado === "romano" || sistemaTipoDetectado === "hexadecimal" || sistemaTipoDetectado === "binario") {
+      if (
+        sistemaTipoDetectado === "romano" ||
+        sistemaTipoDetectado === "hexadecimal" ||
+        sistemaTipoDetectado === "binario"
+      ) {
         // Mostrar modal de escolha de formato
         setMostrarModalFormato(true);
       } else {
@@ -321,6 +445,102 @@ const TreinoAtivo = () => {
     totalErrosRef.current = totalErrosRef.current + 1;
   };
 
+  const handleAcertoCalendario = async (resposta) => {
+    const valor = String(resposta || "").trim();
+    if (!valor || !treinoId || treinoFinalizado) return;
+    if (processandoCalendarioRef.current) return;
+    processandoCalendarioRef.current = true;
+    setProcessando(true);
+    setInputCalendarioComErro(false);
+
+    try {
+      const tipoRespostaApi =
+        calendarioTreinoPendenteRef.current?.tipoResposta ||
+        (() => {
+          try {
+            const s = sessionStorage.getItem(STORAGE_KEY);
+            return s ? JSON.parse(s)?.tipoResposta : null;
+          } catch {
+            return null;
+          }
+        })() ||
+        location.state?.tipoResposta ||
+        "numeros";
+      const response = await api.post("/calendario/treinos/validar-resposta", {
+        treino_id: treinoId,
+        resposta: valor,
+        tipo_resposta: tipoRespostaApi,
+      });
+
+      const data = response?.data;
+      const correto = data?.correto === true;
+      const tempoEsgotado = data?.tempoEsgotado === true;
+      const proximaData = data?.proximaData;
+
+      if (tempoEsgotado) {
+        return;
+      }
+
+      if (correto) {
+        const novoTotal = totalAcertosRef.current + 1;
+        totalAcertosRef.current = novoTotal;
+        setTotalAcertos(novoTotal);
+        setInputCalendarioComErro(false);
+        setContaAtualIndex(0);
+        setContas((prev) => {
+          const novas = [...prev];
+          novas.shift();
+          if (proximaData) novas.push(proximaData);
+          return novas;
+        });
+      } else {
+        totalErrosRef.current = totalErrosRef.current + 1;
+        setInputCalendarioComErro(true);
+      }
+    } catch (error) {
+      logError("TreinoAtivo - handleAcertoCalendario", error);
+      setErro(getErrorMessage(error));
+    } finally {
+      processandoCalendarioRef.current = false;
+      setProcessando(false);
+    }
+  };
+
+  const finalizarTreinoCalendario = async () => {
+    if (!treinoId || finalizadoRef.current) return;
+
+    finalizadoRef.current = true;
+    setTreinoFinalizado(true);
+    setProcessando(true);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const response = await api.post("/calendario/treinos/finalizar", {
+        treino_id: treinoId,
+        total: totalAcertosRef.current,
+        erros: totalErrosRef.current,
+      });
+
+      const resultadoFinal = { ...response.data };
+
+      setResultado(resultadoFinal);
+      setMostrarResultado(true);
+      setTotalAcertos(response.data.total);
+      limparTreinoDoStorage();
+
+      if (resultadoFinal.bateuRecorde) {
+        showSuccess("Parabéns! Você bateu um novo recorde!");
+      }
+    } catch (error) {
+      logError("TreinoAtivo - finalizarTreinoCalendario", error);
+      setErro(getErrorMessage(error));
+      finalizadoRef.current = false;
+      setTreinoFinalizado(false);
+      setProcessando(false);
+    }
+  };
+
   const finalizarTreino = async () => {
     // Prevenir múltiplas finalizações
     if (!treinoId || finalizadoRef.current) return;
@@ -333,7 +553,7 @@ const TreinoAtivo = () => {
     try {
       // Aguardar um pouco para garantir que qualquer resposta pendente seja processada
       // Mas não esperar muito para não atrasar a finalização
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const response = await api.post("/treinos/finalizar", {
         treino_id: treinoId,
@@ -353,7 +573,7 @@ const TreinoAtivo = () => {
           treinoData.operacao.id,
           treinoData.limite.id,
           treinoData.sistema.id,
-          response.data.total
+          response.data.total,
         );
 
         // Sobrescrever informações de recorde com dados locais
@@ -385,7 +605,11 @@ const TreinoAtivo = () => {
   };
 
   const handleTempoEsgotado = () => {
-    finalizarTreino();
+    if (modoCalendario) {
+      finalizarTreinoCalendario();
+    } else {
+      finalizarTreino();
+    }
   };
 
   const handleRecomecar = () => {
@@ -394,7 +618,11 @@ const TreinoAtivo = () => {
     setErro(""); // Limpar erros anteriores
 
     // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
-    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") {
+    if (
+      sistemaTipo === "romano" ||
+      sistemaTipo === "hexadecimal" ||
+      sistemaTipo === "binario"
+    ) {
       // Mostrar modal de escolha de formato
       setMostrarModalFormato(true);
     } else {
@@ -406,41 +634,82 @@ const TreinoAtivo = () => {
     }
   };
 
-  const confirmarInicioTreino = async (treinoIdParaConfirmar) => {
-    if (!treinoIdParaConfirmar) {
-      return;
-    }
-
-    try {
-      await api.post("/treinos/confirmar-inicio", {
-        treino_id: treinoIdParaConfirmar,
-      });
-    } catch (error) {
-      // Não bloquear a contagem regressiva se houver erro
-      logError("TreinoAtivo - confirmarInicioTreino", error);
-    }
-  };
-
   const handleEscolherFormato = async (formato) => {
     setFormatoResposta(formato);
     setMostrarModalFormato(false);
-    // Se for refresh, salvar formato no sessionStorage
     if (isRefreshRef.current && treinoData) {
       salvarTreinoNoStorage(treinoData, formato);
     }
-    // Se não for refresh, confirmar início do treino (incrementar quantidade) antes de mostrar contagem
-    // Se for refresh, a confirmação será feita quando a contagem terminar
-    if (treinoId && !isRefreshRef.current) {
-      await confirmarInicioTreino(treinoId);
-    }
-    // Após escolher formato, mostrar contagem regressiva
+    // confirmar-inicio será chamado em iniciarTreino quando a contagem terminar
     setMostrarContagem(true);
   };
 
   const handleCancelarFormato = () => {
     setMostrarModalFormato(false);
-    // Se estava mostrando resultado, voltar para ele
-    // Caso contrário, apenas fechar o modal e continuar o treino atual
+    if (resultado) {
+      setMostrarResultado(true);
+    }
+  };
+
+  const handleRecomecarCalendario = () => {
+    setMostrarResultado(false);
+    setErro("");
+    setMostrarModalOpcoesCalendario(true);
+  };
+
+  const handleRecomecarDuranteTreinoCalendario = async () => {
+    if (!treinoId || finalizadoRef.current) return;
+    recomecarCalendarioDuranteRef.current = true;
+    finalizadoRef.current = true;
+    setTreinoFinalizado(true);
+    setProcessando(true);
+    setErro("");
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await api.post("/calendario/treinos/finalizar", {
+        treino_id: treinoId,
+        erros: totalErrosRef.current,
+      });
+    } catch (error) {
+      logError("TreinoAtivo - handleRecomecarDuranteTreinoCalendario", error);
+    } finally {
+      setProcessando(false);
+    }
+    setMostrarModalOpcoesCalendario(true);
+  };
+
+  const handleConfirmarOpcoesCalendarioRecomecar = async (opcoes) => {
+    setMostrarModalOpcoesCalendario(false);
+    recomecarCalendarioDuranteRef.current = false;
+    setResultado(null);
+    if (!treinoData?.tipo || !treinoData?.limite?.id) return;
+    try {
+      const response = await api.post("/calendario/treinos/iniciar", {
+        tipo: treinoData.tipo,
+        limite_id: treinoData.limite.id,
+      });
+      // confirmar-inicio será chamado em handleContagemTerminar quando a contagem terminar
+      const tipoResposta = opcoes?.resposta === "nomeDia" ? "texto" : "numeros";
+      calendarioTreinoPendenteRef.current = {
+        treinoData: response.data,
+        visualizacao: opcoes?.visualizacao || "texto",
+        tipoResposta: opcoes?.resposta != null ? tipoResposta : "numeros",
+      };
+      setTreinoData(response.data);
+      setMostrarContagem(true);
+    } catch (error) {
+      logError("TreinoAtivo - recomeçar calendario", error);
+      setErro(getErrorMessage(error));
+    }
+  };
+
+  const handleCancelarOpcoesCalendario = () => {
+    setMostrarModalOpcoesCalendario(false);
+    if (recomecarCalendarioDuranteRef.current) {
+      recomecarCalendarioDuranteRef.current = false;
+      navigate("/calendario");
+      return;
+    }
     if (resultado) {
       setMostrarResultado(true);
     }
@@ -448,23 +717,41 @@ const TreinoAtivo = () => {
 
   const handleContagemTerminar = async () => {
     setMostrarContagem(false);
-    const isRefresh = isRefreshRef.current;
-    // Se for refresh, criar treino e incrementar quantidade
-    // Se não for refresh, criar treino normalmente e confirmar depois
-    const novoTreinoId = await iniciarTreino(treinoData, isRefresh);
-    // Confirmar início do treino (incrementar quantidade) após criar novo treino
-    // Só confirmar se não foi refresh (refresh já confirmou dentro de iniciarTreino)
-    if (novoTreinoId && !isRefresh) {
+
+    // Calendário: treino já foi criado no useEffect; confirmar início (inicia o cronômetro no backend) e exibir
+    const pendente = calendarioTreinoPendenteRef.current;
+    if (pendente?.treinoData) {
+      const dt = pendente.treinoData;
       try {
-        await api.post("/treinos/confirmar-inicio", {
-          treino_id: novoTreinoId,
+        await api.post("/calendario/treinos/confirmar-inicio", {
+          treino_id: dt.treino_id,
         });
-      } catch (error) {
-        // Não bloquear se houver erro
-        logError("TreinoAtivo - handleContagemTerminar confirmarInicio", error);
+      } catch (e) {
+        logError("TreinoAtivo - handleContagemTerminar confirmar-inicio calendário", e);
       }
+      setTreinoId(dt.treino_id);
+      setContas(dt.datas_iniciais || []);
+      setTempoLimite(dt.limite?.tempo || 60);
+      setInicioTreino(Date.now());
+      setTotalAcertos(0);
+      totalAcertosRef.current = 0;
+      totalErrosRef.current = 0;
+      setContaAtualIndex(0);
+      setProcessando(false);
+      setMostrarResultado(false);
+      finalizadoRef.current = false;
+      setTreinoFinalizado(false);
+      setInputCalendarioComErro(false);
+      inicializadoRef.current = true;
+      salvarTreinoNoStorage(dt, null, {
+        visualizacao: pendente.visualizacao || "texto",
+        tipoResposta: pendente.tipoResposta || "numeros",
+      });
+      calendarioTreinoPendenteRef.current = null;
+      return;
     }
-    // Resetar flag de refresh após processar
+
+    await iniciarTreino(treinoData, isRefreshRef.current);
     isRefreshRef.current = false;
   };
 
@@ -477,7 +764,7 @@ const TreinoAtivo = () => {
 
       try {
         // Aguardar um pouco para garantir que qualquer resposta pendente seja processada
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Finalizar treino atual (silenciosamente)
         await api.post("/treinos/finalizar", {
@@ -496,7 +783,11 @@ const TreinoAtivo = () => {
     setProcessando(false);
 
     // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
-    if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") {
+    if (
+      sistemaTipo === "romano" ||
+      sistemaTipo === "hexadecimal" ||
+      sistemaTipo === "binario"
+    ) {
       // Mostrar modal de escolha de formato
       setMostrarModalFormato(true);
     } else {
@@ -518,6 +809,129 @@ const TreinoAtivo = () => {
       <div className="treino-ativo-container">
         <Loading text="Carregando..." />
       </div>
+    );
+  }
+
+  if (modoCalendario) {
+    // Durante contagem ou antes de ter treinoId, mostrar apenas contagem ou loading
+    if (mostrarContagem || !treinoId) {
+      return (
+        <>
+          {mostrarContagem && (
+            <ContagemRegressiva onTerminar={handleContagemTerminar} />
+          )}
+          {!mostrarContagem && <Loading text="Preparando treino..." />}
+        </>
+      );
+    }
+
+    // Preferir ref/sessionStorage sobre location.state para que "Recomeçar" com novas opções seja aplicado
+    const storedCalendario = (() => {
+      try {
+        const s = sessionStorage.getItem(STORAGE_KEY);
+        return s ? JSON.parse(s) : null;
+      } catch {
+        return null;
+      }
+    })();
+    const visualizacaoCalendario =
+      calendarioTreinoPendenteRef.current?.visualizacao ||
+      storedCalendario?.visualizacao ||
+      location.state?.visualizacao ||
+      "texto";
+    const tipoRespostaCalendario =
+      calendarioTreinoPendenteRef.current?.tipoResposta ||
+      storedCalendario?.tipoResposta ||
+      location.state?.tipoResposta ||
+      "numeros";
+
+    const mostrarOpcoesRespostaCalendario =
+      isMobile &&
+      (treinoData?.tipo === "data_geral" || treinoData?.tipo === "data_21");
+
+    return (
+      <>
+        <ModalOpcoesCalendario
+          mostrar={mostrarModalOpcoesCalendario}
+          mostrarOpcoesResposta={mostrarOpcoesRespostaCalendario}
+          onConfirmar={handleConfirmarOpcoesCalendarioRecomecar}
+          onCancelar={handleCancelarOpcoesCalendario}
+          visualizacaoInicial={
+            location.state?.visualizacao ||
+            (() => {
+              try {
+                const s = sessionStorage.getItem(STORAGE_KEY);
+                return s ? JSON.parse(s)?.visualizacao : null;
+              } catch {
+                return null;
+              }
+            })() ||
+            "texto"
+          }
+          respostaInicial={
+            (() => {
+              const t =
+                location.state?.tipoResposta ||
+                (() => {
+                  try {
+                    const s = sessionStorage.getItem(STORAGE_KEY);
+                    return s ? JSON.parse(s)?.tipoResposta : null;
+                  } catch {
+                    return null;
+                  }
+                })();
+              return t === "texto" ? "nomeDia" : "numeros";
+            })()
+          }
+        />
+        {mostrarResultado && resultado && (
+          <ResultadoTreino
+            resultado={resultado}
+            onRecomecar={handleRecomecarCalendario}
+            onNovoTreino={() => navigate("/calendario")}
+          />
+        )}
+        <div className="treino-ativo-container">
+          <div className="treino-ativo-grid">
+            <div className="treino-coluna-esquerda">
+              <ListaDatas
+                datas={contas}
+                formatoVisualizacao={visualizacaoCalendario}
+                tipoResposta={tipoRespostaCalendario}
+                onAcerto={handleAcertoCalendario}
+                onErro={handleErro}
+                inputComErro={inputCalendarioComErro}
+                disabled={processando || treinoFinalizado}
+              />
+              {!mostrarResultado && !treinoFinalizado && (
+                <button
+                  className="btn-recomecar-durante-treino btn-recomecar-mobile"
+                  onClick={handleRecomecarDuranteTreinoCalendario}
+                >
+                  Recomeçar
+                </button>
+              )}
+            </div>
+            <div className="treino-coluna-direita">
+              <Timer
+                tempoLimite={tempoLimite}
+                inicioTreino={inicioTreino}
+                onTempoEsgotado={handleTempoEsgotado}
+                pausado={false}
+              />
+              <ContadorPontos totalAcertos={totalAcertos} />
+              {!mostrarResultado && !treinoFinalizado && (
+                <button
+                  className="btn-recomecar-durante-treino"
+                  onClick={handleRecomecarDuranteTreinoCalendario}
+                >
+                  Recomeçar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -555,13 +969,16 @@ const TreinoAtivo = () => {
 
   return (
     <>
-      {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") && (
-        <ModalEscolhaFormatoResposta
-          sistemaTipo={sistemaTipo}
-          onEscolher={handleEscolherFormato}
-          onCancelar={handleCancelarFormato}
-        />
-      )}
+      {mostrarModalFormato &&
+        (sistemaTipo === "romano" ||
+          sistemaTipo === "hexadecimal" ||
+          sistemaTipo === "binario") && (
+          <ModalEscolhaFormatoResposta
+            sistemaTipo={sistemaTipo}
+            onEscolher={handleEscolherFormato}
+            onCancelar={handleCancelarFormato}
+          />
+        )}
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}

@@ -292,40 +292,31 @@ class UsuarioController {
       }
 
       // Campos que podem ser atualizados
+      const camposBase = [
+        "email",
+        "senha",
+        "nome",
+        "operacao_id",
+        "limite_id",
+        "sistema_id",
+        "ranking_global",
+        "calendario_tipo_treino",
+      ];
+
       const camposPermitidos = isAdmin
         ? [
-            "email",
-            "senha",
-            "nome",
+            ...camposBase,
             "tipo",
             "id_plano",
             "data_vencimento_plano",
             "ativo",
-            "operacao_id",
-            "limite_id",
-            "sistema_id",
-            "ranking_global",
           ]
         : isProfe
           ? [
-              "email",
-              "senha",
-              "nome",
+              ...camposBase,
               "ativo",
-              "operacao_id",
-              "limite_id",
-              "sistema_id",
-              "ranking_global",
             ] // Profe não pode alterar tipo nem plano
-          : [
-              "email",
-              "senha",
-              "nome",
-              "operacao_id",
-              "limite_id",
-              "sistema_id",
-              "ranking_global",
-            ];
+          : camposBase;
 
       const dadosAtualizacao = {};
 
