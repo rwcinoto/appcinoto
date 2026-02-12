@@ -15,7 +15,15 @@ module.exports = {
         allowNull: false,
       },
       tipo: {
-        type: Sequelize.ENUM("data_geral", "mes", "ano", "seculo", "data_21"),
+        type: Sequelize.ENUM(
+          "data_geral",
+          "dia",
+          "mes",
+          "ano",
+          "seculo",
+          "data_esse_ano",
+          "data_21",
+        ),
         allowNull: false,
         comment: "Tipo de treino de calendário",
       },

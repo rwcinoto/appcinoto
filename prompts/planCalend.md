@@ -228,29 +228,46 @@ Criar (ou adaptar ListaContas) para exibir data e campo de resposta, com Teclado
 
 ---
 
-## 12. Treinos especiais: mês e século
+## 12. Treinos especiais: anos, séculos, meses, dias e ano atual
 
-### 12.1. Treino de meses
+### 12.1. Treino de anos
+
+- Modal perguntando: "Como quer ver a data?"
+- Mostrar data completa
+- Resposta: (ANO + INT(ANO/4)) mod 7, onde ANO = dois últimos algarismos do ano da data
+- Exemplo: 84 + 21 = 105; 105 mod 7 = 0
+
+### 12.2. Treino de séculos
+
+- Modal no início: usuário digita número do século XXI (padrão 0) e pergunta: "Como quer ver a data?" (número ou texto)
+- Relações: XVII=XXI; XVI/XX/XIV=XXI+1; XIX/XXIII=XXI+3; XVIII/XXII=XXI-2
+- Considerar século XXI = 2000-2099; XX = 1900-1999; etc.
+- Mostrar data completa, usuário digita número do século
+- Valores -7 a 7, equivalentes módulo 7
+
+### 12.3. Treino de meses
 
 - Modal no início: usuário digita o número de Janeiro (padrão 0)
 - Relações: outubro=janeiro; abril/julho=janeiro-1; maio=janeiro+1; agosto=janeiro+2; fev/mar/nov=janeiro+3; set/dez=janeiro-2; jun=janeiro-3
 - Valores -7 a 7; equivalentes módulo 7 (0=7, 4=-3, etc.)
 - Mostrar data completa, usuário digita número equivalente ao mês
 
-### 12.2. Treino de séculos
+### 12.4. Treino de dias
 
-- Modal no início: usuário digita número do século XXI (padrão 0)
-- Relações: XVII=XXI; XVI/XX/XIV=XXI+1; XIX/XXIII=XXI+3; XVIII/XXII=XXI-2
-- Considerar século XXI = 2000-2099; XX = 1900-1999; etc.
-- Mostrar data completa, usuário digita número do século
-- Valores -7 a 7, equivalentes módulo 7
-
-### 12.3. Treino de anos
-
-- Sem modal inicial
+- Precisamos incluir essa opção "dia" nos tipos de treino, inlcusive na tabela recordes_calendario do banco de dados. Aproveitar e incluir a opção "data_esse_ano" no enum porque vamos implementar na tarefa 12.5
+- Modal perguntando: "Como quer ver a data?"
 - Mostrar data completa
-- Resposta: (ANO + INT(ANO/4)) mod 7, onde ANO = dois últimos algarismos do ano da data
-- Exemplo: 84 + 21 = 105; 105 mod 7 = 0
+- Resposta: DIA mod 7, onde DIA é o dia da data
+- Exemplo: 23 = 2 (23 mod 7 = 2), 18 = 4 (18 mod 7 = 4)
+
+### 12.5. Adicionar treino de datas do ano atual
+
+- Treino semelhante ao do século XXI, mas deve mostrar apenas datas do ano atual (verificar em que ano estamos).
+- Modal perguntando: "Como quer ver a data?"
+
+### 12.6. Revisar permissões para os treinos especiais
+
+- no plano de id = 2 só tem treino de data geral. A partir do plano de id=3, tem treino de ano e século (além do treino de data geral). A partir do plano de id=4, incluir treinos de dia e mês. E a partir do plano de id=5 acrescenta treinos de data do ano atual e do século XXI também.
 
 ---
 

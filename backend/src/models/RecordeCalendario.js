@@ -30,7 +30,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       tipo: {
-        type: DataTypes.ENUM("data_geral", "mes", "ano", "seculo", "data_21"),
+        type: DataTypes.ENUM(
+          "data_geral",
+          "dia",
+          "mes",
+          "ano",
+          "seculo",
+          "data_esse_ano",
+          "data_21",
+        ),
         allowNull: false,
       },
       id_limite: {
@@ -78,9 +86,8 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "RecordeCalendario",
       tableName: "recordes_calendario",
       timestamps: false,
-    }
+    },
   );
 
   return RecordeCalendario;
 };
-

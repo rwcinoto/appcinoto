@@ -8,28 +8,34 @@ import "./CardRecorde.css";
 
 const TIPOS_CALENDARIO_LABEL = {
   data_geral: "Data 1582-2399",
+  dia: "Dia",
   mes: "Mês",
   ano: "Ano",
   seculo: "Século",
+  data_esse_ano: "Data esse ano",
   data_21: "Data século XXI",
 };
 
 const obterCorPorTipoCalendario = (tipo) => {
   const cores = {
     data_geral: "#2196f3",
+    dia: "#00bcd4",
     mes: "#4caf50",
     ano: "#ff9800",
     seculo: "#9c27b0",
+    data_esse_ano: "#e91e63",
     data_21: "#f44336",
   };
   return cores[tipo] || "#666";
 };
 
 const obterUnidadePorTipoCalendario = (tipo) => {
+  if (tipo === "data_geral" || tipo === "data_21" || tipo === "data_esse_ano")
+    return "data";
+  if (tipo === "dia") return "dia";
   if (tipo === "mes") return "mês";
   if (tipo === "ano") return "ano";
   if (tipo === "seculo") return "século";
-  if (tipo === "data_geral" || tipo === "data_21") return "data";
   return "data";
 };
 
@@ -71,7 +77,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
       ? tempoMedioPorData.toFixed(1).replace(".", ",")
       : null;
   const unidadeTempoMedio = obterUnidadePorTipoCalendario(
-    recorde ? recorde.tipo : ""
+    recorde ? recorde.tipo : "",
   );
 
   const handleIniciarTreino = async () => {
@@ -118,7 +124,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
   const linkRanking =
     recorde && recorde.limite
       ? `/calendario?tipo=${encodeURIComponent(
-          recorde.tipo
+          recorde.tipo,
         )}&limite_id=${recorde.limite.id}`
       : "/calendario";
 
@@ -139,19 +145,19 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
         });
 
         const response = await api.get(
-          `/calendario/rankings?${params.toString()}`
+          `/calendario/rankings?${params.toString()}`,
         );
 
         const ranking = response.data?.ranking || [];
         const itemUsuario = ranking.find(
-          (item) => item.id_usuario === usuarioRankingId
+          (item) => item.id_usuario === usuarioRankingId,
         );
 
         setPosicaoRanking(itemUsuario ? itemUsuario.posicao : null);
       } catch (error) {
         console.error(
           "Erro ao buscar posição no ranking de calendário:",
-          error
+          error,
         );
         setPosicaoRanking(null);
       }
@@ -226,9 +232,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
             Treinos: {recorde.quantidade || 0}
           </span>
           {posicaoRanking !== null && (
-            <div
-              style={{ display: "flex", alignItems: "center", gap: "8px" }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span className="card-recorde-posicao-label">
                 Posição global:
               </span>
@@ -248,4 +252,3 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
 };
 
 export default CardRecordeCalendario;
-
