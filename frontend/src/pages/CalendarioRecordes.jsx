@@ -11,9 +11,11 @@ import "./Recordes.css";
 const TIPOS_CALENDARIO = [
   { value: "", label: "Todos" },
   { value: "data_geral", label: "Data 1582-2399" },
+  { value: "dia", label: "Dia" },
   { value: "mes", label: "Mês" },
   { value: "ano", label: "Ano" },
   { value: "seculo", label: "Século" },
+  { value: "data_esse_ano", label: "Data esse ano" },
   { value: "data_21", label: "Data século XXI" },
 ];
 
@@ -240,4 +242,3 @@ const CalendarioRecordes = () => {
 };
 
 export default CalendarioRecordes;
-

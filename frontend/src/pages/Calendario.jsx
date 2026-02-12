@@ -9,13 +9,15 @@ import api from "../services/api";
 import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Rankings.css";
 
-// Opções de tipo de treino conforme plano (data_geral para todos; mes, ano, seculo para id>=3; data_21 para id>=4)
+// Opções de tipo de treino conforme plano (data_geral para todos; ano e seculo para id>=3; dia e mes para id>=4; data_21 e data_esse_ano para id>=5)
 const TIPOS_DISPONIVEIS = [
-  { value: "data_geral", label: "Data 1582-2399", planoMin: 1 },
-  { value: "mes", label: "Mês", planoMin: 3 },
+  { value: "data_geral", label: "Data 1582-2399", planoMin: 2 },
+  { value: "dia", label: "Dia", planoMin: 4 },
+  { value: "mes", label: "Mês", planoMin: 4 },
   { value: "ano", label: "Ano", planoMin: 3 },
   { value: "seculo", label: "Século", planoMin: 3 },
-  { value: "data_21", label: "Data século XXI", planoMin: 4 },
+  { value: "data_esse_ano", label: "Data esse ano", planoMin: 5 },
+  { value: "data_21", label: "Data século XXI", planoMin: 5 },
 ];
 
 const Calendario = () => {
@@ -105,14 +107,22 @@ const Calendario = () => {
 
     if (limiteParam && limites.find((l) => String(l.id) === limiteParam)) {
       setLimiteSelecionado(limiteParam);
-    } else if (!limiteSelecionado || !limites.find((l) => String(l.id) === limiteSelecionado)) {
-      const limitePadrao =
-        limites.find((l) => l.tempo === 60) || limites[0];
+    } else if (
+      !limiteSelecionado ||
+      !limites.find((l) => String(l.id) === limiteSelecionado)
+    ) {
+      const limitePadrao = limites.find((l) => l.tempo === 60) || limites[0];
       if (limitePadrao) {
         setLimiteSelecionado(String(limitePadrao.id));
       }
     }
-  }, [limites, searchParams, tiposPermitidos, tipoSelecionado, limiteSelecionado]);
+  }, [
+    limites,
+    searchParams,
+    tiposPermitidos,
+    tipoSelecionado,
+    limiteSelecionado,
+  ]);
 
   useEffect(() => {
     if (usuario && tipoSelecionado && limiteSelecionado) {

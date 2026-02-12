@@ -11,6 +11,8 @@ const ListaDatas = ({
   onErro,
   inputComErro = false,
   disabled = false,
+  // Tipo específico do treino de calendário: data_geral, mes, ano, seculo, data_21
+  tipoTreinoCalendario,
 }) => {
   const inputRef = useRef(null);
   const manterFocoRef = useRef(false);
@@ -67,7 +69,12 @@ const ListaDatas = ({
   };
 
   const submeterResposta = (resposta) => {
-    const valor = String(resposta || "").trim();
+    // Precisamos aceitar 0 como valor válido (especialmente em treinos de século),
+    // por isso não podemos usar `resposta || ""`.
+    const valor =
+      resposta === 0
+        ? "0"
+        : String(resposta ?? "").trim();
     if (!valor || processandoRef.current || disabled) return;
     processandoRef.current = true;
     if (onAcerto) onAcerto(valor);
@@ -85,10 +92,35 @@ const ListaDatas = ({
     if (!e.isTrusted) return;
     const valor = e.target.value;
     if (tipoResposta === "numeros") {
-      const filtrado = valor.replace(/[^0-7]/g, "").slice(0, 1);
-      e.target.value = filtrado;
-      if (filtrado.length === 1) {
-        submeterResposta(filtrado);
+      // Treinos de séculos, meses, dia e ano: aceitar inteiros de -7 a 7 (equivalentes módulo 7)
+      if (
+        tipoTreinoCalendario === "seculo" ||
+        tipoTreinoCalendario === "mes" ||
+        tipoTreinoCalendario === "dia" ||
+        tipoTreinoCalendario === "ano"
+      ) {
+        const bruto = valor.replace(/\s+/g, "");
+        // Permitir estado intermediário "-", "+" ou vazio sem enviar
+        if (bruto === "" || bruto === "-" || bruto === "+") {
+          e.target.value = bruto;
+          return;
+        }
+        const num = parseInt(bruto, 10);
+        if (Number.isNaN(num)) {
+          return;
+        }
+        if (num < -7 || num > 7) {
+          return;
+        }
+        e.target.value = String(num);
+        submeterResposta(num);
+      } else {
+        // Demais treinos numéricos (dia da semana, ano, etc.): 0–7, 1 dígito
+        const filtrado = valor.replace(/[^0-7]/g, "").slice(0, 1);
+        e.target.value = filtrado;
+        if (filtrado.length === 1) {
+          submeterResposta(filtrado);
+        }
       }
     } else {
       e.target.value = valor.toLowerCase().replace(/[^a-záàâãéêíóôõú]/g, "");
@@ -97,15 +129,65 @@ const ListaDatas = ({
 
   const handleTecladoKeyPress = (evento) => {
     if (!inputRef.current || disabled) return;
+    const atual = inputRef.current.value || "";
+
     if (evento.key === "Backspace") {
-      inputRef.current.value = "";
-    } else if (tipoResposta === "numeros") {
-      if (/^[0-7]$/.test(evento.key)) {
-        inputRef.current.value = evento.key;
-        submeterResposta(evento.key);
+      if (
+        tipoResposta === "numeros" &&
+        (tipoTreinoCalendario === "seculo" ||
+          tipoTreinoCalendario === "mes" ||
+          tipoTreinoCalendario === "dia" ||
+          tipoTreinoCalendario === "ano")
+      ) {
+        inputRef.current.value = atual.slice(0, -1);
+      } else {
+        inputRef.current.value = "";
+      }
+      return;
+    }
+
+    if (tipoResposta === "numeros") {
+      if (
+        tipoTreinoCalendario === "seculo" ||
+        tipoTreinoCalendario === "mes" ||
+        tipoTreinoCalendario === "dia" ||
+        tipoTreinoCalendario === "ano"
+      ) {
+        // Construir número com sinal usando o teclado virtual
+        let novo = atual;
+        if (evento.key === "-") {
+          // Permitir apenas um sinal no início
+          if (!novo.startsWith("-") && novo.length === 0) {
+            novo = "-";
+          } else {
+            return;
+          }
+        } else if (/^[0-9]$/.test(evento.key)) {
+          novo = `${novo}${evento.key}`;
+        } else {
+          return;
+        }
+
+        const bruto = novo.replace(/\s+/g, "");
+        if (bruto === "" || bruto === "-") {
+          inputRef.current.value = bruto;
+          return;
+        }
+
+        const num = parseInt(bruto, 10);
+        if (Number.isNaN(num) || num < -7 || num > 7) {
+          return;
+        }
+        inputRef.current.value = String(num);
+        submeterResposta(num);
+      } else {
+        if (/^[0-7]$/.test(evento.key)) {
+          inputRef.current.value = evento.key;
+          submeterResposta(evento.key);
+        }
       }
     } else {
-      const v = inputRef.current.value + evento.key;
+      const v = atual + evento.key;
       inputRef.current.value = v;
     }
   };
@@ -133,8 +215,18 @@ const ListaDatas = ({
             <input
               ref={inputRef}
               type="text"
-              inputMode={isMobile ? "none" : tipoResposta === "numeros" ? "numeric" : "text"}
-              maxLength={tipoResposta === "numeros" ? 1 : undefined}
+              inputMode={
+                isMobile ? "none" : tipoResposta === "numeros" ? "numeric" : "text"
+              }
+              maxLength={
+                tipoResposta === "numeros" &&
+                tipoTreinoCalendario !== "seculo" &&
+                tipoTreinoCalendario !== "mes" &&
+                tipoTreinoCalendario !== "dia" &&
+                tipoTreinoCalendario !== "ano"
+                  ? 1
+                  : undefined
+              }
               className={`conta-input-resultado${inputComErro ? " errado" : ""}`}
               disabled={disabled}
               placeholder="?"

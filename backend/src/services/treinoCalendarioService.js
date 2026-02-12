@@ -6,6 +6,7 @@ const {
   TIPOS_TREINO_CALENDARIO,
   sortearDataGeral,
   sortearDataSeculo21,
+  sortearDataAnoAtual,
   calcularDiaSemana,
   converterDiaSemanaParaFormatoUsuario,
 } = calendarioService;
@@ -24,7 +25,7 @@ class TreinoCalendarioService {
    * Gerar uma lista de datas conforme o tipo de treino.
    *
    * @param {number} quantidade - Quantidade de datas a gerar
-   * @param {string} tipo - Tipo de treino (data_geral, data_21, mes, ano, seculo)
+   * @param {string} tipo - Tipo de treino (data_geral, dia, mes, ano, seculo, data_esse_ano, data_21)
    * @returns {Array<{ ano: number, mes: number, dia: number }>}
    */
   gerarDatas(quantidade = 1, tipo = TIPOS_TREINO_CALENDARIO.DATA_GERAL) {
@@ -39,10 +40,16 @@ class TreinoCalendarioService {
           data = sortearDataSeculo21();
           break;
 
+        case TIPOS_TREINO_CALENDARIO.DATA_ESSE_ANO:
+          // Apenas datas do ano atual (Brasil).
+          data = sortearDataAnoAtual();
+          break;
+
+        case TIPOS_TREINO_CALENDARIO.DIA:
         case TIPOS_TREINO_CALENDARIO.MES:
         case TIPOS_TREINO_CALENDARIO.ANO:
         case TIPOS_TREINO_CALENDARIO.SECULO:
-          // Para treinos de mês/ano/século, usamos o mesmo sorteio geral.
+          // Para treinos de dia/mês/ano/século, usamos o mesmo sorteio geral.
           // A diferença estará na forma de validar a resposta.
           data = sortearDataGeral();
           break;
@@ -153,11 +160,53 @@ class TreinoCalendarioService {
   }
 
   /**
+   * Valida uma resposta de treino de MESES.
+   *
+   * A pessoa vê a data completa, mas responde apenas a chave do mês,
+   * calculada a partir da chave de janeiro informada (base).
+   *
+   * Usamos a mesma convenção de chaves em -7..7 (equivalentes módulo 7).
+   *
+   * @param {{ ano: number, mes: number, dia: number }} data
+   * @param {string|number} respostaUsuario
+   * @param {number} chaveJaneiroBase
+   * @returns {{ correto: boolean, chaveEsperada: number }}
+   */
+  validarRespostaMes(data, respostaUsuario, chaveJaneiroBase = 0) {
+    const { mes } = data || {};
+    if (!mes) {
+      throw new Error("Data inválida para validação de chave de mês.");
+    }
+
+    const baseNormalizada = this.normalizarChaveModulo7(
+      Number(chaveJaneiroBase) || 0,
+    );
+    const chaveEsperada = this.calcularChaveMes(mes, baseNormalizada);
+
+    const respostaNum =
+      typeof respostaUsuario === "string"
+        ? parseInt(respostaUsuario.trim(), 10)
+        : Number(respostaUsuario);
+
+    let correto = false;
+
+    if (!Number.isNaN(respostaNum)) {
+      const respostaNormalizada = this.normalizarChaveModulo7(respostaNum);
+      correto = respostaNormalizada === chaveEsperada;
+    }
+
+    return {
+      correto,
+      chaveEsperada,
+    };
+  }
+
+  /**
    * Calcula a chave de século para um ano, dado o valor base do século XXI.
    *
    * Regras (relativas ao século XXI):
    * - século XVII = mesmo valor do XXI
-   * - séculos XVI, XX e XIV = valor do XXI + 1
+   * - séculos XVI, XX e XXIV = valor do XXI + 1
    * - séculos XIX e XXIII = valor do XXI + 3
    * - séculos XVIII e XXII = valor do XXI - 2
    *
@@ -183,7 +232,7 @@ class TreinoCalendarioService {
         break;
       case 16:
       case 20:
-      case 14:
+      case 24:
         delta = 1;
         break;
       case 19:
@@ -231,6 +280,124 @@ class TreinoCalendarioService {
     const doisUltimos = Math.abs(anoCompleto) % 100;
     const chave = (doisUltimos + Math.floor(doisUltimos / 4)) % 7;
     return chave;
+  }
+
+  /**
+   * Valida uma resposta de treino de ANOS.
+   *
+   * A pessoa vê a data completa, mas responde apenas a chave do ano:
+   *   (ANO + INT(ANO / 4)) mod 7,
+   * onde ANO são os dois últimos dígitos do ano.
+   *
+   * Aceitamos qualquer inteiro; ele é normalizado módulo 7 para permitir,
+   * por exemplo, que 7 seja aceito como 0, 14 como 0, etc.
+   *
+   * @param {{ ano: number, mes: number, dia: number }} data
+   * @param {string|number} respostaUsuario
+   * @returns {{ correto: boolean, chaveEsperada: number }}
+   */
+  validarRespostaAno(data, respostaUsuario) {
+    const { ano } = data || {};
+    if (!ano) {
+      throw new Error("Data inválida para validação de chave de ano.");
+    }
+
+    const chaveEsperada = this.calcularChaveAno(ano); // 0..6
+
+    const respostaNum =
+      typeof respostaUsuario === "string"
+        ? parseInt(respostaUsuario.trim(), 10)
+        : Number(respostaUsuario);
+
+    let correto = false;
+
+    if (!Number.isNaN(respostaNum)) {
+      // Normalizar módulo 7 para aceitar, por exemplo, 7, 14, -7, etc.
+      const normalizada = ((respostaNum % 7) + 7) % 7;
+      correto = normalizada === chaveEsperada;
+    }
+
+    return {
+      correto,
+      chaveEsperada,
+    };
+  }
+
+  /**
+   * Valida uma resposta de treino de DIAS.
+   *
+   * A pessoa vê a data completa, mas responde apenas o dia da data (DIA mod 7).
+   *
+   * @param {{ ano: number, mes: number, dia: number }} data
+   * @param {string|number} respostaUsuario
+   * @returns {{ correto: boolean, restoEsperado: number }}
+   */
+  validarRespostaDia(data, respostaUsuario) {
+    const { dia } = data || {};
+    if (!dia) {
+      throw new Error("Data inválida para validação de treino de dias.");
+    }
+
+    const restoEsperado = ((dia % 7) + 7) % 7; // 0..6
+
+    const respostaNum =
+      typeof respostaUsuario === "string"
+        ? parseInt(respostaUsuario.trim(), 10)
+        : Number(respostaUsuario);
+
+    let correto = false;
+
+    if (!Number.isNaN(respostaNum)) {
+      const normalizada = ((respostaNum % 7) + 7) % 7;
+      correto = normalizada === restoEsperado;
+    }
+
+    return {
+      correto,
+      restoEsperado,
+    };
+  }
+
+  /**
+   * Valida uma resposta de treino de SÉCULOS.
+   *
+   * A pessoa vê a data completa, mas responde apenas a chave do século,
+   * relativa à chave do século XXI informada (base, padrão 0).
+   *
+   * Usamos a mesma convenção de chaves em -7..7 (equivalentes módulo 7).
+   *
+   * @param {{ ano: number, mes: number, dia: number }} data
+   * @param {string|number} respostaUsuario
+   * @param {number} chaveSeculo21Base
+   * @returns {{ correto: boolean, chaveEsperada: number }}
+   */
+  validarRespostaSeculo(data, respostaUsuario, chaveSeculo21Base = 0) {
+    const { ano } = data || {};
+    if (!ano) {
+      throw new Error("Data inválida para validação de chave de século.");
+    }
+
+    const baseNormalizada = this.normalizarChaveModulo7(
+      Number(chaveSeculo21Base) || 0,
+    );
+    const chaveEsperada = this.calcularChaveSeculo(ano, baseNormalizada);
+
+    const respostaNum =
+      typeof respostaUsuario === "string"
+        ? parseInt(respostaUsuario.trim(), 10)
+        : Number(respostaUsuario);
+
+    let correto = false;
+
+    if (!Number.isNaN(respostaNum)) {
+      const respostaNormalizada = this.normalizarChaveModulo7(respostaNum);
+      correto = respostaNormalizada === chaveEsperada;
+    }
+
+    return {
+      correto,
+      chaveEsperada,
+    };
   }
 
   /**

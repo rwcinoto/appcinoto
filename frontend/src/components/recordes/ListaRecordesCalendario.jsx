@@ -3,7 +3,15 @@ import Loading from "../common/Loading";
 import CardRecordeCalendario from "./CardRecordeCalendario";
 import "./ListaRecordes.css";
 
-const ORDEM_TIPOS = ["data_geral", "mes", "ano", "seculo", "data_21"];
+const ORDEM_TIPOS = [
+  "data_geral",
+  "dia",
+  "mes",
+  "ano",
+  "seculo",
+  "data_esse_ano",
+  "data_21",
+];
 
 const ListaRecordesCalendario = ({
   recordes,
@@ -57,4 +65,3 @@ const ListaRecordesCalendario = ({
 };
 
 export default ListaRecordesCalendario;
-

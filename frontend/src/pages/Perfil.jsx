@@ -301,9 +301,11 @@ const Perfil = () => {
             >
               <option value="">Nenhum</option>
               <option value="data_geral">Data 1582-2399</option>
+              <option value="dia">Dia</option>
               <option value="mes">Mês</option>
               <option value="ano">Ano</option>
               <option value="seculo">Século</option>
+              <option value="data_esse_ano">Data esse ano</option>
               <option value="data_21">Data século XXI</option>
             </select>
           </div>

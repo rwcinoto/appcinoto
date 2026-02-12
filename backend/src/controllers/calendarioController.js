@@ -36,7 +36,7 @@ class CalendarioController {
    * Iniciar treino de calendário
    *
    * Corpo esperado:
-   * - tipo: "data_geral" | "mes" | "ano" | "seculo" | "data_21"
+   * - tipo: "data_geral" | "mes" | "dia" | "ano" | "seculo" | "data_21" | "data_esse_ano"
    * - limite_id: ID do limite de tempo
    */
   async iniciarTreino(req, res) {
@@ -46,7 +46,7 @@ class CalendarioController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      const { tipo, limite_id } = req.body;
+      const { tipo, limite_id, chaveSeculo21Base, chaveJaneiroBase } = req.body;
       const usuario = req.usuario;
 
       if (!tipo || !limite_id) {
@@ -79,27 +79,32 @@ class CalendarioController {
 
       // Regras específicas de plano para tipos de treino de calendário
       // Plano id = 2: apenas data_geral
-      // Plano id >= 3: pode mes, ano, seculo (além de data_geral)
-      // Plano id >= 4: pode data_21 (além dos demais)
+      // Plano id >= 3: pode ano, seculo (além de data_geral)
+      // Plano id >= 4: pode dia e mês (além dos demais)
+      // Plano id >= 5: pode data_21 e data_esse_ano (além dos demais)
       const planoId = usuario.id_plano;
 
       const tiposBasicos = ["data_geral"];
-      const tiposAtePlano3 = ["mes", "ano", "seculo"];
-      const tiposAtePlano4 = ["data_21"];
+      const tiposAtePlano3 = ["ano", "seculo"];
+      const tiposAtePlano4 = ["dia", "mes"];
+      const tiposAtePlano5 = ["data_21", "data_esse_ano"];
 
       const tipoTreino = String(tipo);
 
       const permitidoPorPlano =
         // data_geral é permitido para todos
         tiposBasicos.includes(tipoTreino) ||
-        // mes, ano, seculo a partir do plano 3
+        // ano e século a partir do plano 3
         (planoId >= 3 && tiposAtePlano3.includes(tipoTreino)) ||
-        // data_21 a partir do plano 4
-        (planoId >= 4 && tiposAtePlano4.includes(tipoTreino));
+        // dia e mês a partir do plano 4
+        (planoId >= 4 && tiposAtePlano4.includes(tipoTreino)) ||
+        // data_21 e data_esse_ano a partir do plano 5
+        (planoId >= 5 && tiposAtePlano5.includes(tipoTreino));
 
       if (!permitidoPorPlano) {
         return res.status(403).json({
-          message: "Este tipo de treino de calendário não está disponível no seu nível",
+          message:
+            "Este tipo de treino de calendário não está disponível no seu nível",
         });
       }
 
@@ -108,7 +113,7 @@ class CalendarioController {
       const quantidadeDatas = Math.ceil((limite.tempo / 60) * 150);
       const datasIniciais = treinoCalendarioService.gerarBufferDatas(
         quantidadeDatas,
-        tipoTreino
+        tipoTreino,
       );
 
       // Criar treino de calendário (inicio será definido em confirmar-inicio, após a contagem)
@@ -123,6 +128,22 @@ class CalendarioController {
           tempo: limite.tempo,
         },
         datas: datasIniciais,
+        // Para treinos de século, armazenamos a chave base do século XXI,
+        // informada pelo usuário (padrão 0), normalizada em -7..7.
+        chaveSeculo21Base:
+          tipoTreino === "seculo"
+            ? treinoCalendarioService.normalizarChaveModulo7(
+                Number(chaveSeculo21Base) || 0,
+              )
+            : undefined,
+        // Para treinos de meses, armazenamos a chave base de janeiro,
+        // informada pelo usuário (padrão 0), normalizada em -7..7.
+        chaveJaneiroBase:
+          tipoTreino === "mes"
+            ? treinoCalendarioService.normalizarChaveModulo7(
+                Number(chaveJaneiroBase) || 0,
+              )
+            : undefined,
         inicio: null, // definido em confirmar-inicio quando a contagem terminar
         totalAcertos: 0,
         totalRespondido: 0,
@@ -177,7 +198,9 @@ class CalendarioController {
       const treino = treinosCalendarioAtivos.get(treino_id);
 
       if (!treino) {
-        return res.status(404).json({ message: "Treino de calendário não encontrado" });
+        return res
+          .status(404)
+          .json({ message: "Treino de calendário não encontrado" });
       }
 
       if (treino.id_usuario !== usuario.id) {
@@ -211,14 +234,44 @@ class CalendarioController {
       }
 
       const dataAtual = treino.datas[0];
-      const proximaData =
-        treino.datas.length > 2 ? treino.datas[2] : null;
+      const proximaData = treino.datas.length > 2 ? treino.datas[2] : null;
 
-      const validacao = treinoCalendarioService.validarRespostaData(
-        dataAtual,
-        resposta,
-        tipoResposta
-      );
+      let validacao;
+      // Treinos especiais:
+      // - ANOS: resposta é a chave do ano
+      // - MESES: resposta é a chave do mês, baseada na chave de janeiro
+      // - SÉCULOS: resposta é a chave do século, baseada na chave do século XXI
+      // - DIAS: resposta é o dia mod 7
+      if (treino.tipo === "ano") {
+        validacao = treinoCalendarioService.validarRespostaAno(
+          dataAtual,
+          resposta,
+        );
+      } else if (treino.tipo === "mes") {
+        validacao = treinoCalendarioService.validarRespostaMes(
+          dataAtual,
+          resposta,
+          treino.chaveJaneiroBase || 0,
+        );
+      } else if (treino.tipo === "seculo") {
+        validacao = treinoCalendarioService.validarRespostaSeculo(
+          dataAtual,
+          resposta,
+          treino.chaveSeculo21Base || 0,
+        );
+      } else if (treino.tipo === "dia") {
+        validacao = treinoCalendarioService.validarRespostaDia(
+          dataAtual,
+          resposta,
+        );
+      } else {
+        // Demais tipos usam a validação padrão de dia da semana
+        validacao = treinoCalendarioService.validarRespostaData(
+          dataAtual,
+          resposta,
+          tipoResposta,
+        );
+      }
 
       treino.totalRespondido++;
       if (validacao.correto) {
@@ -263,7 +316,9 @@ class CalendarioController {
       const treino = treinosCalendarioAtivos.get(treino_id);
 
       if (!treino) {
-        return res.status(404).json({ message: "Treino de calendário não encontrado" });
+        return res
+          .status(404)
+          .json({ message: "Treino de calendário não encontrado" });
       }
 
       if (treino.id_usuario !== usuario.id) {
@@ -298,7 +353,7 @@ class CalendarioController {
               treino.tipo,
               treino.limite.id,
               treino.totalAcertos,
-              erros !== undefined ? erros : 0
+              erros !== undefined ? erros : 0,
             );
 
           bateuRecorde = resultado.bateuRecorde;
@@ -307,7 +362,7 @@ class CalendarioController {
         } catch (error) {
           console.error(
             "Erro ao verificar e salvar recorde de calendário:",
-            error
+            error,
           );
           erroRecorde = error.message;
         }
@@ -321,12 +376,12 @@ class CalendarioController {
           });
           await Usuario.sequelize.query(
             "UPDATE usuarios SET data_ultimo_treino = :data WHERE id = :id",
-            { replacements: { data: dataBrasil, id: usuario.id } }
+            { replacements: { data: dataBrasil, id: usuario.id } },
           );
         } catch (error) {
           console.error(
             "Erro ao atualizar data_ultimo_treino (calendário):",
-            error
+            error,
           );
         }
       }
@@ -335,7 +390,12 @@ class CalendarioController {
 
       return res.json({
         total: treino.totalAcertos,
-        erros: errosAtuais !== null ? errosAtuais : (erros !== undefined ? erros : null),
+        erros:
+          errosAtuais !== null
+            ? errosAtuais
+            : erros !== undefined
+              ? erros
+              : null,
         bateuRecorde,
         recordeAnterior,
         erroRecorde: erroRecorde || undefined,
@@ -368,7 +428,9 @@ class CalendarioController {
       const treino = treinosCalendarioAtivos.get(treino_id);
 
       if (!treino) {
-        return res.status(404).json({ message: "Treino de calendário não encontrado" });
+        return res
+          .status(404)
+          .json({ message: "Treino de calendário não encontrado" });
       }
 
       if (treino.id_usuario !== usuario.id) {
@@ -385,12 +447,12 @@ class CalendarioController {
           await recordeCalendarioService.incrementarQuantidadeTreinoCalendario(
             usuario.id,
             treino.tipo,
-            treino.limite.id
+            treino.limite.id,
           );
         } catch (error) {
           console.error(
             "Erro ao incrementar quantidade de treino de calendário:",
-            error
+            error,
           );
         }
       }
@@ -407,4 +469,3 @@ class CalendarioController {
 }
 
 module.exports = new CalendarioController();
-

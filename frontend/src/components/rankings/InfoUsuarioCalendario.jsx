@@ -44,6 +44,14 @@ const InfoUsuarioCalendario = ({
         limiteId,
         visualizacao: opcoes?.visualizacao || "texto",
         tipoResposta: opcoes?.resposta != null ? tipoResposta : "numeros",
+        chaveSeculo21Base:
+          tipo === "seculo" && opcoes?.chaveSeculo21 != null
+            ? Number(opcoes.chaveSeculo21)
+            : undefined,
+        chaveJaneiroBase:
+          tipo === "mes" && opcoes?.chaveJaneiro != null
+            ? Number(opcoes.chaveJaneiro)
+            : undefined,
       },
     });
   };
@@ -75,7 +83,8 @@ const InfoUsuarioCalendario = ({
   const emojiPosicao = obterEmojiPosicao();
 
   const mostrarOpcoesResposta =
-    isMobile && (tipo === "data_geral" || tipo === "data_21");
+    isMobile &&
+    (tipo === "data_geral" || tipo === "data_21" || tipo === "data_esse_ano");
 
   if (posicaoUsuario === null || posicaoUsuario === undefined) {
     return (
@@ -85,6 +94,10 @@ const InfoUsuarioCalendario = ({
           mostrarOpcoesResposta={mostrarOpcoesResposta}
           onConfirmar={handleConfirmarOpcoes}
           onCancelar={handleCancelarOpcoes}
+          mostrarChaveSeculo21={tipo === "seculo"}
+          chaveSeculo21Inicial={0}
+          mostrarChaveJaneiro={tipo === "mes"}
+          chaveJaneiroInicial={0}
         />
         <div className="info-usuario sem-recorde">
           <div className="info-usuario-mensagem">
@@ -122,6 +135,10 @@ const InfoUsuarioCalendario = ({
         mostrarOpcoesResposta={mostrarOpcoesResposta}
         onConfirmar={handleConfirmarOpcoes}
         onCancelar={handleCancelarOpcoes}
+        mostrarChaveSeculo21={tipo === "seculo"}
+        chaveSeculo21Inicial={0}
+        mostrarChaveJaneiro={tipo === "mes"}
+        chaveJaneiroInicial={0}
       />
       <div
         className={`info-usuario ${estaNoTop3 ? "top-3" : ""}`}

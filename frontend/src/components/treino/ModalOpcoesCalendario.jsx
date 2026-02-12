@@ -8,9 +8,15 @@ const ModalOpcoesCalendario = ({
   onCancelar,
   visualizacaoInicial = "texto",
   respostaInicial = "numeros",
+  mostrarChaveSeculo21 = false,
+  chaveSeculo21Inicial = 0,
+  mostrarChaveJaneiro = false,
+  chaveJaneiroInicial = 0,
 }) => {
   const [visualizacao, setVisualizacao] = useState(visualizacaoInicial);
   const [resposta, setResposta] = useState(respostaInicial);
+  const [chaveSeculo21, setChaveSeculo21] = useState(chaveSeculo21Inicial);
+  const [chaveJaneiro, setChaveJaneiro] = useState(chaveJaneiroInicial);
 
   if (!mostrar) {
     return null;
@@ -21,6 +27,14 @@ const ModalOpcoesCalendario = ({
       onConfirmar({
         visualizacao,
         resposta: mostrarOpcoesResposta ? resposta : null,
+        chaveSeculo21:
+          mostrarChaveSeculo21 && chaveSeculo21 !== ""
+            ? Number(chaveSeculo21)
+            : null,
+        chaveJaneiro:
+          mostrarChaveJaneiro && chaveJaneiro !== ""
+            ? Number(chaveJaneiro)
+            : null,
       });
     }
   };
@@ -88,6 +102,62 @@ const ModalOpcoesCalendario = ({
             </div>
           )}
 
+          {mostrarChaveSeculo21 && (
+            <div className="modal-escolha-formato-opcoes" style={{ marginTop: 16 }}>
+              <div className="opcao-titulo" style={{ marginBottom: 8 }}>
+                Qual chave quer usar para o século xxi?
+              </div>
+              <input
+                type="number"
+                className="input-chaves-calendario"
+                min={-7}
+                max={7}
+                step={1}
+                value={chaveSeculo21}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "" || v === "-" || v === "+") {
+                    setChaveSeculo21(v);
+                    return;
+                  }
+                  const num = Number(v);
+                  if (!Number.isNaN(num)) {
+                    if (num < -7 || num > 7) return;
+                    setChaveSeculo21(num);
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {mostrarChaveJaneiro && (
+            <div className="modal-escolha-formato-opcoes" style={{ marginTop: 16 }}>
+              <div className="opcao-titulo" style={{ marginBottom: 8 }}>
+                Qual chave quer usar para janeiro?
+              </div>
+              <input
+                type="number"
+                className="input-chaves-calendario"
+                min={-7}
+                max={7}
+                step={1}
+                value={chaveJaneiro}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "" || v === "-" || v === "+") {
+                    setChaveJaneiro(v);
+                    return;
+                  }
+                  const num = Number(v);
+                  if (!Number.isNaN(num)) {
+                    if (num < -7 || num > 7) return;
+                    setChaveJaneiro(num);
+                  }
+                }}
+              />
+            </div>
+          )}
+
           <div className="modal-escolha-formato-acoes">
             <button className="btn-cancelar" onClick={handleCancelar}>
               Cancelar
@@ -95,7 +165,11 @@ const ModalOpcoesCalendario = ({
             <button
               className="btn-confirmar"
               onClick={handleConfirmar}
-              disabled={!visualizacao}
+              disabled={
+                !visualizacao ||
+                (mostrarChaveSeculo21 && chaveSeculo21 === "") ||
+                (mostrarChaveJaneiro && chaveJaneiro === "")
+              }
             >
               Continuar
             </button>

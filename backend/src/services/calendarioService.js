@@ -10,9 +10,11 @@
 // Constantes de tipos de treino de calendário
 const TIPOS_TREINO_CALENDARIO = {
   DATA_GERAL: "data_geral",
+  DIA: "dia",
   MES: "mes",
   ANO: "ano",
   SECULO: "seculo",
+  DATA_ESSE_ANO: "data_esse_ano",
   DATA_21: "data_21",
 };
 
@@ -65,10 +67,7 @@ function calcularDiaSemana(ano, mes, dia) {
   }
 
   // Validação mínima de intervalo conforme especificação do sistema
-  if (
-    ano < INTERVALO_PADRAO.inicio.ano ||
-    ano > INTERVALO_PADRAO.fim.ano
-  ) {
+  if (ano < INTERVALO_PADRAO.inicio.ano || ano > INTERVALO_PADRAO.fim.ano) {
     throw new Error("Ano fora do intervalo suportado (1582–2399).");
   }
 
@@ -164,10 +163,7 @@ function sortearDataNoIntervalo(inicio, fim) {
  * @returns {{ ano: number, mes: number, dia: number }}
  */
 function sortearDataGeral() {
-  return sortearDataNoIntervalo(
-    INTERVALO_PADRAO.inicio,
-    INTERVALO_PADRAO.fim
-  );
+  return sortearDataNoIntervalo(INTERVALO_PADRAO.inicio, INTERVALO_PADRAO.fim);
 }
 
 /**
@@ -178,8 +174,33 @@ function sortearDataGeral() {
 function sortearDataSeculo21() {
   return sortearDataNoIntervalo(
     INTERVALO_SECULO_21.inicio,
-    INTERVALO_SECULO_21.fim
+    INTERVALO_SECULO_21.fim,
   );
+}
+
+/**
+ * Retorna o ano atual no fuso horário do Brasil (America/Sao_Paulo).
+ *
+ * @returns {number}
+ */
+function getAnoAtualBrasil() {
+  const str = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  });
+  return parseInt(str.slice(0, 4), 10);
+}
+
+/**
+ * Sorteia uma data apenas no ano atual (Brasil).
+ * Intervalo: 01/01/anoAtual a 31/12/anoAtual.
+ *
+ * @returns {{ ano: number, mes: number, dia: number }}
+ */
+function sortearDataAnoAtual() {
+  const ano = getAnoAtualBrasil();
+  const inicio = { ano, mes: 1, dia: 1 };
+  const fim = { ano, mes: 12, dia: 31 };
+  return sortearDataNoIntervalo(inicio, fim);
 }
 
 /**
@@ -227,7 +248,8 @@ module.exports = {
   sortearDataNoIntervalo,
   sortearDataGeral,
   sortearDataSeculo21,
+  sortearDataAnoAtual,
+  getAnoAtualBrasil,
   formatarDataTexto,
   formatarDataNumeros,
 };
-
