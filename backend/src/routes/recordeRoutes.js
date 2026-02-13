@@ -36,6 +36,13 @@ router.get(
   recordeController.listar.bind(recordeController)
 );
 
+// GET /api/recordes/ultimos-batidos - Listar últimos N recordes batidos (de todos os usuários)
+router.get(
+  "/ultimos-batidos",
+  authMiddleware,
+  recordeController.listarUltimosBatidos.bind(recordeController)
+);
+
 // GET /api/recordes/:id - Obter recorde específico
 // A validação de que o recorde pertence ao usuário é feita no service
 router.get(

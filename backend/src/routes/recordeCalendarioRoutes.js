@@ -23,5 +23,13 @@ router.get(
   recordeCalendarioController.listar.bind(recordeCalendarioController)
 );
 
+router.get(
+  "/ultimos-batidos",
+  authMiddleware,
+  recordeCalendarioController.listarUltimosBatidos.bind(
+    recordeCalendarioController
+  )
+);
+
 module.exports = router;
 

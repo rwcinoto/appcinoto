@@ -33,10 +33,12 @@
 
 .card-recorde-botao-treino {
   background: transparent;
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--cor-operacao, var(--color-border));
   border-radius: 6px;
   padding: 6px 10px;
-  font-size: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.2s, border-color 0.3s ease;
   flex-shrink: 0;

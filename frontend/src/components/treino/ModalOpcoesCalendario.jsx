@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ModalEscolhaFormatoResposta.css";
 
 const ModalOpcoesCalendario = ({
@@ -6,7 +6,7 @@ const ModalOpcoesCalendario = ({
   mostrarOpcoesResposta,
   onConfirmar,
   onCancelar,
-  visualizacaoInicial = "texto",
+  visualizacaoInicial = "numeros",
   respostaInicial = "numeros",
   mostrarChaveSeculo21 = false,
   chaveSeculo21Inicial = 0,
@@ -17,6 +17,22 @@ const ModalOpcoesCalendario = ({
   const [resposta, setResposta] = useState(respostaInicial);
   const [chaveSeculo21, setChaveSeculo21] = useState(chaveSeculo21Inicial);
   const [chaveJaneiro, setChaveJaneiro] = useState(chaveJaneiroInicial);
+
+  // Ao abrir o modal, usar os valores passados (ex.: escolha do treino anterior ao recomeçar)
+  useEffect(() => {
+    if (mostrar) {
+      setVisualizacao(visualizacaoInicial);
+      setResposta(respostaInicial);
+      setChaveSeculo21(chaveSeculo21Inicial);
+      setChaveJaneiro(chaveJaneiroInicial);
+    }
+  }, [
+    mostrar,
+    visualizacaoInicial,
+    respostaInicial,
+    chaveSeculo21Inicial,
+    chaveJaneiroInicial,
+  ]);
 
   if (!mostrar) {
     return null;
@@ -62,9 +78,7 @@ const ModalOpcoesCalendario = ({
               }`}
               onClick={() => setVisualizacao("texto")}
             >
-              <div className="opcao-titulo">
-                Texto (12 de abril de 1976)
-              </div>
+              <div className="opcao-titulo">Texto (12 de abril de 1976)</div>
             </button>
             <button
               className={`modal-escolha-formato-opcao ${
@@ -77,7 +91,10 @@ const ModalOpcoesCalendario = ({
           </div>
 
           {mostrarOpcoesResposta && (
-            <div className="modal-escolha-formato-opcoes" style={{ marginTop: 16 }}>
+            <div
+              className="modal-escolha-formato-opcoes"
+              style={{ marginTop: 16 }}
+            >
               <div className="opcao-titulo" style={{ marginBottom: 8 }}>
                 Como quer digitar a resposta?
               </div>
@@ -103,7 +120,10 @@ const ModalOpcoesCalendario = ({
           )}
 
           {mostrarChaveSeculo21 && (
-            <div className="modal-escolha-formato-opcoes" style={{ marginTop: 16 }}>
+            <div
+              className="modal-escolha-formato-opcoes"
+              style={{ marginTop: 16 }}
+            >
               <div className="opcao-titulo" style={{ marginBottom: 8 }}>
                 Qual chave quer usar para o século xxi?
               </div>
@@ -131,7 +151,10 @@ const ModalOpcoesCalendario = ({
           )}
 
           {mostrarChaveJaneiro && (
-            <div className="modal-escolha-formato-opcoes" style={{ marginTop: 16 }}>
+            <div
+              className="modal-escolha-formato-opcoes"
+              style={{ marginTop: 16 }}
+            >
               <div className="opcao-titulo" style={{ marginBottom: 8 }}>
                 Qual chave quer usar para janeiro?
               </div>
@@ -181,4 +204,3 @@ const ModalOpcoesCalendario = ({
 };
 
 export default ModalOpcoesCalendario;
-

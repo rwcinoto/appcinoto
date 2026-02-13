@@ -1,6 +1,7 @@
 "use strict";
 
 const { RecordeCalendario, Usuario, Limite } = require("../models");
+const { Op } = require("sequelize");
 
 class RecordeCalendarioService {
   /**
@@ -258,6 +259,45 @@ class RecordeCalendarioService {
       recordeAnterior: recordeAnterior ? recordeAnterior : null,
       errosAtuais: erros,
     };
+  }
+
+  /**
+   * Lista os últimos N recordes de calendário batidos (de todos os usuários), ordenados por data
+   * @param {number} limite - Quantidade máxima (padrão: 20)
+   * @returns {Promise<Array>} Array de recordes com usuario e limite
+   */
+  async listarUltimosRecordesBatidos(limite = 20) {
+    const recordes = await RecordeCalendario.findAll({
+      where: {
+        total: { [Op.gt]: 0 },
+        id_usuario: { [Op.gt]: 0 },
+      },
+      attributes: [
+        "id",
+        "id_usuario",
+        "tipo",
+        "id_limite",
+        "total",
+        "data_recorde",
+        "atualizado_em",
+      ],
+      include: [
+        {
+          association: "usuario",
+          required: true,
+          attributes: ["id", "nome"],
+        },
+        {
+          association: "limite",
+          required: true,
+          attributes: ["id", "descricao", "tempo"],
+        },
+      ],
+      order: [["atualizado_em", "DESC"]],
+      limit: Math.min(limite, 100),
+    });
+
+    return recordes;
   }
 }
 

@@ -188,7 +188,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
               title="Iniciar treino de calendário com esta configuração"
               aria-label="Iniciar treino de calendário com esta configuração"
             >
-              {iniciandoTreino ? "..." : "🏃"}
+              {iniciandoTreino ? "..." : "🏃 Treinar"}
             </button>
             <h3>{labelTipo}</h3>
           </div>

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import Loading from "../components/common/Loading";
 import ListaRecordesCalendario from "../components/recordes/ListaRecordesCalendario";
+import ListaUltimosRecordesCalendarioBatidos from "../components/recordes/ListaUltimosRecordesCalendarioBatidos";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { getErrorMessage, logError } from "../utils/errorHandler";
@@ -237,6 +238,8 @@ const CalendarioRecordes = () => {
         usuarioIdVisualizado={usuarioIdParam ? parseInt(usuarioIdParam) : null}
         isVisitante={usuario?.isVisitante || false}
       />
+
+      <ListaUltimosRecordesCalendarioBatidos />
     </div>
   );
 };

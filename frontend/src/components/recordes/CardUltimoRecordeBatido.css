@@ -1,0 +1,132 @@
+.card-ultimo-recorde-batido {
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.card-ultimo-recorde-batido:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.dark .card-ultimo-recorde-batido:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-ultimo-recorde-batido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.card-ultimo-recorde-batido-operacao {
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-ultimo-recorde-batido-botao-treino {
+  background: transparent;
+  border: 2px solid;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.card-ultimo-recorde-batido-botao-treino:hover {
+  background: var(--color-background-dark);
+  transform: scale(1.05);
+}
+
+.card-ultimo-recorde-batido-botao-treino:active {
+  transform: scale(0.95);
+}
+
+.card-ultimo-recorde-batido-botao-treino:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.card-ultimo-recorde-batido-usuario {
+  margin-bottom: 8px;
+}
+
+.card-ultimo-recorde-batido-link-usuario {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.card-ultimo-recorde-batido-link-usuario:hover {
+  color: #1976d2;
+  text-decoration: underline;
+}
+
+.card-ultimo-recorde-batido-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.card-ultimo-recorde-batido-limite {
+  color: var(--color-text-light);
+}
+
+.card-ultimo-recorde-batido-sistema-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.card-ultimo-recorde-batido-separador {
+  color: var(--color-text-light);
+  font-size: 10px;
+}
+
+.card-ultimo-recorde-batido-total {
+  font-weight: 600;
+}
+
+.card-ultimo-recorde-batido-posicao {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-ultimo-recorde-batido-posicao-label {
+  font-size: 14px;
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.card-ultimo-recorde-batido-posicao-link {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.card-ultimo-recorde-batido-posicao-link:hover {
+  color: #1976d2;
+  text-decoration: underline;
+}
