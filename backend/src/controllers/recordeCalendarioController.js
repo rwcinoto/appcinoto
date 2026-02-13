@@ -2,6 +2,7 @@
 
 const { validationResult } = require("express-validator");
 const { Limite, Usuario, RecordeCalendario } = require("../models");
+const recordeCalendarioService = require("../services/recordeCalendarioService");
 
 class RecordeCalendarioController {
   /**
@@ -131,6 +132,42 @@ class RecordeCalendarioController {
       console.error("Erro ao listar recordes de calendário:", error);
       return res.status(500).json({
         message: "Erro ao listar recordes de calendário",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Lista os últimos N recordes de calendário batidos (de todos os usuários)
+   */
+  async listarUltimosBatidos(req, res) {
+    try {
+      const limite = Math.min(parseInt(req.query.limite, 10) || 20, 100);
+
+      const recordes =
+        await recordeCalendarioService.listarUltimosRecordesBatidos(limite);
+
+      const recordesFormatados = recordes.map((recorde) => ({
+        id: recorde.id,
+        tipo: recorde.tipo,
+        total: recorde.total,
+        data_recorde: recorde.data_recorde || recorde.atualizado_em,
+        usuario: recorde.usuario
+          ? { id: recorde.usuario.id, nome: recorde.usuario.nome }
+          : null,
+        limite: recorde.limite
+          ? { id: recorde.limite.id, descricao: recorde.limite.descricao }
+          : null,
+      }));
+
+      return res.json(recordesFormatados);
+    } catch (error) {
+      console.error(
+        "Erro ao listar últimos recordes de calendário batidos:",
+        error
+      );
+      return res.status(500).json({
+        message: "Erro ao listar últimos recordes de calendário batidos",
         error: error.message,
       });
     }

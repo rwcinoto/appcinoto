@@ -171,6 +171,52 @@ class RecordeController {
   }
 
   /**
+   * Lista os últimos N recordes batidos (de todos os usuários)
+   * Para exibir avisos de recordes recentes na página de recordes
+   */
+  async listarUltimosBatidos(req, res) {
+    try {
+      const limite = Math.min(parseInt(req.query.limite, 10) || 20, 100);
+
+      const recordes = await recordeService.listarUltimosRecordesBatidos(limite);
+
+      const recordesFormatados = recordes.map((recorde) => ({
+        id: recorde.id,
+        total: recorde.total,
+        data_recorde: recorde.data_recorde || recorde.atualizado_em,
+        usuario: recorde.usuario
+          ? { id: recorde.usuario.id, nome: recorde.usuario.nome }
+          : null,
+        operacao: recorde.operacao
+          ? {
+              id: recorde.operacao.id,
+              nome: recorde.operacao.nome,
+              tipo: recorde.operacao.tipo,
+            }
+          : null,
+        limite: recorde.limite
+          ? { id: recorde.limite.id, descricao: recorde.limite.descricao }
+          : null,
+        sistema: recorde.sistema
+          ? {
+              id: recorde.sistema.id,
+              descricao: recorde.sistema.descricao,
+              tipo: recorde.sistema.tipo,
+            }
+          : null,
+      }));
+
+      return res.json(recordesFormatados);
+    } catch (error) {
+      console.error("Erro ao listar últimos recordes batidos:", error);
+      return res.status(500).json({
+        message: "Erro ao listar últimos recordes batidos",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
    * Obtém um recorde específico por ID
    * Verifica que o recorde pertence ao usuário logado
    */

@@ -13,6 +13,11 @@ import Timer from "../components/treino/Timer";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import api from "../services/api";
+import {
+  CHAVE_JANEIRO_PADRAO,
+  CHAVE_SECULO_21_PADRAO,
+  PERGUNTAR_CHAVES_CALENDARIO,
+} from "../constants/calendario";
 import { getErrorMessage, logError } from "../utils/errorHandler";
 import { verificarESalvarRecordeVisitante } from "../utils/recordesVisitante";
 import "./TreinoAtivo.css";
@@ -113,7 +118,7 @@ const TreinoAtivo = () => {
       };
       if (opcoesCalendario) {
         dadosParaSalvar.modo = "calendario";
-        dadosParaSalvar.visualizacao = opcoesCalendario.visualizacao || "texto";
+        dadosParaSalvar.visualizacao = opcoesCalendario.visualizacao || "numeros";
         dadosParaSalvar.tipoResposta =
           opcoesCalendario.tipoResposta || "numeros";
         if (opcoesCalendario.chaveSeculo21Base != null) {
@@ -215,35 +220,34 @@ const TreinoAtivo = () => {
     if (calendarioSelecao && !location.state?.treinoData) {
       const criarETreino = async () => {
         try {
+          const chaveSeculo21Base =
+            location.state.tipo === "seculo"
+              ? Number(
+                  location.state.chaveSeculo21Base ??
+                    CHAVE_SECULO_21_PADRAO,
+                )
+              : undefined;
+          const chaveJaneiroBase =
+            location.state.tipo === "mes"
+              ? Number(
+                  location.state.chaveJaneiroBase ?? CHAVE_JANEIRO_PADRAO,
+                )
+              : undefined;
           const response = await api.post("/calendario/treinos/iniciar", {
             tipo: location.state.tipo,
             limite_id: parseInt(location.state.limiteId, 10),
-            // Para treinos de século, enviar a chave base informada pelo usuário
-            chaveSeculo21Base:
-              location.state.tipo === "seculo"
-                ? Number(location.state.chaveSeculo21Base ?? 0)
-                : undefined,
-            // Para treinos de meses, enviar a chave base de janeiro
-            chaveJaneiroBase:
-              location.state.tipo === "mes"
-                ? Number(location.state.chaveJaneiroBase ?? 0)
-                : undefined,
+            chaveSeculo21Base,
+            chaveJaneiroBase,
           });
           // confirmar-inicio será chamado quando a contagem terminar (handleContagemTerminar)
           calendarioTreinoPendenteRef.current = {
             treinoData: response.data,
-            visualizacao: location.state.visualizacao || "texto",
+            visualizacao: location.state.visualizacao || "numeros",
             tipoResposta: location.state.tipoResposta || "numeros",
             chaveSeculo21Base:
-              location.state.tipo === "seculo" &&
-              location.state.chaveSeculo21Base != null
-                ? Number(location.state.chaveSeculo21Base)
-                : undefined,
+              location.state.tipo === "seculo" ? chaveSeculo21Base : undefined,
             chaveJaneiroBase:
-              location.state.tipo === "mes" &&
-              location.state.chaveJaneiroBase != null
-                ? Number(location.state.chaveJaneiroBase)
-                : undefined,
+              location.state.tipo === "mes" ? chaveJaneiroBase : undefined,
           };
           setTreinoData(response.data);
           setMostrarContagem(true);
@@ -335,7 +339,7 @@ const TreinoAtivo = () => {
         }
       })();
       const viz =
-        location.state?.visualizacao || dadosDoStorage?.visualizacao || "texto";
+        location.state?.visualizacao || dadosDoStorage?.visualizacao || "numeros";
       const tipResp =
         location.state?.tipoResposta ||
         dadosDoStorage?.tipoResposta ||
@@ -714,12 +718,16 @@ const TreinoAtivo = () => {
     if (!treinoData?.tipo || !treinoData?.limite?.id) return;
     try {
       const chaveSeculo21Base =
-        treinoData.tipo === "seculo" && opcoes?.chaveSeculo21 != null
-          ? Number(opcoes.chaveSeculo21)
+        treinoData.tipo === "seculo"
+          ? PERGUNTAR_CHAVES_CALENDARIO && opcoes?.chaveSeculo21 != null
+            ? Number(opcoes.chaveSeculo21)
+            : CHAVE_SECULO_21_PADRAO
           : undefined;
       const chaveJaneiroBase =
-        treinoData.tipo === "mes" && opcoes?.chaveJaneiro != null
-          ? Number(opcoes.chaveJaneiro)
+        treinoData.tipo === "mes"
+          ? PERGUNTAR_CHAVES_CALENDARIO && opcoes?.chaveJaneiro != null
+            ? Number(opcoes.chaveJaneiro)
+            : CHAVE_JANEIRO_PADRAO
           : undefined;
       const response = await api.post("/calendario/treinos/iniciar", {
         tipo: treinoData.tipo,
@@ -731,16 +739,12 @@ const TreinoAtivo = () => {
       const tipoResposta = opcoes?.resposta === "nomeDia" ? "texto" : "numeros";
       calendarioTreinoPendenteRef.current = {
         treinoData: response.data,
-        visualizacao: opcoes?.visualizacao || "texto",
+        visualizacao: opcoes?.visualizacao || "numeros",
         tipoResposta: opcoes?.resposta != null ? tipoResposta : "numeros",
         chaveSeculo21Base:
-          treinoData.tipo === "seculo" && chaveSeculo21Base != null
-            ? chaveSeculo21Base
-            : undefined,
+          treinoData.tipo === "seculo" ? chaveSeculo21Base : undefined,
         chaveJaneiroBase:
-          treinoData.tipo === "mes" && chaveJaneiroBase != null
-            ? chaveJaneiroBase
-            : undefined,
+          treinoData.tipo === "mes" ? chaveJaneiroBase : undefined,
       };
       setTreinoData(response.data);
       setMostrarContagem(true);
@@ -763,7 +767,8 @@ const TreinoAtivo = () => {
   };
 
   const handleContagemTerminar = async () => {
-    setMostrarContagem(false);
+    // Não esconder a contagem ainda: manter o fundo vazio até o novo treino estar no estado,
+    // para evitar uma piscada com os dados do treino anterior.
 
     // Calendário: treino já foi criado no useEffect; confirmar início (inicia o cronômetro no backend) e exibir
     const pendente = calendarioTreinoPendenteRef.current;
@@ -794,17 +799,19 @@ const TreinoAtivo = () => {
       setInputCalendarioComErro(false);
       inicializadoRef.current = true;
       salvarTreinoNoStorage(dt, null, {
-        visualizacao: pendente.visualizacao || "texto",
+        visualizacao: pendente.visualizacao || "numeros",
         tipoResposta: pendente.tipoResposta || "numeros",
         chaveSeculo21Base: pendente.chaveSeculo21Base,
         chaveJaneiroBase: pendente.chaveJaneiroBase,
       });
       calendarioTreinoPendenteRef.current = null;
+      setMostrarContagem(false);
       return;
     }
 
     await iniciarTreino(treinoData, isRefreshRef.current);
     isRefreshRef.current = false;
+    setMostrarContagem(false);
   };
 
   const handleRecomecarDuranteTreino = async () => {
@@ -865,15 +872,15 @@ const TreinoAtivo = () => {
   }
 
   if (modoCalendario) {
-    // Durante contagem ou antes de ter treinoId, mostrar apenas contagem ou loading
+    // Durante contagem ou antes de ter treinoId, mostrar apenas fundo do tema + contagem ou loading
     if (mostrarContagem || !treinoId) {
       return (
-        <>
+        <div className="treino-ativo-container">
           {mostrarContagem && (
             <ContagemRegressiva onTerminar={handleContagemTerminar} />
           )}
           {!mostrarContagem && <Loading text="Preparando treino..." />}
-        </>
+        </div>
       );
     }
 
@@ -890,7 +897,7 @@ const TreinoAtivo = () => {
       calendarioTreinoPendenteRef.current?.visualizacao ||
       storedCalendario?.visualizacao ||
       location.state?.visualizacao ||
-      "texto";
+      "numeros";
     const tipoRespostaCalendario =
       calendarioTreinoPendenteRef.current?.tipoResposta ||
       storedCalendario?.tipoResposta ||
@@ -911,61 +918,53 @@ const TreinoAtivo = () => {
           onConfirmar={handleConfirmarOpcoesCalendarioRecomecar}
           onCancelar={handleCancelarOpcoesCalendario}
           visualizacaoInicial={
+            storedCalendario?.visualizacao ||
             location.state?.visualizacao ||
-            (() => {
-              try {
-                const s = sessionStorage.getItem(STORAGE_KEY);
-                return s ? JSON.parse(s)?.visualizacao : null;
-              } catch {
-                return null;
-              }
-            })() ||
-            "texto"
+            "numeros"
           }
           respostaInicial={(() => {
             const t =
-              location.state?.tipoResposta ||
-              (() => {
-                try {
-                  const s = sessionStorage.getItem(STORAGE_KEY);
-                  return s ? JSON.parse(s)?.tipoResposta : null;
-                } catch {
-                  return null;
-                }
-              })();
+              storedCalendario?.tipoResposta ||
+              location.state?.tipoResposta;
             return t === "texto" ? "nomeDia" : "numeros";
           })()}
-          mostrarChaveSeculo21={treinoData?.tipo === "seculo"}
+          mostrarChaveSeculo21={
+            PERGUNTAR_CHAVES_CALENDARIO && treinoData?.tipo === "seculo"
+          }
           chaveSeculo21Inicial={
             treinoData?.tipo === "seculo"
               ? (() => {
-                  if (typeof location.state?.chaveSeculo21Base === "number") {
-                    return location.state.chaveSeculo21Base;
+                  if (PERGUNTAR_CHAVES_CALENDARIO) {
+                    if (typeof location.state?.chaveSeculo21Base === "number")
+                      return location.state.chaveSeculo21Base;
+                    if (
+                      storedCalendario &&
+                      typeof storedCalendario.chaveSeculo21Base === "number"
+                    )
+                      return storedCalendario.chaveSeculo21Base;
+                    return 0;
                   }
-                  if (
-                    storedCalendario &&
-                    typeof storedCalendario.chaveSeculo21Base === "number"
-                  ) {
-                    return storedCalendario.chaveSeculo21Base;
-                  }
-                  return 0;
+                  return CHAVE_SECULO_21_PADRAO;
                 })()
               : 0
           }
-          mostrarChaveJaneiro={treinoData?.tipo === "mes"}
+          mostrarChaveJaneiro={
+            PERGUNTAR_CHAVES_CALENDARIO && treinoData?.tipo === "mes"
+          }
           chaveJaneiroInicial={
             treinoData?.tipo === "mes"
               ? (() => {
-                  if (typeof location.state?.chaveJaneiroBase === "number") {
-                    return location.state.chaveJaneiroBase;
+                  if (PERGUNTAR_CHAVES_CALENDARIO) {
+                    if (typeof location.state?.chaveJaneiroBase === "number")
+                      return location.state.chaveJaneiroBase;
+                    if (
+                      storedCalendario &&
+                      typeof storedCalendario.chaveJaneiroBase === "number"
+                    )
+                      return storedCalendario.chaveJaneiroBase;
+                    return 0;
                   }
-                  if (
-                    storedCalendario &&
-                    typeof storedCalendario.chaveJaneiroBase === "number"
-                  ) {
-                    return storedCalendario.chaveJaneiroBase;
-                  }
-                  return 0;
+                  return CHAVE_JANEIRO_PADRAO;
                 })()
               : 0
           }
@@ -1054,6 +1053,16 @@ const TreinoAtivo = () => {
     );
   }
 
+  // Durante a contagem regressiva, mostrar só o fundo do tema e a contagem (sem dados do treino anterior)
+  if (mostrarContagem) {
+    return (
+      <>
+        <div className="treino-ativo-container" aria-hidden="true" />
+        <ContagemRegressiva onTerminar={handleContagemTerminar} />
+      </>
+    );
+  }
+
   return (
     <>
       {mostrarModalFormato &&
@@ -1064,11 +1073,9 @@ const TreinoAtivo = () => {
             sistemaTipo={sistemaTipo}
             onEscolher={handleEscolherFormato}
             onCancelar={handleCancelarFormato}
+            formatoInicial={formatoResposta || "natural"}
           />
         )}
-      {mostrarContagem && (
-        <ContagemRegressiva onTerminar={handleContagemTerminar} />
-      )}
       {mostrarResultado && resultado && (
         <ResultadoTreino
           resultado={resultado}

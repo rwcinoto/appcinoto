@@ -24,7 +24,7 @@ class RecordeService {
     usuarioId,
     operacaoId,
     limiteId,
-    sistemaId
+    sistemaId,
   ) {
     // Garantir que os IDs são números
     const usuarioIdNum = parseInt(usuarioId);
@@ -149,7 +149,7 @@ class RecordeService {
     limiteId,
     sistemaId,
     total,
-    erros = null
+    erros = null,
   ) {
     // Validações iniciais
     if (total < 0) {
@@ -277,7 +277,7 @@ class RecordeService {
               total,
               erros,
               recordeCriado.total,
-              recordeCriado.erros
+              recordeCriado.erros,
             );
 
             recordeAnterior = {
@@ -312,7 +312,7 @@ class RecordeService {
         total,
         erros,
         recordeExistente.total,
-        recordeExistente.erros
+        recordeExistente.erros,
       );
 
       // Salvar recorde anterior antes de atualizar
@@ -514,6 +514,57 @@ class RecordeService {
     }
 
     return recorde;
+  }
+
+  /**
+   * Lista os últimos N recordes batidos (de todos os usuários), ordenados por data
+   * Útil para exibir avisos de recordes recentes na página de recordes
+   * @param {number} limite - Quantidade máxima de recordes (padrão: 20)
+   * @returns {Promise<Array>} Array de recordes com usuário, operação, limite e sistema
+   */
+  async listarUltimosRecordesBatidos(limite = 20) {
+    const recordes = await Recorde.findAll({
+      where: {
+        total: { [Op.gt]: 0 }, // Apenas recordes reais (exclui placeholders com total=0)
+        id_usuario: { [Op.gt]: 0 }, // Excluir visitantes (id 0)
+      },
+      attributes: [
+        "id",
+        "id_usuario",
+        "id_operacao",
+        "id_limite",
+        "id_sistema",
+        "total",
+        "data_recorde",
+        "atualizado_em",
+      ],
+      include: [
+        {
+          association: "usuario",
+          required: true,
+          attributes: ["id", "nome"],
+        },
+        {
+          association: "operacao",
+          required: true,
+          attributes: ["id", "nome", "tipo"],
+        },
+        {
+          association: "limite",
+          required: true,
+          attributes: ["id", "descricao"],
+        },
+        {
+          association: "sistema",
+          required: true,
+          attributes: ["id", "descricao", "tipo"],
+        },
+      ],
+      order: [["data_recorde", "DESC"]],
+      limit: Math.min(limite, 100),
+    });
+
+    return recordes;
   }
 }
 

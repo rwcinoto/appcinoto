@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import Loading from "../components/common/Loading";
 import ListaRecordes from "../components/recordes/ListaRecordes";
+import ListaUltimosRecordesBatidos from "../components/recordes/ListaUltimosRecordesBatidos";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { getErrorMessage, logError } from "../utils/errorHandler";
@@ -46,12 +47,13 @@ const Recordes = () => {
       const queryString = params.toString();
       const querySuffix = queryString ? `?${queryString}` : "";
 
-      const [operacoesRes, limitesRes, sistemasRes, planosRes] = await Promise.all([
-        api.get(`/operacoes${querySuffix}`),
-        api.get(`/limites${querySuffix}`),
-        api.get(`/sistemas${querySuffix}`),
-        api.get(`/planos${querySuffix}`),
-      ]);
+      const [operacoesRes, limitesRes, sistemasRes, planosRes] =
+        await Promise.all([
+          api.get(`/operacoes${querySuffix}`),
+          api.get(`/limites${querySuffix}`),
+          api.get(`/sistemas${querySuffix}`),
+          api.get(`/planos${querySuffix}`),
+        ]);
 
       setOperacoes(operacoesRes.data);
       setLimites(limitesRes.data);
@@ -141,7 +143,15 @@ const Recordes = () => {
     } finally {
       setLoading(false);
     }
-  }, [operacaoSelecionada, tipoOperacaoSelecionado, limiteSelecionado, sistemaSelecionado, planoSelecionado, usuarioIdParam, usuario]);
+  }, [
+    operacaoSelecionada,
+    tipoOperacaoSelecionado,
+    limiteSelecionado,
+    sistemaSelecionado,
+    planoSelecionado,
+    usuarioIdParam,
+    usuario,
+  ]);
 
   useEffect(() => {
     if (usuario) {
@@ -200,16 +210,14 @@ const Recordes = () => {
     ? `Recordes de ${usuarioVisualizado.nome}`
     : "Meus recordes";
 
-  // Limitar recordes exibidos a 60
-  const LIMITE_EXIBICAO = 60;
+  // Limitar recordes exibidos a 40
+  const LIMITE_EXIBICAO = 40;
   const totalRecordes = recordes.length;
   const recordesExibidos = recordes.slice(0, LIMITE_EXIBICAO);
   const temMaisRecordes = totalRecordes > LIMITE_EXIBICAO;
 
   // Obter tipos únicos de operação para o filtro
-  const tiposOperacao = Array.from(
-    new Set(operacoes.map((op) => op.tipo))
-  );
+  const tiposOperacao = Array.from(new Set(operacoes.map((op) => op.tipo)));
 
   return (
     <div className="recordes-container">
@@ -348,6 +356,8 @@ const Recordes = () => {
         usuarioIdVisualizado={usuarioIdParam ? parseInt(usuarioIdParam) : null}
         isVisitante={usuario?.isVisitante || false}
       />
+
+      <ListaUltimosRecordesBatidos />
     </div>
   );
 };

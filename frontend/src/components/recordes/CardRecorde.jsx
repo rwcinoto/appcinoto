@@ -21,12 +21,18 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   const [formatoResposta, setFormatoResposta] = useState(null);
 
   // Determinar qual usuário usar para buscar a posição
-  const usuarioIdParaPosicao = usuarioIdVisualizado || (usuario?.id || null);
+  const usuarioIdParaPosicao = usuarioIdVisualizado || usuario?.id || null;
 
   // Buscar posição no ranking global
   useEffect(() => {
     const buscarPosicaoRanking = async () => {
-      if (!recorde || !usuarioIdParaPosicao || !recorde.operacao || !recorde.limite || !recorde.sistema) {
+      if (
+        !recorde ||
+        !usuarioIdParaPosicao ||
+        !recorde.operacao ||
+        !recorde.limite ||
+        !recorde.sistema
+      ) {
         return;
       }
 
@@ -42,7 +48,9 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
           params.append("usuario_id", usuarioIdVisualizado.toString());
         }
 
-        const response = await api.get(`/rankings/posicao?${params.toString()}`);
+        const response = await api.get(
+          `/rankings/posicao?${params.toString()}`,
+        );
         setPosicaoRanking(response.data.posicao);
       } catch (error) {
         console.error("Erro ao buscar posição no ranking:", error);
@@ -113,9 +121,17 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
         romano: { background: "rgba(156, 39, 176, 0.25)", color: "#BA68C8" },
         decimal: { background: "rgba(198, 40, 40, 0.25)", color: "#EF5350" },
         binario: { background: "rgba(230, 81, 0, 0.25)", color: "#FFB74D" },
-        hexadecimal: { background: "rgba(158, 158, 158, 0.25)", color: "#B0B0B0" },
+        hexadecimal: {
+          background: "rgba(158, 158, 158, 0.25)",
+          color: "#B0B0B0",
+        },
       };
-      return coresDark[tipo] || { background: "rgba(158, 158, 158, 0.25)", color: "#B0B0B0" };
+      return (
+        coresDark[tipo] || {
+          background: "rgba(158, 158, 158, 0.25)",
+          color: "#B0B0B0",
+        }
+      );
     }
 
     const cores = {
@@ -171,7 +187,11 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       setDadosTreino(response.data);
 
       // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
-      if (tipoSistema === "romano" || tipoSistema === "hexadecimal" || tipoSistema === "binario") {
+      if (
+        tipoSistema === "romano" ||
+        tipoSistema === "hexadecimal" ||
+        tipoSistema === "binario"
+      ) {
         // Mostrar modal de escolha de formato
         setMostrarModalFormato(true);
       } else {
@@ -209,109 +229,123 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
       state: {
         treinoData: dadosTreino,
         formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
-        sistemaTipo: tipoSistema || "natural"
-      }
+        sistemaTipo: tipoSistema || "natural",
+      },
     });
   };
 
   return (
     <>
-      {mostrarModalFormato && (tipoSistema === "romano" || tipoSistema === "hexadecimal" || tipoSistema === "binario") && (
-        <ModalEscolhaFormatoResposta
-          sistemaTipo={tipoSistema}
-          onEscolher={handleEscolherFormato}
-          onCancelar={handleCancelarFormato}
-        />
-      )}
+      {mostrarModalFormato &&
+        (tipoSistema === "romano" ||
+          tipoSistema === "hexadecimal" ||
+          tipoSistema === "binario") && (
+          <ModalEscolhaFormatoResposta
+            sistemaTipo={tipoSistema}
+            onEscolher={handleEscolherFormato}
+            onCancelar={handleCancelarFormato}
+          />
+        )}
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}
-      <div className="card-recorde" style={{ borderColor: corOperacao, "--cor-operacao": corOperacao }}>
-      <div className="card-recorde-header">
-        <div className="card-recorde-titulo-linha">
-          <button
-            className="card-recorde-botao-treino"
-            onClick={handleIniciarTreino}
-            disabled={iniciandoTreino}
-            title="Iniciar treino com estas configurações"
-            aria-label="Iniciar treino com estas configurações"
-          >
-            {iniciandoTreino ? "..." : "🏃"}
-          </button>
-          <h3>{recorde.operacao?.nome || "Operação"}</h3>
-          <span className="card-recorde-tipo" style={{ color: corOperacao }}>
-            {formatarTipoOperacao(tipoOperacao)}
-          </span>
-        </div>
-        <div className="card-recorde-acertos-linha">
-          <span className="card-recorde-acertos-texto">
-            <strong>Acertos:</strong>{" "}
-            <span
-              className="card-recorde-acertos-valor"
-              style={{ color: corOperacao }}
+      <div
+        className="card-recorde"
+        style={{ borderColor: corOperacao, "--cor-operacao": corOperacao }}
+      >
+        <div className="card-recorde-header">
+          <div className="card-recorde-titulo-linha">
+            <button
+              className="card-recorde-botao-treino"
+              onClick={handleIniciarTreino}
+              disabled={iniciandoTreino}
+              title="Iniciar treino com estas configurações"
+              aria-label="Iniciar treino com estas configurações"
             >
-              {recorde.total || 0}
+              {iniciandoTreino ? "..." : "🏃 Treinar"}
+            </button>
+            <h3>{recorde.operacao?.nome || "Operação"}</h3>
+            <span className="card-recorde-tipo" style={{ color: corOperacao }}>
+              {formatarTipoOperacao(tipoOperacao)}
             </span>
-            {tempoMedioFormatado && (
-              <span className="card-recorde-tempo-medio">
-                {" "}({tempoMedioFormatado} seg/conta)
-              </span>
-            )}
-          </span>
-        </div>
-      </div>
-
-      <div className="card-recorde-info-linha">
-        <div className="card-recorde-info-item">
-          <span className="card-recorde-info-label">Limite</span>
-          <span className="card-recorde-info-value">
-            {recorde.limite?.descricao || "-"}
-          </span>
-        </div>
-
-        <div className="card-recorde-info-item">
-          <span className="card-recorde-info-label">Sistema</span>
-          <span
-            className="card-recorde-info-value"
-            style={{
-              backgroundColor: coresSistema.background,
-              color: coresSistema.color,
-              padding: "4px 12px",
-              borderRadius: "12px",
-              display: "inline-block"
-            }}
-          >
-            {recorde.sistema?.tipo
-              ? formatarTipoSistema(recorde.sistema.tipo)
-              : "-"}
-          </span>
-        </div>
-
-        <div className="card-recorde-info-item">
-          <span className="card-recorde-info-label">Data</span>
-          <span className="card-recorde-info-value">
-            {formatarData(recorde.data_recorde || recorde.atualizado_em)}
-          </span>
-        </div>
-      </div>
-
-      <div className="card-recorde-posicao-ranking">
-        <span className="card-recorde-tentativas-texto">
-          Treinos: {recorde.quantidade || 0}
-        </span>
-        {posicaoRanking !== null && recorde.operacao && recorde.limite && recorde.sistema && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span className="card-recorde-posicao-label">Posição global:</span>
-            <Link
-              to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
-              className="card-recorde-posicao-valor card-recorde-posicao-link"
-            >
-              #{posicaoRanking}
-            </Link>
           </div>
-        )}
+          <div className="card-recorde-acertos-linha">
+            <span className="card-recorde-acertos-texto">
+              <strong>Acertos:</strong>{" "}
+              <span
+                className="card-recorde-acertos-valor"
+                style={{ color: corOperacao }}
+              >
+                {recorde.total || 0}
+              </span>
+              {tempoMedioFormatado && (
+                <span className="card-recorde-tempo-medio">
+                  {" "}
+                  ({tempoMedioFormatado} seg/conta)
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        <div className="card-recorde-info-linha">
+          <div className="card-recorde-info-item">
+            <span className="card-recorde-info-label">Limite</span>
+            <span className="card-recorde-info-value">
+              {recorde.limite?.descricao || "-"}
+            </span>
+          </div>
+
+          <div className="card-recorde-info-item">
+            <span className="card-recorde-info-label">Sistema</span>
+            <span
+              className="card-recorde-info-value"
+              style={{
+                backgroundColor: coresSistema.background,
+                color: coresSistema.color,
+                padding: "4px 12px",
+                borderRadius: "12px",
+                display: "inline-block",
+              }}
+            >
+              {recorde.sistema?.tipo
+                ? formatarTipoSistema(recorde.sistema.tipo)
+                : "-"}
+            </span>
+          </div>
+
+          <div className="card-recorde-info-item">
+            <span className="card-recorde-info-label">Data</span>
+            <span className="card-recorde-info-value">
+              {formatarData(recorde.data_recorde || recorde.atualizado_em)}
+            </span>
+          </div>
+        </div>
+
+        <div className="card-recorde-posicao-ranking">
+          <span className="card-recorde-tentativas-texto">
+            Treinos: {recorde.quantidade || 0}
+          </span>
+          {posicaoRanking !== null &&
+            recorde.operacao &&
+            recorde.limite &&
+            recorde.sistema && (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span className="card-recorde-posicao-label">
+                  Posição global:
+                </span>
+                <Link
+                  to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
+                  className="card-recorde-posicao-valor card-recorde-posicao-link"
+                >
+                  #{posicaoRanking}
+                </Link>
+              </div>
+            )}
+        </div>
       </div>
-    </div>
     </>
   );
 };

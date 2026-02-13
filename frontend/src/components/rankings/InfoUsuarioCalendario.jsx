@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  CHAVE_JANEIRO_PADRAO,
+  CHAVE_SECULO_21_PADRAO,
+  PERGUNTAR_CHAVES_CALENDARIO,
+} from "../../constants/calendario";
 import ModalOpcoesCalendario from "../treino/ModalOpcoesCalendario";
 import "./InfoUsuario.css";
 
@@ -34,24 +39,28 @@ const InfoUsuarioCalendario = ({
 
   const handleConfirmarOpcoes = (opcoes) => {
     setMostrarModalOpcoes(false);
-    const tipoResposta =
-      opcoes?.resposta === "nomeDia" ? "texto" : "numeros";
-    // Navega para TreinoAtivo com a seleção; o treino será criado e a contagem exibida lá
+    const tipoResposta = opcoes?.resposta === "nomeDia" ? "texto" : "numeros";
+    const chaveSeculo21Base =
+      tipo === "seculo"
+        ? PERGUNTAR_CHAVES_CALENDARIO && opcoes?.chaveSeculo21 != null
+          ? Number(opcoes.chaveSeculo21)
+          : CHAVE_SECULO_21_PADRAO
+        : undefined;
+    const chaveJaneiroBase =
+      tipo === "mes"
+        ? PERGUNTAR_CHAVES_CALENDARIO && opcoes?.chaveJaneiro != null
+          ? Number(opcoes.chaveJaneiro)
+          : CHAVE_JANEIRO_PADRAO
+        : undefined;
     navigate("/treino-ativo", {
       state: {
         modo: "calendario",
         tipo,
         limiteId,
-        visualizacao: opcoes?.visualizacao || "texto",
+        visualizacao: opcoes?.visualizacao || "numeros",
         tipoResposta: opcoes?.resposta != null ? tipoResposta : "numeros",
-        chaveSeculo21Base:
-          tipo === "seculo" && opcoes?.chaveSeculo21 != null
-            ? Number(opcoes.chaveSeculo21)
-            : undefined,
-        chaveJaneiroBase:
-          tipo === "mes" && opcoes?.chaveJaneiro != null
-            ? Number(opcoes.chaveJaneiro)
-            : undefined,
+        chaveSeculo21Base,
+        chaveJaneiroBase,
       },
     });
   };
@@ -94,10 +103,12 @@ const InfoUsuarioCalendario = ({
           mostrarOpcoesResposta={mostrarOpcoesResposta}
           onConfirmar={handleConfirmarOpcoes}
           onCancelar={handleCancelarOpcoes}
-          mostrarChaveSeculo21={tipo === "seculo"}
-          chaveSeculo21Inicial={0}
-          mostrarChaveJaneiro={tipo === "mes"}
-          chaveJaneiroInicial={0}
+          mostrarChaveSeculo21={
+            PERGUNTAR_CHAVES_CALENDARIO && tipo === "seculo"
+          }
+          chaveSeculo21Inicial={CHAVE_SECULO_21_PADRAO}
+          mostrarChaveJaneiro={PERGUNTAR_CHAVES_CALENDARIO && tipo === "mes"}
+          chaveJaneiroInicial={CHAVE_JANEIRO_PADRAO}
         />
         <div className="info-usuario sem-recorde">
           <div className="info-usuario-mensagem">
@@ -135,10 +146,10 @@ const InfoUsuarioCalendario = ({
         mostrarOpcoesResposta={mostrarOpcoesResposta}
         onConfirmar={handleConfirmarOpcoes}
         onCancelar={handleCancelarOpcoes}
-        mostrarChaveSeculo21={tipo === "seculo"}
-        chaveSeculo21Inicial={0}
-        mostrarChaveJaneiro={tipo === "mes"}
-        chaveJaneiroInicial={0}
+        mostrarChaveSeculo21={PERGUNTAR_CHAVES_CALENDARIO && tipo === "seculo"}
+        chaveSeculo21Inicial={CHAVE_SECULO_21_PADRAO}
+        mostrarChaveJaneiro={PERGUNTAR_CHAVES_CALENDARIO && tipo === "mes"}
+        chaveJaneiroInicial={CHAVE_JANEIRO_PADRAO}
       />
       <div
         className={`info-usuario ${estaNoTop3 ? "top-3" : ""}`}
@@ -189,7 +200,7 @@ const InfoUsuarioCalendario = ({
                 title="Iniciar treino com estas configurações"
                 aria-label="Iniciar treino com estas configurações"
               >
-                🏃
+                🏃 Iniciar este treino
               </button>
             </div>
           )}

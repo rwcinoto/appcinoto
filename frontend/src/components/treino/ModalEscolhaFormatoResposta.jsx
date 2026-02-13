@@ -1,8 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ModalEscolhaFormatoResposta.css";
 
-const ModalEscolhaFormatoResposta = ({ sistemaTipo, onEscolher, onCancelar }) => {
-  const [formatoEscolhido, setFormatoEscolhido] = useState("natural");
+const ModalEscolhaFormatoResposta = ({
+  sistemaTipo,
+  onEscolher,
+  onCancelar,
+  formatoInicial = "natural",
+}) => {
+  const [formatoEscolhido, setFormatoEscolhido] = useState(
+    formatoInicial === "sistema" || formatoInicial === "natural"
+      ? formatoInicial
+      : "natural",
+  );
+
+  // Ao abrir o modal, usar o valor passado (ex.: escolha do treino anterior ao recomeçar)
+  useEffect(() => {
+    const valor =
+      formatoInicial === "sistema" || formatoInicial === "natural"
+        ? formatoInicial
+        : "natural";
+    setFormatoEscolhido(valor);
+  }, [formatoInicial]);
 
   const handleConfirmar = () => {
     if (formatoEscolhido) {

@@ -14,7 +14,7 @@ const InfoUsuario = ({
   operacaoId,
   limiteId,
   sistemaId,
-  sistemaTipo
+  sistemaTipo,
 }) => {
   const navigate = useNavigate();
   const [iniciandoTreino, setIniciandoTreino] = useState(false);
@@ -41,7 +41,11 @@ const InfoUsuario = ({
       setDadosTreino(response.data);
 
       // Verificar se o sistema é romano, hexadecimal ou binário para mostrar modal de escolha
-      if (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") {
+      if (
+        sistemaTipo === "romano" ||
+        sistemaTipo === "hexadecimal" ||
+        sistemaTipo === "binario"
+      ) {
         // Mostrar modal de escolha de formato
         setMostrarModalFormato(true);
       } else {
@@ -79,14 +83,14 @@ const InfoUsuario = ({
       state: {
         treinoData: dadosTreino,
         formatoResposta: formatoResposta || "sistema", // Padrão se não escolhido
-        sistemaTipo: sistemaTipo || "natural"
-      }
+        sistemaTipo: sistemaTipo || "natural",
+      },
     });
   };
 
   // Encontrar dados do usuário no ranking (se estiver no top 100)
   const usuarioNoRanking = ranking?.find(
-    (item) => item.posicao === posicaoUsuario
+    (item) => item.posicao === posicaoUsuario,
   );
 
   // Verificar se está no top 3
@@ -96,24 +100,29 @@ const InfoUsuario = ({
   if (posicaoUsuario === null || posicaoUsuario === undefined) {
     return (
       <>
-        {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") && (
-          <ModalEscolhaFormatoResposta
-            sistemaTipo={sistemaTipo}
-            onEscolher={handleEscolherFormato}
-            onCancelar={handleCancelarFormato}
-          />
-        )}
+        {mostrarModalFormato &&
+          (sistemaTipo === "romano" ||
+            sistemaTipo === "hexadecimal" ||
+            sistemaTipo === "binario") && (
+            <ModalEscolhaFormatoResposta
+              sistemaTipo={sistemaTipo}
+              onEscolher={handleEscolherFormato}
+              onCancelar={handleCancelarFormato}
+            />
+          )}
         {mostrarContagem && (
           <ContagemRegressiva onTerminar={handleContagemTerminar} />
         )}
         <div className="info-usuario sem-recorde">
           <div className="info-usuario-mensagem">
-            <p>Você ainda não tem recorde neste ranking (ou deabilitou no perfil para aparecer no ranking global).</p>
+            <p>
+              Você ainda não tem recorde neste ranking (ou deabilitou no perfil
+              para aparecer no ranking global).
+            </p>
             <p className="info-usuario-subtitulo">
               {isVisitante
                 ? "Visitantes não aparecem no ranking. Faça login para participar e aparecer no ranking!"
-                : "Complete um treino para aparecer no ranking!"
-              }
+                : "Complete um treino para aparecer no ranking!"}
             </p>
             {!isVisitante && operacaoId && limiteId && sistemaId && (
               <div className="info-usuario-botao-container">
@@ -159,13 +168,16 @@ const InfoUsuario = ({
 
   return (
     <>
-      {mostrarModalFormato && (sistemaTipo === "romano" || sistemaTipo === "hexadecimal" || sistemaTipo === "binario") && (
-        <ModalEscolhaFormatoResposta
-          sistemaTipo={sistemaTipo}
-          onEscolher={handleEscolherFormato}
-          onCancelar={handleCancelarFormato}
-        />
-      )}
+      {mostrarModalFormato &&
+        (sistemaTipo === "romano" ||
+          sistemaTipo === "hexadecimal" ||
+          sistemaTipo === "binario") && (
+          <ModalEscolhaFormatoResposta
+            sistemaTipo={sistemaTipo}
+            onEscolher={handleEscolherFormato}
+            onCancelar={handleCancelarFormato}
+          />
+        )}
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}
@@ -180,51 +192,53 @@ const InfoUsuario = ({
             : {}
         }
       >
-      <div className="info-usuario-conteudo">
-        <div className="info-usuario-coluna info-usuario-pontuacao">
-          <span className="info-usuario-label">Sua pontuação</span>
-          <span className="info-usuario-valor pontuacao">{pontuacao}</span>
-        </div>
-        <div className="info-usuario-coluna info-usuario-posicao">
-          <span className="info-usuario-label">Posição</span>
-          <div
-            className="info-usuario-valor posicao"
-            style={estaNoTop3 ? { color: corPosicao } : {}}
-          >
-            {emojiPosicao && <span className="emoji-posicao">{emojiPosicao}</span>}
-            <span className="numero-posicao">#{posicaoUsuario}</span>
-            {totalParticipantes > 0 && (
-              <span className="total-participantes">
-                {" "}de {totalParticipantes} participantes
-              </span>
-            )}
+        <div className="info-usuario-conteudo">
+          <div className="info-usuario-coluna info-usuario-pontuacao">
+            <span className="info-usuario-label">Sua pontuação</span>
+            <span className="info-usuario-valor pontuacao">{pontuacao}</span>
           </div>
-        </div>
-        {estaNoTop3 && (
-          <div className="info-usuario-coluna info-usuario-parabens">
-            <span className="info-usuario-parabens-texto">
-              Parabéns! Você está entre os 3 primeiros! 🎉
-            </span>
-          </div>
-        )}
-        {operacaoId && limiteId && sistemaId && (
-          <div className="info-usuario-coluna info-usuario-botao">
-            <button
-              className="info-usuario-botao-treino"
-              onClick={handleIniciarTreino}
-              disabled={iniciandoTreino}
-              title="Iniciar treino com estas configurações"
-              aria-label="Iniciar treino com estas configurações"
+          <div className="info-usuario-coluna info-usuario-posicao">
+            <span className="info-usuario-label">Posição</span>
+            <div
+              className="info-usuario-valor posicao"
+              style={estaNoTop3 ? { color: corPosicao } : {}}
             >
-              {iniciandoTreino ? "..." : "🏃"}
-            </button>
+              {emojiPosicao && (
+                <span className="emoji-posicao">{emojiPosicao}</span>
+              )}
+              <span className="numero-posicao">#{posicaoUsuario}</span>
+              {totalParticipantes > 0 && (
+                <span className="total-participantes">
+                  {" "}
+                  de {totalParticipantes} participantes
+                </span>
+              )}
+            </div>
           </div>
-        )}
+          {estaNoTop3 && (
+            <div className="info-usuario-coluna info-usuario-parabens">
+              <span className="info-usuario-parabens-texto">
+                Parabéns! Você está entre os 3 primeiros! 🎉
+              </span>
+            </div>
+          )}
+          {operacaoId && limiteId && sistemaId && (
+            <div className="info-usuario-coluna info-usuario-botao">
+              <button
+                className="info-usuario-botao-treino"
+                onClick={handleIniciarTreino}
+                disabled={iniciandoTreino}
+                title="Iniciar treino com estas configurações"
+                aria-label="Iniciar treino com estas configurações"
+              >
+                {iniciandoTreino ? "..." : "🏃 Iniciar este treino"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };
 
 export default InfoUsuario;
-
