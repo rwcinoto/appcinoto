@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const { Limite, Usuario } = require("../models");
 const treinoCalendarioService = require("../services/treinoCalendarioService");
 const recordeCalendarioService = require("../services/recordeCalendarioService");
+const recordeService = require("../services/recordeService");
 
 // Armazenar treinos de calendário ativos em memória (Map: treino_id -> dados do treino)
 // Em produção, isso poderia ser movido para Redis ou banco de dados
@@ -442,19 +443,23 @@ class CalendarioController {
       // Iniciar o cronômetro quando o usuário confirma (após a contagem regressiva)
       treino.inicio = Date.now();
 
-      if (!usuario.isVisitante) {
-        try {
+      try {
+        if (usuario.isVisitante) {
+          await recordeService.incrementarQuantidadeTreinoCalendarioVisitante(
+            treino.limite.id
+          );
+        } else {
           await recordeCalendarioService.incrementarQuantidadeTreinoCalendario(
             usuario.id,
             treino.tipo,
             treino.limite.id,
           );
-        } catch (error) {
-          console.error(
-            "Erro ao incrementar quantidade de treino de calendário:",
-            error,
-          );
         }
+      } catch (error) {
+        console.error(
+          "Erro ao incrementar quantidade de treino de calendário:",
+          error,
+        );
       }
 
       return res.json({ success: true });

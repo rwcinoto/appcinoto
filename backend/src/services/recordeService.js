@@ -2,6 +2,7 @@
 
 const {
   Recorde,
+  RecordeVisitante,
   Usuario,
   Operacao,
   Limite,
@@ -93,6 +94,83 @@ class RecordeService {
       // Se existe, incrementar quantidade
       await recordeExistente.increment("quantidade", { by: 1 });
     }
+  }
+
+  /**
+   * Incrementa a quantidade de treinos realizados por visitantes (ou cria registro se não existir)
+   * Deve ser chamado quando o visitante confirma início do treino (contagem regressiva)
+   * @param {number} operacaoId - ID da operação
+   * @param {number} limiteId - ID do limite
+   * @param {number} sistemaId - ID do sistema
+   * @returns {Promise<void>}
+   */
+  async incrementarQuantidadeTreinoVisitante(operacaoId, limiteId, sistemaId) {
+    const operacaoIdNum = parseInt(operacaoId);
+    const limiteIdNum = parseInt(limiteId);
+    const sistemaIdNum = parseInt(sistemaId);
+
+    const dataAtual = new Date();
+
+    const recordeExistente = await RecordeVisitante.findOne({
+      where: {
+        id_operacao: operacaoIdNum,
+        id_limite: limiteIdNum,
+        id_sistema: sistemaIdNum,
+      },
+    });
+
+    if (!recordeExistente) {
+      try {
+        await RecordeVisitante.create({
+          id_operacao: operacaoIdNum,
+          id_limite: limiteIdNum,
+          id_sistema: sistemaIdNum,
+          quantidade: 1,
+          criado_em: dataAtual,
+          atualizado_em: dataAtual,
+        });
+      } catch (error) {
+        if (
+          error.name === "SequelizeUniqueConstraintError" ||
+          error.parent?.code === "ER_DUP_ENTRY"
+        ) {
+          const recordeCriado = await RecordeVisitante.findOne({
+            where: {
+              id_operacao: operacaoIdNum,
+              id_limite: limiteIdNum,
+              id_sistema: sistemaIdNum,
+            },
+          });
+
+          if (recordeCriado) {
+            await recordeCriado.increment("quantidade", { by: 1 });
+          } else {
+            throw error;
+          }
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      await recordeExistente.increment("quantidade", { by: 1 });
+    }
+  }
+
+  /**
+   * Incrementa a quantidade de treinos de calendário realizados por visitantes.
+   * Usa id_operacao=99 como sentinela (calendário não tem operação real).
+   * id_sistema pode ser qualquer id válido (ex: 1), pois identificamos calendário por id_operacao.
+   * @param {number} limiteId - ID do limite
+   * @returns {Promise<void>}
+   */
+  async incrementarQuantidadeTreinoCalendarioVisitante(limiteId) {
+    const ID_OPERACAO_CALENDARIO = 99;
+    const ID_SISTEMA_QUALQUER = 1; // Qualquer id válido; calendário se identifica por id_operacao
+    await this.incrementarQuantidadeTreinoVisitante(
+      ID_OPERACAO_CALENDARIO,
+      limiteId,
+      ID_SISTEMA_QUALQUER
+    );
   }
 
   /**
@@ -347,6 +425,36 @@ class RecordeService {
       recordeAnterior: recordeAnterior ? recordeAnterior : null,
       errosAtuais: erros, // Incluir erros do treino atual para exibição
     };
+  }
+
+  /**
+   * Lista quantidade de treinos por tipo (operacao, limite, sistema) realizados por visitantes.
+   * Apenas admin. Retorna operacao, limite (tempo em minutos), sistema, quantidade, atualizado_em.
+   * @returns {Promise<Array>} Array de recordes de visitantes com dados para exibição
+   */
+  async listarRecordesVisitantes() {
+    const recordes = await RecordeVisitante.findAll({
+      attributes: ["id", "id_operacao", "id_limite", "id_sistema", "quantidade", "atualizado_em"],
+      include: [
+        { association: "operacao", attributes: ["id", "nome"] },
+        { association: "limite", attributes: ["id", "tempo", "descricao"] },
+        { association: "sistema", attributes: ["id", "descricao", "tipo"] },
+      ],
+      order: [
+        [Sequelize.literal("`operacao`.`nome`"), "ASC"],
+        [Sequelize.literal("`limite`.`tempo`"), "ASC"],
+        [Sequelize.literal("`sistema`.`descricao`"), "ASC"],
+      ],
+    });
+
+    return recordes.map((rv) => ({
+      id: rv.id,
+      operacao_nome: rv.operacao?.nome ?? "—",
+      limite_minutos: rv.limite ? Math.round(rv.limite.tempo / 60) : null,
+      sistema_descricao: rv.id_operacao === 99 ? "Calendário" : (rv.sistema?.descricao ?? rv.sistema?.tipo ?? "—"),
+      quantidade: rv.quantidade,
+      atualizado_em: rv.atualizado_em,
+    }));
   }
 
   /**

@@ -225,13 +225,17 @@
   border-color: var(--color-border-dark);
 }
 
-/* Estado de erro (vermelho) - tema do cubo mágico */
+/* Estado de erro (vermelho) - tema do cubo mágico. Cor do texto não muda para ficar legível no tema escuro */
 .conta-input-resultado.errado {
   border-color: #f44336 !important;
   background: rgba(244, 67, 54, 0.1) !important;
-  color: #d32f2f !important;
+  color: var(--color-text) !important;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
   animation: wrongShake 0.3s ease;
+}
+
+.dark .conta-input-resultado.errado {
+  color: var(--color-text-dark) !important;
 }
 
 @keyframes wrongShake {
@@ -260,7 +264,11 @@
   border-color: #f44336 !important;
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
   background: rgba(244, 67, 54, 0.1) !important;
-  color: #d32f2f !important;
+  color: var(--color-text) !important;
+}
+
+.dark .conta-item.atual .conta-input-resultado.errado {
+  color: var(--color-text-dark) !important;
 }
 
 .conta-input-resultado::placeholder {

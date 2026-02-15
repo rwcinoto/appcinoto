@@ -89,27 +89,53 @@ const NovoTreino = () => {
     return operacoes.filter((operacao) => operacao.tipo === tipoOperacaoSelecionado);
   }, [operacoes, tipoOperacaoSelecionado]);
 
-  // Definir operação padrão: preferência do usuário (operacao_id) se estiver em operacoesFiltradas, senão aleatória
-  useEffect(() => {
-    if (operacoesFiltradas.length > 0 && !operacaoSelecionada) {
-      const operacaoFavorita = usuario?.operacao_id && operacoesFiltradas.find((o) => o.id === usuario.operacao_id);
-      if (operacaoFavorita) {
-        setOperacaoSelecionada(operacaoFavorita);
-      } else {
-        // Selecionar uma operação aleatória da lista
-        const indiceAleatorio = Math.floor(Math.random() * operacoesFiltradas.length);
-        setOperacaoSelecionada(operacoesFiltradas[indiceAleatorio]);
-      }
-    }
-  }, [operacoesFiltradas, operacaoSelecionada, tipoOperacaoSelecionado, usuario]);
-
   // Indica se a operação exige apenas sistemas de conversão (romano, binário, hexadecimal):
-  // tipo "conversao" ou descrição contendo "Conversão" (ex.: operação aleatória de conversão)
   const ehOperacaoConversao = useCallback((op) => {
     if (!op) return false;
     if (op.tipo === "conversao") return true;
     return op.descricao && op.descricao.toLowerCase().includes("conversão");
   }, []);
+
+  // Operação é compatível com o sistema (pelo tipo): raiz não com inteiro; conversão só com romano/binário/hexadecimal
+  const operacaoCompativelComSistema = useCallback((op, sistema) => {
+    if (!sistema || !op) return true;
+    if (sistema.tipo === "inteiro" && op.tipo === "raiz") return false;
+    if (
+      (sistema.tipo === "natural" || sistema.tipo === "inteiro" || sistema.tipo === "decimal") &&
+      ehOperacaoConversao(op)
+    ) {
+      return false;
+    }
+    return true;
+  }, [ehOperacaoConversao]);
+
+  // Operações compatíveis com o sistema favorito (para não sortear raiz com inteiro nem conversão com decimal/natural/inteiro)
+  const operacoesCompatíveisComSistemaFavorito = useMemo(() => {
+    const sistemaFavorito =
+      usuario?.sistema_id && sistemas.find((s) => s.id === usuario.sistema_id);
+    if (!sistemaFavorito) return operacoesFiltradas;
+    const candidatas = operacoesFiltradas.filter((op) =>
+      operacaoCompativelComSistema(op, sistemaFavorito)
+    );
+    return candidatas.length > 0 ? candidatas : operacoesFiltradas;
+  }, [operacoesFiltradas, usuario?.sistema_id, sistemas, operacaoCompativelComSistema]);
+
+  // Definir operação padrão: preferência do usuário (operacao_id) se estiver em operações compatíveis com o sistema favorito, senão aleatória entre essas
+  useEffect(() => {
+    if (operacoesCompatíveisComSistemaFavorito.length > 0 && !operacaoSelecionada) {
+      const operacaoFavorita =
+        usuario?.operacao_id &&
+        operacoesCompatíveisComSistemaFavorito.find((o) => o.id === usuario.operacao_id);
+      if (operacaoFavorita) {
+        setOperacaoSelecionada(operacaoFavorita);
+      } else {
+        const indiceAleatorio = Math.floor(
+          Math.random() * operacoesCompatíveisComSistemaFavorito.length
+        );
+        setOperacaoSelecionada(operacoesCompatíveisComSistemaFavorito[indiceAleatorio]);
+      }
+    }
+  }, [operacoesCompatíveisComSistemaFavorito, operacaoSelecionada, usuario]);
 
   // Filtrar sistemas disponíveis baseado no tipo da operação selecionada:
   // - Se operação for raiz, remover sistema "inteiro"
@@ -167,28 +193,32 @@ const NovoTreino = () => {
     }
   }, [sistemasDisponiveis, sistemaSelecionado]);
 
-  // Se a operação selecionada não está mais disponível após filtrar, selecionar aleatoriamente uma disponível
+  // Se a operação selecionada não está mais disponível após filtrar, escolher uma compatível com o sistema favorito
   useEffect(() => {
     if (operacaoSelecionada && operacoesFiltradas.length > 0) {
       const operacaoAtual = operacoesFiltradas.find(
         (op) => op.id === operacaoSelecionada.id
       );
       if (!operacaoAtual) {
-        // Operação selecionada não está mais disponível, selecionar aleatoriamente uma disponível
-        // Mas só se o usuário não tiver uma operação favorita
-        const operacaoFavorita = usuario?.operacao_id && operacoesFiltradas.find((o) => o.id === usuario.operacao_id);
+        const operacaoFavorita =
+          usuario?.operacao_id &&
+          operacoesCompatíveisComSistemaFavorito.find((o) => o.id === usuario.operacao_id);
         if (operacaoFavorita) {
           setOperacaoSelecionada(operacaoFavorita);
+        } else if (operacoesCompatíveisComSistemaFavorito.length > 0) {
+          const indiceAleatorio = Math.floor(
+            Math.random() * operacoesCompatíveisComSistemaFavorito.length
+          );
+          setOperacaoSelecionada(operacoesCompatíveisComSistemaFavorito[indiceAleatorio]);
         } else {
           const indiceAleatorio = Math.floor(Math.random() * operacoesFiltradas.length);
           setOperacaoSelecionada(operacoesFiltradas[indiceAleatorio]);
         }
       }
     } else if (operacaoSelecionada && operacoesFiltradas.length === 0) {
-      // Não há operações disponíveis, limpar seleção
       setOperacaoSelecionada(null);
     }
-  }, [operacoesFiltradas, operacaoSelecionada, usuario]);
+  }, [operacoesFiltradas, operacoesCompatíveisComSistemaFavorito, operacaoSelecionada, usuario]);
 
   const formatarTipoOperacao = (tipo) => {
     const tipos = {

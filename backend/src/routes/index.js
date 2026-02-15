@@ -41,4 +41,7 @@ router.use("/calendario/recordes", require("./recordeCalendarioRoutes"));
 // Rotas de conjuntos
 router.use("/conjuntos", require("./conjuntoRoutes"));
 
+// Rotas de visitantes (apenas admin - quantidade de treinos por tipo)
+router.use("/visitantes", require("./recordeVisitanteRoutes"));
+
 module.exports = router;

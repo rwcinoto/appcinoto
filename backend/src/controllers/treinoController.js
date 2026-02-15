@@ -501,20 +501,25 @@ class TreinoController {
 
       // Incrementar quantidade de treinos (ou criar registro se não existir)
       // Isso deve ser feito quando a contagem regressiva começar
-      // Visitantes não incrementam quantidade de treinos
-      if (!usuario.isVisitante) {
-        try {
+      try {
+        if (usuario.isVisitante) {
+          await recordeService.incrementarQuantidadeTreinoVisitante(
+            treino.operacao.id,
+            treino.limite.id,
+            treino.sistema.id
+          );
+        } else {
           await recordeService.incrementarQuantidadeTreino(
             usuario.id,
             treino.operacao.id,
             treino.limite.id,
             treino.sistema.id
           );
-        } catch (error) {
-          // Se houver erro ao incrementar quantidade, registrar mas não bloquear
-          console.error("Erro ao incrementar quantidade de treino:", error);
-          // Continuar mesmo assim (não bloquear o treino por erro na quantidade)
         }
+      } catch (error) {
+        // Se houver erro ao incrementar quantidade, registrar mas não bloquear
+        console.error("Erro ao incrementar quantidade de treino:", error);
+        // Continuar mesmo assim (não bloquear o treino por erro na quantidade)
       }
 
       return res.json({ success: true });
