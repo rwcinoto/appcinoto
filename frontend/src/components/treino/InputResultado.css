@@ -54,11 +54,11 @@
   }
 }
 
-/* Estado errado (vermelho) - tema do cubo mágico */
+/* Estado errado (vermelho) - tema do cubo mágico. Cor do texto não muda para ficar legível no tema escuro */
 .input-resultado.errado {
   border-color: #F44336;
   background: rgba(244, 67, 54, 0.1);
-  color: #D32F2F;
+  color: var(--color-text);
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
   animation: wrongShake 0.3s ease;
 }

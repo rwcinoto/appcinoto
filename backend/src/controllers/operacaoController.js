@@ -10,9 +10,14 @@ class OperacaoController {
         return res.status(400).json({ errors: erros.array() });
       }
 
+      // Operação id=99 é sentinela para treinos de calendário em recordes_visitantes.
+      // Não é uma operação real de treino; excluir para não aparecer nas listagens.
+      const ID_OPERACAO_CALENDARIO_SENTINELA = 99;
+
       // Se o parâmetro todos=true estiver presente, retornar todas as operações sem filtrar por plano
       if (req.query.todos === "true") {
         const operacoes = await Operacao.findAll({
+          where: { id: { [Op.ne]: ID_OPERACAO_CALENDARIO_SENTINELA } },
           include: [
             { association: "plano" },
             { association: "operacoes_incluidas" },
@@ -60,6 +65,7 @@ class OperacaoController {
           id_plano: {
             [Op.in]: idsPlanos,
           },
+          id: { [Op.ne]: ID_OPERACAO_CALENDARIO_SENTINELA },
         },
         include: [
           { association: "plano" },

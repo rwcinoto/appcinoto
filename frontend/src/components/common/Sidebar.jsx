@@ -52,6 +52,12 @@ const Sidebar = ({ aberto = true, onFechar }) => {
       icon: "👨‍💼",
       adminOnly: true,
     },
+    {
+      path: "/visitantes",
+      label: "Visitantes",
+      icon: "👋",
+      adminApenas: true,
+    },
   ];
 
   const cadastrosSubmenus = [
@@ -94,6 +100,9 @@ const Sidebar = ({ aberto = true, onFechar }) => {
   }, [location.pathname, isCadastrosActive]);
 
   const filteredMenuItems = menuItems.filter((item) => {
+    if (item.adminApenas && (!usuario || usuario.tipo !== "admin")) {
+      return false;
+    }
     if (item.adminOnly && (!usuario || (usuario.tipo !== "admin" && usuario.tipo !== "profe"))) {
       return false;
     }

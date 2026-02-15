@@ -25,6 +25,7 @@ const InstrucoesRecordes = lazy(() => import("./pages/InstrucoesRecordes"));
 const Sistemas = lazy(() => import("./pages/Sistemas"));
 const TreinoAtivo = lazy(() => import("./pages/TreinoAtivo"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
+const Visitantes = lazy(() => import("./pages/Visitantes"));
 const Calendario = lazy(() => import("./pages/Calendario"));
 const CalendarioRecordes = lazy(() => import("./pages/CalendarioRecordes"));
 const InstrucoesCalendario = lazy(() => import("./pages/InstrucoesCalendario"));
@@ -70,6 +71,7 @@ const AppRoutes = () => {
           <Route path="/instrucoes/conjuntos" element={<InstrucoesConjuntos />} />
           <Route path="/conjuntos/:id" element={<DetalhesConjunto />} />
           <Route path="/usuarios" element={<Usuarios />} />
+          <Route path="/visitantes" element={<Visitantes />} />
           {/* Rotas de cadastros */}
           <Route path="/cadastros/planos" element={<Planos />} />
           <Route path="/cadastros/operacoes" element={<Operacoes />} />
