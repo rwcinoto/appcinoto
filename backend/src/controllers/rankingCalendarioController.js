@@ -8,7 +8,7 @@ class RankingCalendarioController {
   /**
    * Obtém ranking de calendário (global).
    * Filtros via query params:
-   * - tipo: "data_geral" | "mes" | "ano" | "seculo" | "data_21"
+   * - tipo: "data_geral" | "mes" | "ano" | "seculo" | "data_2021"
    * - limite_id: número
    */
   async obterRanking(req, res) {

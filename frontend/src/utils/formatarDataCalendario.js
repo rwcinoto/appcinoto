@@ -42,3 +42,26 @@ export function formatarDataNumeros({ ano, mes, dia }) {
   const mesStr = String(mes).padStart(2, "0");
   return `${diaStr}/${mesStr}/${ano}`;
 }
+
+/**
+ * Calcula o dia da semana para uma data (calendário gregoriano, UTC).
+ * Compatível com o backend: 0 = domingo, 1 = segunda, ..., 6 = sábado.
+ * @param {number} ano
+ * @param {number} mes - 1 a 12
+ * @param {number} dia
+ * @returns {number} 0 (domingo) a 6 (sábado)
+ */
+export function calcularDiaSemana(ano, mes, dia) {
+  const d = new Date(Date.UTC(ano, mes - 1, dia));
+  return d.getUTCDay();
+}
+
+/**
+ * Converte dia da semana interno (0–6) para formato do usuário: 1 = domingo, ..., 7 = sábado.
+ * @param {number} diaSemana - 0 (domingo) a 6 (sábado)
+ * @returns {number} 1 a 7
+ */
+export function diaSemanaParaResposta(diaSemana) {
+  const d = ((diaSemana % 7) + 7) % 7;
+  return d === 0 ? 1 : d === 6 ? 7 : d + 1;
+}

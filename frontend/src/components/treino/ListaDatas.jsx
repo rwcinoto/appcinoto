@@ -11,7 +11,7 @@ const ListaDatas = ({
   onErro,
   inputComErro = false,
   disabled = false,
-  // Tipo específico do treino de calendário: data_geral, mes, ano, seculo, data_21
+  // Tipo específico do treino de calendário: data_geral, mes, ano, seculo, data_2021
   tipoTreinoCalendario,
 }) => {
   const inputRef = useRef(null);
@@ -187,8 +187,11 @@ const ListaDatas = ({
         }
       }
     } else {
-      const v = atual + evento.key;
+      // Teclado de dias da semana envia o texto completo ("dom", "seg", etc.) em uma tecla
+      const v = evento.key;
       inputRef.current.value = v;
+      // Enviar a resposta para o backend (no celular o input fica sem foco, então precisa enviar aqui)
+      submeterResposta(v);
     }
   };
 

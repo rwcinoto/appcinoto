@@ -5,7 +5,7 @@ const calendarioService = require("./calendarioService");
 const {
   TIPOS_TREINO_CALENDARIO,
   sortearDataGeral,
-  sortearDataSeculo21,
+  sortearData1900a2099,
   sortearDataAnoAtual,
   calcularDiaSemana,
   converterDiaSemanaParaFormatoUsuario,
@@ -15,7 +15,7 @@ const {
  * Serviço para geração de datas de treino de calendário e validação de respostas.
  *
  * Responsabilidades deste service:
- * - sortear datas conforme o tipo de treino (data geral, século XXI, etc.)
+ * - sortear datas conforme o tipo de treino (data geral, 1900-2099, etc.)
  * - gerar buffers de datas (várias datas de uma vez)
  * - fornecer funções auxiliares para treinos de meses, anos e séculos
  * - validar respostas de dia da semana (número ou texto abreviado)
@@ -25,7 +25,7 @@ class TreinoCalendarioService {
    * Gerar uma lista de datas conforme o tipo de treino.
    *
    * @param {number} quantidade - Quantidade de datas a gerar
-   * @param {string} tipo - Tipo de treino (data_geral, dia, mes, ano, seculo, data_esse_ano, data_21)
+   * @param {string} tipo - Tipo de treino (data_geral, dia, mes, ano, seculo, data_esse_ano, data_2021)
    * @returns {Array<{ ano: number, mes: number, dia: number }>}
    */
   gerarDatas(quantidade = 1, tipo = TIPOS_TREINO_CALENDARIO.DATA_GERAL) {
@@ -36,8 +36,8 @@ class TreinoCalendarioService {
       let data;
 
       switch (tipo) {
-        case TIPOS_TREINO_CALENDARIO.DATA_21:
-          data = sortearDataSeculo21();
+        case TIPOS_TREINO_CALENDARIO.DATA_2021:
+          data = sortearData1900a2099();
           break;
 
         case TIPOS_TREINO_CALENDARIO.DATA_ESSE_ANO:

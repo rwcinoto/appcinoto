@@ -12,7 +12,7 @@ class RecordeCalendarioService {
    * (antes da contagem regressiva), semelhante a incrementarQuantidadeTreino.
    *
    * @param {number} usuarioId
-   * @param {string} tipo - Tipo de treino (data_geral, mes, ano, seculo, data_21)
+   * @param {string} tipo - Tipo de treino (data_geral, mes, ano, seculo, data_2021)
    * @param {number} limiteId
    * @returns {Promise<void>}
    */
@@ -106,7 +106,7 @@ class RecordeCalendarioService {
    * Verifica se existe recorde de calendário e salva/atualiza conforme necessário.
    *
    * @param {number} usuarioId
-   * @param {string} tipo - Tipo de treino (data_geral, mes, ano, seculo, data_21)
+   * @param {string} tipo - Tipo de treino (data_geral, mes, ano, seculo, data_2021)
    * @param {number} limiteId
    * @param {number} total
    * @param {number|null} erros

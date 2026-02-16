@@ -24,6 +24,7 @@ const Recordes = lazy(() => import("./pages/Recordes"));
 const InstrucoesRecordes = lazy(() => import("./pages/InstrucoesRecordes"));
 const Sistemas = lazy(() => import("./pages/Sistemas"));
 const TreinoAtivo = lazy(() => import("./pages/TreinoAtivo"));
+const GabaritoTreino = lazy(() => import("./pages/GabaritoTreino"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 const Visitantes = lazy(() => import("./pages/Visitantes"));
 const Calendario = lazy(() => import("./pages/Calendario"));
@@ -58,6 +59,7 @@ const AppRoutes = () => {
           <Route path="/novo-treino" element={<NovoTreino />} />
           <Route path="/instrucoes/novo-treino" element={<InstrucoesTreino />} />
           <Route path="/treino-ativo" element={<TreinoAtivo />} />
+          <Route path="/treino/gabarito" element={<GabaritoTreino />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/instrucoes/perfil" element={<InstrucoesPerfil />} />
           <Route path="/recordes" element={<Recordes />} />

@@ -1,7 +1,12 @@
 import React from "react";
 import "./ResultadoTreino.css";
 
-const ResultadoTreino = ({ resultado, onRecomecar, onNovoTreino }) => {
+const ResultadoTreino = ({
+  resultado,
+  onGabarito,
+  onRecomecar,
+  onNovoTreino,
+}) => {
   const { total, erros, bateuRecorde, recordeAnterior } = resultado || {};
 
   // Calcular precisão
@@ -104,6 +109,15 @@ const ResultadoTreino = ({ resultado, onRecomecar, onNovoTreino }) => {
         </div>
 
         <div className="resultado-treino-actions">
+          {onGabarito && (
+            <button
+              type="button"
+              className="btn-gabarito"
+              onClick={onGabarito}
+            >
+              Gabarito
+            </button>
+          )}
           <button className="btn-recomecar" onClick={onRecomecar}>
             Recomeçar
           </button>

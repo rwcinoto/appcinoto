@@ -22,7 +22,7 @@ module.exports = {
           "ano",
           "seculo",
           "data_esse_ano",
-          "data_21",
+          "data_2021",
         ),
         allowNull: false,
         comment: "Tipo de treino de calendário",

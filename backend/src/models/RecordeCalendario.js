@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
           "ano",
           "seculo",
           "data_esse_ano",
-          "data_21",
+          "data_2021",
         ),
         allowNull: false,
       },

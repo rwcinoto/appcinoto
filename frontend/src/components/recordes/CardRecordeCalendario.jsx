@@ -1,9 +1,15 @@
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  CHAVE_JANEIRO_PADRAO,
+  CHAVE_SECULO_21_PADRAO,
+  PERGUNTAR_CHAVES_CALENDARIO,
+} from "../../constants/calendario";
 import api from "../../services/api";
 import { getErrorMessage, logError } from "../../utils/errorHandler";
 import ContagemRegressiva from "../treino/ContagemRegressiva";
+import ModalOpcoesCalendario from "../treino/ModalOpcoesCalendario";
 import "./CardRecorde.css";
 
 const TIPOS_CALENDARIO_LABEL = {
@@ -13,7 +19,7 @@ const TIPOS_CALENDARIO_LABEL = {
   ano: "Ano",
   seculo: "Século",
   data_esse_ano: "Data esse ano",
-  data_21: "Data século XXI",
+  data_2021: "Data 1900-2099",
 };
 
 const obterCorPorTipoCalendario = (tipo) => {
@@ -24,13 +30,13 @@ const obterCorPorTipoCalendario = (tipo) => {
     ano: "#ff9800",
     seculo: "#9c27b0",
     data_esse_ano: "#e91e63",
-    data_21: "#f44336",
+    data_2021: "#f44336",
   };
   return cores[tipo] || "#666";
 };
 
 const obterUnidadePorTipoCalendario = (tipo) => {
-  if (tipo === "data_geral" || tipo === "data_21" || tipo === "data_esse_ano")
+  if (tipo === "data_geral" || tipo === "data_2021" || tipo === "data_esse_ano")
     return "data";
   if (tipo === "dia") return "dia";
   if (tipo === "mes") return "mês";
@@ -45,6 +51,20 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
   const [mostrarContagem, setMostrarContagem] = useState(false);
   const [dadosTreino, setDadosTreino] = useState(null);
   const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [mostrarModalOpcoes, setMostrarModalOpcoes] = useState(false);
+  const [opcoesParaNavegacao, setOpcoesParaNavegacao] = useState(null);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth <= 768,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia?.("(max-width: 768px)");
+    if (!mq) return;
+    const atualizar = () => setIsMobile(mq.matches);
+    atualizar();
+    mq.addEventListener("change", atualizar);
+    return () => mq.removeEventListener("change", atualizar);
+  }, []);
 
   const formatarData = (data) => {
     if (!data) return "-";
@@ -80,27 +100,59 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
     recorde ? recorde.tipo : "",
   );
 
-  const handleIniciarTreino = async () => {
+  const handleIniciarTreino = () => {
     if (!recorde?.tipo || !recorde?.limite) {
       return;
     }
+    setMostrarModalOpcoes(true);
+  };
+
+  const handleConfirmarOpcoes = async (opcoes) => {
+    setMostrarModalOpcoes(false);
+    if (!recorde?.tipo || !recorde?.limite) return;
 
     setIniciandoTreino(true);
-
     try {
+      const tipoResposta = opcoes?.resposta === "nomeDia" ? "texto" : "numeros";
+      const chaveSeculo21Base =
+        recorde.tipo === "seculo"
+          ? PERGUNTAR_CHAVES_CALENDARIO && opcoes?.chaveSeculo21 != null
+            ? Number(opcoes.chaveSeculo21)
+            : CHAVE_SECULO_21_PADRAO
+          : undefined;
+      const chaveJaneiroBase =
+        recorde.tipo === "mes"
+          ? PERGUNTAR_CHAVES_CALENDARIO && opcoes?.chaveJaneiro != null
+            ? Number(opcoes.chaveJaneiro)
+            : CHAVE_JANEIRO_PADRAO
+          : undefined;
+
       const response = await api.post("/calendario/treinos/iniciar", {
         tipo: recorde.tipo,
         limite_id: recorde.limite.id,
+        chaveSeculo21Base,
+        chaveJaneiroBase,
       });
 
       setDadosTreino(response.data);
-      // confirmar-inicio será chamado em TreinoAtivo quando a contagem terminar
+      setOpcoesParaNavegacao({
+        visualizacao: opcoes?.visualizacao || "numeros",
+        tipoResposta: opcoes?.resposta != null ? tipoResposta : "numeros",
+        chaveSeculo21Base:
+          recorde.tipo === "seculo" ? chaveSeculo21Base : undefined,
+        chaveJaneiroBase: recorde.tipo === "mes" ? chaveJaneiroBase : undefined,
+      });
       setMostrarContagem(true);
     } catch (error) {
-      logError("CardRecordeCalendario - handleIniciarTreino", error);
+      logError("CardRecordeCalendario - handleConfirmarOpcoes", error);
       alert(getErrorMessage(error));
+    } finally {
       setIniciandoTreino(false);
     }
+  };
+
+  const handleCancelarOpcoes = () => {
+    setMostrarModalOpcoes(false);
   };
 
   const handleContagemTerminar = () => {
@@ -110,6 +162,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
       state: {
         modo: "calendario",
         treinoData: dadosTreino,
+        ...(opcoesParaNavegacao || {}),
       },
     });
   };
@@ -170,8 +223,28 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
     return null;
   }
 
+  const mostrarOpcoesResposta =
+    isMobile &&
+    (recorde?.tipo === "data_geral" ||
+      recorde?.tipo === "data_2021" ||
+      recorde?.tipo === "data_esse_ano");
+
   return (
     <>
+      <ModalOpcoesCalendario
+        mostrar={mostrarModalOpcoes}
+        mostrarOpcoesResposta={mostrarOpcoesResposta}
+        onConfirmar={handleConfirmarOpcoes}
+        onCancelar={handleCancelarOpcoes}
+        mostrarChaveSeculo21={
+          PERGUNTAR_CHAVES_CALENDARIO && recorde?.tipo === "seculo"
+        }
+        chaveSeculo21Inicial={CHAVE_SECULO_21_PADRAO}
+        mostrarChaveJaneiro={
+          PERGUNTAR_CHAVES_CALENDARIO && recorde?.tipo === "mes"
+        }
+        chaveJaneiroInicial={CHAVE_JANEIRO_PADRAO}
+      />
       {mostrarContagem && (
         <ContagemRegressiva onTerminar={handleContagemTerminar} />
       )}
