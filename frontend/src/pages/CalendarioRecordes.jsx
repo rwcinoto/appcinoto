@@ -17,7 +17,7 @@ const TIPOS_CALENDARIO = [
   { value: "ano", label: "Ano" },
   { value: "seculo", label: "Século" },
   { value: "data_esse_ano", label: "Data esse ano" },
-  { value: "data_21", label: "Data século XXI" },
+  { value: "data_2021", label: "Data 1900-2099" },
 ];
 
 const CalendarioRecordes = () => {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import Loading from "../components/common/Loading";
@@ -9,7 +9,7 @@ import api from "../services/api";
 import { getErrorMessage, logError } from "../utils/errorHandler";
 import "./Rankings.css";
 
-// Opções de tipo de treino conforme plano (data_geral para todos; ano e seculo para id>=3; dia e mes para id>=4; data_21 e data_esse_ano para id>=5)
+// Opções de tipo de treino conforme plano (data_geral para todos; ano e seculo para id>=3; dia e mes para id>=4; data_2021 e data_esse_ano para id>=5)
 const TIPOS_DISPONIVEIS = [
   { value: "data_geral", label: "Data 1582-2399", planoMin: 2 },
   { value: "dia", label: "Dia", planoMin: 4 },
@@ -17,7 +17,7 @@ const TIPOS_DISPONIVEIS = [
   { value: "ano", label: "Ano", planoMin: 3 },
   { value: "seculo", label: "Século", planoMin: 3 },
   { value: "data_esse_ano", label: "Data esse ano", planoMin: 5 },
-  { value: "data_21", label: "Data século XXI", planoMin: 5 },
+  { value: "data_2021", label: "Data 1900-2099", planoMin: 5 },
 ];
 
 const Calendario = () => {
@@ -33,6 +33,7 @@ const Calendario = () => {
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
   const [tempoLimite, setTempoLimite] = useState(null);
   const [erro, setErro] = useState("");
+  const tipoInicialAplicadoRef = useRef(false);
 
   const planoId = usuario?.id_plano || 0;
 
@@ -98,11 +99,29 @@ const Calendario = () => {
 
     if (tipoParam && tiposPermitidos.some((t) => t.value === tipoParam)) {
       setTipoSelecionado(tipoParam);
-    } else if (
-      tiposPermitidos.length > 0 &&
-      !tiposPermitidos.some((t) => t.value === tipoSelecionado)
-    ) {
-      setTipoSelecionado(tiposPermitidos[0].value);
+      tipoInicialAplicadoRef.current = true;
+    } else if (tiposPermitidos.length > 0) {
+      const tipoAtualInvalido = !tiposPermitidos.some(
+        (t) => t.value === tipoSelecionado
+      );
+      const semTipoNaUrl = !tipoParam;
+      // Aplicar favorito só na primeira carga (sem tipo na URL); depois respeitar a escolha do usuário no dropdown
+      const deveAplicarPadrao =
+        semTipoNaUrl &&
+        !tipoInicialAplicadoRef.current &&
+        (tipoAtualInvalido || tipoSelecionado === "data_geral");
+      if (deveAplicarPadrao) {
+        const tipoFavorito = usuario?.calendario_tipo_treino;
+        const favoritoPermitido =
+          tipoFavorito &&
+          tiposPermitidos.some((t) => t.value === tipoFavorito);
+        setTipoSelecionado(
+          favoritoPermitido ? tipoFavorito : tiposPermitidos[0].value
+        );
+        tipoInicialAplicadoRef.current = true;
+      } else if (tipoAtualInvalido) {
+        setTipoSelecionado(tiposPermitidos[0].value);
+      }
     }
 
     if (limiteParam && limites.find((l) => String(l.id) === limiteParam)) {
@@ -122,6 +141,7 @@ const Calendario = () => {
     tiposPermitidos,
     tipoSelecionado,
     limiteSelecionado,
+    usuario?.calendario_tipo_treino,
   ]);
 
   useEffect(() => {

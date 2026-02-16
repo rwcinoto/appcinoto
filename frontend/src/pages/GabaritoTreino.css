@@ -1,0 +1,126 @@
+.gabarito-treino-page {
+  padding: 24px 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.gabarito-treino-container {
+  background: var(--color-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+  transition: background-color 0.3s ease;
+}
+
+.gabarito-treino-titulo {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.gabarito-treino-subtitulo {
+  margin: 0 0 24px 0;
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.gabarito-treino-tabela-wrapper {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+.gabarito-treino-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.gabarito-treino-tabela th,
+.gabarito-treino-tabela td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.gabarito-treino-tabela th {
+  background: var(--color-background-light);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.gabarito-treino-tabela tbody tr:hover {
+  background: var(--color-background-light);
+}
+
+.gabarito-treino-tabela .col-num {
+  width: 48px;
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.gabarito-treino-tabela .col-pergunta {
+  min-width: 180px;
+}
+
+.gabarito-treino-tabela .col-resposta {
+  min-width: 100px;
+  font-weight: 500;
+}
+
+.gabarito-treino-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-voltar-gabarito {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-background-dark);
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.btn-voltar-gabarito:hover {
+  background: var(--color-background-light);
+  border-color: var(--color-border-dark);
+}
+
+.gabarito-treino-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--color-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.gabarito-treino-empty h1 {
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.gabarito-treino-empty p {
+  margin: 0 0 24px 0;
+  color: var(--color-text-light);
+}
+
+@media (max-width: 768px) {
+  .gabarito-treino-tabela th,
+  .gabarito-treino-tabela td {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .gabarito-treino-titulo {
+    font-size: 1.25rem;
+  }
+}

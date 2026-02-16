@@ -306,7 +306,7 @@ const Perfil = () => {
               <option value="ano">Ano</option>
               <option value="seculo">Século</option>
               <option value="data_esse_ano">Data esse ano</option>
-              <option value="data_21">Data século XXI</option>
+              <option value="data_2021">Data 1900-2099</option>
             </select>
           </div>
 

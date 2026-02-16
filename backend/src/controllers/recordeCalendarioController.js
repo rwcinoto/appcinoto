@@ -9,7 +9,7 @@ class RecordeCalendarioController {
    * Lista recordes de calendário de um usuário.
    *
    * Filtros via query string:
-   * - tipo (opcional): "data_geral" | "mes" | "ano" | "seculo" | "data_21"
+   * - tipo (opcional): "data_geral" | "mes" | "ano" | "seculo" | "data_2021"
    * - limite_id (opcional): ID do limite
    * - usuario_id (opcional): usuário alvo (padrão: usuário logado)
    *

@@ -14,7 +14,7 @@ Criar migration com os campos:
 
 - `id` (INT, auto incremento, PK)
 - `id_usuario` (INT 11, FK usuarios)
-- `tipo` (ENUM: 'data_geral', 'mes', 'ano', 'seculo', 'data_21')
+- `tipo` (ENUM: 'data_geral', 'mes', 'ano', 'seculo', 'data_2021')
 - `id_limite` (INT 11, FK limites)
 - `total` (INT 11)
 - `erros` (INT 11, opcional)
@@ -41,13 +41,13 @@ Criar `calendarioService.js` (ou similar) com:
 
 - Função para calcular dia da semana de uma data (1=domingo, 2=segunda, …, 6=sexta, 0 ou 7=sábado)
 - Função para sortear datas no intervalo 15/10/1582 a 31/12/2399
-- Função para sortear datas apenas do século XXI (2000-2099)
+- Função para sortear datas 1900-2099 (séculos XX e XXI)
 - Função para formatar data em texto (ex.: "15 de setembro de 1984") e em números (15/09/1984)
-- Constantes dos tipos: data_geral, mes, ano, seculo, data_21
+- Constantes dos tipos: data_geral, mes, ano, seculo, data_2021
 
 ### 2.2. Serviço `treinoCalendarioService.js`
 
-- `gerarDatas(quantidade, tipo)` – sorteio de datas conforme tipo (data_geral, data_21, etc.)
+- `gerarDatas(quantidade, tipo)` – sorteio de datas conforme tipo (data_geral, data_2021, etc.)
 - `gerarBufferDatas(quantidade, tipo)` – 150 datas previamente sorteadas (análogo a contas)
 - Para treino de meses: lógica das chaves (janeiro base, demais derivadas). Vai mostrar a data completa, mas a resposta é apenas para o mês.
 - Para treino de séculos: lógica das chaves (século XXI base, demais derivadas). Vai mostrar a data completa, mas a resposta é apenas para o século.
@@ -94,7 +94,7 @@ Lógica para criar/atualizar recorde de calendário (similar ao `recordeService.
 
 - Plano id=2: apenas tipo data_geral
 - Plano id≥3: data_geral, mes, ano, seculo
-- Plano id≥4: data_geral, mes, ano, seculo, data_21
+- Plano id≥4: data_geral, mes, ano, seculo, data_2021
 - Menu Calendário visível para todos os planos
 - Instruções disponíveis para todos
 
@@ -122,7 +122,7 @@ Criar página `Calendario.jsx` que:
 
 - Usa **a mesma página Rankings** ou um componente compartilhado, passando um prop `modo="calendario"`
 - Alternativa: criar rota `/rankings?modo=calendario` e adaptar Rankings para suportar modo calendário (filtro tipo em vez de operação/sistema)
-- Filtros: tipo (data 1582-2399 [padrão], mês, ano, século, data século XXI) e limite (1 min padrão, mesmos limites das operações)
+- Filtros: tipo (data 1582-2399 [padrão], mês, ano, século, data 1900-2099) e limite (1 min padrão, mesmos limites das operações)
 - Botão "Meus recordes" ao lado dos filtros – leva a `/calendario/recordes` ou `/recordes?modo=calendario`
 - Usa componente InfoUsuario (ou equivalente) com botão para iniciar treino – adaptar para chamar API de calendário
 - Link de ajuda (?) ao lado do título – leva a `/instrucoes/calendario`
@@ -198,13 +198,13 @@ Trazer marcadas as preferências do perfil, se houver.
 
 Migration para adicionar em `usuarios`:
 
-- `calendario_tipo_treino` (ENUM ou VARCHAR: data_geral, mes, ano, seculo, data_21) – default data_geral
+- `calendario_tipo_treino` (ENUM ou VARCHAR: data_geral, mes, ano, seculo, data_2021) – default data_geral
 
 ### 10.2. Formulário de perfil
 
 Na página Perfil, adicionar seção "Preferências de calendário":
 
-- Tipo de treino (data 1582-2399, mês, ano, século, data século XXI)
+- Tipo de treino (data 1582-2399, mês, ano, século, data 1900-2099)
 
 ---
 
@@ -262,12 +262,12 @@ Criar (ou adaptar ListaContas) para exibir data e campo de resposta, com Teclado
 
 ### 12.5. Adicionar treino de datas do ano atual
 
-- Treino semelhante ao do século XXI, mas deve mostrar apenas datas do ano atual (verificar em que ano estamos).
+- Treino semelhante ao de data 1900-2099, mas deve mostrar apenas datas do ano atual (verificar em que ano estamos).
 - Modal perguntando: "Como quer ver a data?"
 
 ### 12.6. Revisar permissões para os treinos especiais
 
-- no plano de id = 2 só tem treino de data geral. A partir do plano de id=3, tem treino de ano e século (além do treino de data geral). A partir do plano de id=4, incluir treinos de dia e mês. E a partir do plano de id=5 acrescenta treinos de data do ano atual e do século XXI também.
+- no plano de id = 2 só tem treino de data geral. A partir do plano de id=3, tem treino de ano e século (além do treino de data geral). A partir do plano de id=4, incluir treinos de dia e mês. E a partir do plano de id=5 acrescenta treinos de data do ano atual e de 1900-2099 também.
 
 ---
 
@@ -293,7 +293,7 @@ Criar (ou adaptar ListaContas) para exibir data e campo de resposta, com Teclado
 | 16  | Adaptar TreinoAtivo para modo calendário (ou criar TreinoCalendarioAtivo reutilizando componentes) |
 | 17  | Componente ListaDatas (exibição de data + input + validação)                                       |
 | 18  | Treino de data geral – fluxo completo e salvamento de recorde                                      |
-| 19  | Treino de data século XXI                                                                          |
+| 19  | Treino de data 1900-2099                                                                          |
 | 20  | Treino de meses – modal de chave de janeiro + tela de treino                                       |
 | 21  | Treino de séculos – modal de chave século XXI + tela de treino                                     |
 | 22  | Treino de anos – tela de treino (sem modal)                                                        |

@@ -83,6 +83,13 @@ const TreinoAtivo = () => {
   const [totalAcertos, setTotalAcertos] = useState(0);
   const totalAcertosRef = useRef(0); // Ref para rastrear acertos de forma mais confiável
   const totalErrosRef = useRef(0); // Ref para rastrear erros de forma mais confiável
+  const historicoGabaritoRef = useRef([]); // Perguntas usadas no treino para a página de gabarito
+  const contasRef = useRef([]); // Cópia de contas para ler no finalizar (evitar state stale)
+  const opcoesCalendarioGabaritoRef = useRef({
+    visualizacao: "numeros",
+    tipoResposta: "numeros",
+    tipoTreinoCalendario: null,
+  });
   const [tempoLimite, setTempoLimite] = useState(0);
   const [inicioTreino, setInicioTreino] = useState(null); // Timestamp do início do treino
   const [sistemaTipo, setSistemaTipo] = useState("natural");
@@ -100,6 +107,11 @@ const TreinoAtivo = () => {
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== "undefined" && window.innerWidth <= 768,
   );
+
+  // Manter contasRef em sync com contas para usar ao finalizar (gabarito)
+  useEffect(() => {
+    contasRef.current = contas;
+  }, [contas]);
 
   const modoCalendario =
     location.state?.modo === "calendario" ||
@@ -170,6 +182,7 @@ const TreinoAtivo = () => {
 
       setTreinoId(treino_id);
       setContas(contas_iniciais);
+      historicoGabaritoRef.current = [];
       setTempoLimite(limite.tempo);
       setSistemaTipo(sistema.tipo);
       setTotalAcertos(0);
@@ -346,6 +359,12 @@ const TreinoAtivo = () => {
         "numeros";
       setTreinoId(dt.treino_id);
       setContas(dt.datas_iniciais || []);
+      historicoGabaritoRef.current = [];
+      opcoesCalendarioGabaritoRef.current = {
+        visualizacao: viz,
+        tipoResposta: tipResp,
+        tipoTreinoCalendario: dt.tipo ?? null,
+      };
       setTempoLimite(dt.limite?.tempo || 60);
       setInicioTreino(Date.now());
       setTotalAcertos(0);
@@ -448,7 +467,15 @@ const TreinoAtivo = () => {
       // Sempre manter o índice em 0 (primeira conta da lista)
       setContaAtualIndex(0);
 
-      // Atualizar lista de contas: sempre remover primeira e adicionar próxima
+      // Acumular no gabarito fora do setContas para evitar duplicação (Strict Mode chama o updater 2x)
+      if (correto && contas.length > 0) {
+        historicoGabaritoRef.current.push({
+          tipo: "operacao",
+          conta: contas[0],
+        });
+      }
+
+      // Atualizar lista de contas: remover primeira e adicionar próxima
       setContas((prevContas) => {
         const novasContas = [...prevContas];
         novasContas.shift(); // Remover primeira conta (já respondida)
@@ -520,6 +547,13 @@ const TreinoAtivo = () => {
         setTotalAcertos(novoTotal);
         setInputCalendarioComErro(false);
         setContaAtualIndex(0);
+        // Acumular no gabarito fora do setContas para evitar duplicação (Strict Mode chama o updater 2x)
+        if (contas.length > 0) {
+          historicoGabaritoRef.current.push({
+            tipo: "calendario",
+            data: contas[0],
+          });
+        }
         setContas((prev) => {
           const novas = [...prev];
           novas.shift();
@@ -541,6 +575,14 @@ const TreinoAtivo = () => {
 
   const finalizarTreinoCalendario = async () => {
     if (!treinoId || finalizadoRef.current) return;
+
+    // Incluir no gabarito a última pergunta apresentada (não respondida)
+    if (contasRef.current.length > 0) {
+      historicoGabaritoRef.current.push({
+        tipo: "calendario",
+        data: contasRef.current[0],
+      });
+    }
 
     finalizadoRef.current = true;
     setTreinoFinalizado(true);
@@ -577,6 +619,14 @@ const TreinoAtivo = () => {
   const finalizarTreino = async () => {
     // Prevenir múltiplas finalizações
     if (!treinoId || finalizadoRef.current) return;
+
+    // Incluir no gabarito a última pergunta apresentada (não respondida)
+    if (contasRef.current.length > 0) {
+      historicoGabaritoRef.current.push({
+        tipo: "operacao",
+        conta: contasRef.current[0],
+      });
+    }
 
     // Marcar como finalizado imediatamente para bloquear novas respostas
     finalizadoRef.current = true;
@@ -786,6 +836,12 @@ const TreinoAtivo = () => {
       }
       setTreinoId(dt.treino_id);
       setContas(dt.datas_iniciais || []);
+      historicoGabaritoRef.current = [];
+      opcoesCalendarioGabaritoRef.current = {
+        visualizacao: pendente.visualizacao || "numeros",
+        tipoResposta: pendente.tipoResposta || "numeros",
+        tipoTreinoCalendario: dt.tipo ?? null,
+      };
       setTempoLimite(dt.limite?.tempo || 60);
       setInicioTreino(Date.now());
       setTotalAcertos(0);
@@ -858,9 +914,36 @@ const TreinoAtivo = () => {
     }
   };
 
+  const handleGabarito = () => {
+    const itens = [...historicoGabaritoRef.current];
+    const opcoesCal = opcoesCalendarioGabaritoRef.current;
+    navigate("/treino/gabarito", {
+      state: {
+        itens,
+        modoCalendario: !!modoCalendario,
+        formatoResposta: formatoResposta || "sistema",
+        sistemaTipo,
+        treinoData,
+        visualizacaoCalendario: opcoesCal.visualizacao || "numeros",
+        tipoRespostaCalendario: opcoesCal.tipoResposta || "numeros",
+        tipoTreinoCalendario: opcoesCal.tipoTreinoCalendario ?? treinoData?.tipo ?? null,
+      },
+    });
+  };
+
   const handleNovoTreino = () => {
     limparTreinoDoStorage();
-    navigate("/novo-treino");
+    // Ir para rankings já filtrado no treino que acabou (sobrescreve preferências do perfil)
+    const params = new URLSearchParams();
+    if (treinoData?.operacao?.id != null)
+      params.set("operacao_id", String(treinoData.operacao.id));
+    if (treinoData?.limite?.id != null)
+      params.set("limite_id", String(treinoData.limite.id));
+    if (treinoData?.sistema?.id != null)
+      params.set("sistema_id", String(treinoData.sistema.id));
+    navigate(
+      params.toString() ? `/rankings?${params.toString()}` : "/novo-treino"
+    );
   };
 
   if (!usuario) {
@@ -907,7 +990,7 @@ const TreinoAtivo = () => {
     const mostrarOpcoesRespostaCalendario =
       isMobile &&
       (treinoData?.tipo === "data_geral" ||
-        treinoData?.tipo === "data_21" ||
+        treinoData?.tipo === "data_2021" ||
         treinoData?.tipo === "data_esse_ano");
 
     return (
@@ -972,8 +1055,17 @@ const TreinoAtivo = () => {
         {mostrarResultado && resultado && (
           <ResultadoTreino
             resultado={resultado}
+            onGabarito={handleGabarito}
             onRecomecar={handleRecomecarCalendario}
-            onNovoTreino={() => navigate("/calendario")}
+            onNovoTreino={() => {
+              const params = new URLSearchParams();
+              if (treinoData?.tipo) params.set("tipo", treinoData.tipo);
+              if (treinoData?.limite?.id != null)
+                params.set("limite_id", String(treinoData.limite.id));
+              navigate(
+                params.toString() ? `/calendario?${params.toString()}` : "/calendario"
+              );
+            }}
           />
         )}
         <div className="treino-ativo-container">
@@ -1079,6 +1171,7 @@ const TreinoAtivo = () => {
       {mostrarResultado && resultado && (
         <ResultadoTreino
           resultado={resultado}
+          onGabarito={handleGabarito}
           onRecomecar={handleRecomecar}
           onNovoTreino={handleNovoTreino}
         />

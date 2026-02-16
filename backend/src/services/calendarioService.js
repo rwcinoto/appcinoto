@@ -15,7 +15,7 @@ const TIPOS_TREINO_CALENDARIO = {
   ANO: "ano",
   SECULO: "seculo",
   DATA_ESSE_ANO: "data_esse_ano",
-  DATA_21: "data_21",
+  DATA_2021: "data_2021",
 };
 
 // Intervalo padrão do sistema (inclusive)
@@ -24,9 +24,9 @@ const INTERVALO_PADRAO = {
   fim: { ano: 2399, mes: 12, dia: 31 }, // 31/12/2399
 };
 
-// Intervalo século XXI (inclusive)
-const INTERVALO_SECULO_21 = {
-  inicio: { ano: 2000, mes: 1, dia: 1 }, // 01/01/2000
+// Intervalo datas 1900-2099 (séculos XX e XXI, inclusive)
+const INTERVALO_1900_2099 = {
+  inicio: { ano: 1900, mes: 1, dia: 1 }, // 01/01/1900
   fim: { ano: 2099, mes: 12, dia: 31 }, // 31/12/2099
 };
 
@@ -167,14 +167,14 @@ function sortearDataGeral() {
 }
 
 /**
- * Sorteia uma data apenas no século XXI (2000–2099).
+ * Sorteia uma data no intervalo 1900–2099 (séculos XX e XXI).
  *
  * @returns {{ ano: number, mes: number, dia: number }}
  */
-function sortearDataSeculo21() {
+function sortearData1900a2099() {
   return sortearDataNoIntervalo(
-    INTERVALO_SECULO_21.inicio,
-    INTERVALO_SECULO_21.fim,
+    INTERVALO_1900_2099.inicio,
+    INTERVALO_1900_2099.fim,
   );
 }
 
@@ -242,12 +242,12 @@ function formatarDataNumeros({ ano, mes, dia }) {
 module.exports = {
   TIPOS_TREINO_CALENDARIO,
   INTERVALO_PADRAO,
-  INTERVALO_SECULO_21,
+  INTERVALO_1900_2099,
   calcularDiaSemana,
   converterDiaSemanaParaFormatoUsuario,
   sortearDataNoIntervalo,
   sortearDataGeral,
-  sortearDataSeculo21,
+  sortearData1900a2099,
   sortearDataAnoAtual,
   getAnoAtualBrasil,
   formatarDataTexto,

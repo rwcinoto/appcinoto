@@ -93,7 +93,7 @@ const InfoUsuarioCalendario = ({
 
   const mostrarOpcoesResposta =
     isMobile &&
-    (tipo === "data_geral" || tipo === "data_21" || tipo === "data_esse_ano");
+    (tipo === "data_geral" || tipo === "data_2021" || tipo === "data_esse_ano");
 
   if (posicaoUsuario === null || posicaoUsuario === undefined) {
     return (

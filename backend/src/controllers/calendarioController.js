@@ -37,7 +37,7 @@ class CalendarioController {
    * Iniciar treino de calendário
    *
    * Corpo esperado:
-   * - tipo: "data_geral" | "mes" | "dia" | "ano" | "seculo" | "data_21" | "data_esse_ano"
+   * - tipo: "data_geral" | "mes" | "dia" | "ano" | "seculo" | "data_2021" | "data_esse_ano"
    * - limite_id: ID do limite de tempo
    */
   async iniciarTreino(req, res) {
@@ -82,13 +82,13 @@ class CalendarioController {
       // Plano id = 2: apenas data_geral
       // Plano id >= 3: pode ano, seculo (além de data_geral)
       // Plano id >= 4: pode dia e mês (além dos demais)
-      // Plano id >= 5: pode data_21 e data_esse_ano (além dos demais)
+      // Plano id >= 5: pode data_2021 e data_esse_ano (além dos demais)
       const planoId = usuario.id_plano;
 
       const tiposBasicos = ["data_geral"];
       const tiposAtePlano3 = ["ano", "seculo"];
       const tiposAtePlano4 = ["dia", "mes"];
-      const tiposAtePlano5 = ["data_21", "data_esse_ano"];
+      const tiposAtePlano5 = ["data_2021", "data_esse_ano"];
 
       const tipoTreino = String(tipo);
 
@@ -99,7 +99,7 @@ class CalendarioController {
         (planoId >= 3 && tiposAtePlano3.includes(tipoTreino)) ||
         // dia e mês a partir do plano 4
         (planoId >= 4 && tiposAtePlano4.includes(tipoTreino)) ||
-        // data_21 e data_esse_ano a partir do plano 5
+        // data_2021 e data_esse_ano a partir do plano 5
         (planoId >= 5 && tiposAtePlano5.includes(tipoTreino));
 
       if (!permitidoPorPlano) {
