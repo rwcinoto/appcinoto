@@ -98,8 +98,12 @@ const Calendario = () => {
     const limiteParam = searchParams.get("limite_id");
 
     if (tipoParam && tiposPermitidos.some((t) => t.value === tipoParam)) {
-      setTipoSelecionado(tipoParam);
-      tipoInicialAplicadoRef.current = true;
+      // Aplicar o tipo vindo da URL apenas uma vez (primeira carga)
+      // Depois disso, respeitar o que o usuário escolher no dropdown
+      if (!tipoInicialAplicadoRef.current) {
+        setTipoSelecionado(tipoParam);
+        tipoInicialAplicadoRef.current = true;
+      }
     } else if (tiposPermitidos.length > 0) {
       const tipoAtualInvalido = !tiposPermitidos.some(
         (t) => t.value === tipoSelecionado

@@ -24,13 +24,13 @@ const TIPOS_CALENDARIO_LABEL = {
 
 const obterCorPorTipoCalendario = (tipo) => {
   const cores = {
-    data_geral: "#2196f3",
-    dia: "#00bcd4",
-    mes: "#4caf50",
-    ano: "#ff9800",
-    seculo: "#9c27b0",
-    data_esse_ano: "#e91e63",
-    data_2021: "#f44336",
+    data_geral: "#2196f3", // Azul
+    dia: "#4caf50", // Verde
+    mes: "#ff9800", // Laranja
+    ano: "#ffeb3b", // Amarelo
+    seculo: "#f44336", // Vermelho
+    data_esse_ano: "#BA68C8", // Roxo claro
+    data_2021: "#666", // Cinza
   };
   return cores[tipo] || "#666";
 };
