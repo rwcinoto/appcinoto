@@ -3,7 +3,10 @@
   border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 20px;
-  transition: all 0.3s, background-color 0.3s ease, border-color 0.3s ease;
+  transition:
+    all 0.3s,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -40,7 +43,9 @@
   font-weight: 500;
   color: var(--color-text);
   cursor: pointer;
-  transition: all 0.2s, border-color 0.3s ease;
+  transition:
+    all 0.2s,
+    border-color 0.3s ease;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -138,7 +143,7 @@
 }
 
 .dark .card-recorde-info-value {
-  color: #C0C0C0;
+  color: #c0c0c0;
 }
 
 /* Nota: Os badges de sistema usam estilos inline (style={{...}}) no CardRecorde.jsx */

@@ -89,6 +89,8 @@ const TreinoAtivo = () => {
     visualizacao: "numeros",
     tipoResposta: "numeros",
     tipoTreinoCalendario: null,
+    chaveSeculo21Base: undefined,
+    chaveJaneiroBase: undefined,
   });
   const [tempoLimite, setTempoLimite] = useState(0);
   const [inicioTreino, setInicioTreino] = useState(null); // Timestamp do início do treino
@@ -364,6 +366,9 @@ const TreinoAtivo = () => {
         visualizacao: viz,
         tipoResposta: tipResp,
         tipoTreinoCalendario: dt.tipo ?? null,
+        // Bases podem ter sido salvas no storage quando o treino foi criado
+        chaveSeculo21Base: dadosDoStorage?.chaveSeculo21Base,
+        chaveJaneiroBase: dadosDoStorage?.chaveJaneiroBase,
       };
       setTempoLimite(dt.limite?.tempo || 60);
       setInicioTreino(Date.now());
@@ -841,6 +846,8 @@ const TreinoAtivo = () => {
         visualizacao: pendente.visualizacao || "numeros",
         tipoResposta: pendente.tipoResposta || "numeros",
         tipoTreinoCalendario: dt.tipo ?? null,
+        chaveSeculo21Base: pendente.chaveSeculo21Base,
+        chaveJaneiroBase: pendente.chaveJaneiroBase,
       };
       setTempoLimite(dt.limite?.tempo || 60);
       setInicioTreino(Date.now());
@@ -927,6 +934,8 @@ const TreinoAtivo = () => {
         visualizacaoCalendario: opcoesCal.visualizacao || "numeros",
         tipoRespostaCalendario: opcoesCal.tipoResposta || "numeros",
         tipoTreinoCalendario: opcoesCal.tipoTreinoCalendario ?? treinoData?.tipo ?? null,
+        chaveSeculo21Base: opcoesCal.chaveSeculo21Base,
+        chaveJaneiroBase: opcoesCal.chaveJaneiroBase,
       },
     });
   };

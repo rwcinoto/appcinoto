@@ -5,10 +5,14 @@ import {
   obterSimboloOperacao,
 } from "../utils/conversaoNumerica";
 import {
-  formatarDataTexto,
-  formatarDataNumeros,
+  CHAVE_JANEIRO_PADRAO,
+  CHAVE_SECULO_21_PADRAO,
+} from "../constants/calendario";
+import {
   calcularDiaSemana,
   diaSemanaParaResposta,
+  formatarDataNumeros,
+  formatarDataTexto,
 } from "../utils/formatarDataCalendario";
 import "./GabaritoTreino.css";
 
@@ -16,7 +20,8 @@ import "./GabaritoTreino.css";
  * Formata parcela com parênteses se negativa (para exibição no gabarito).
  */
 function formatarParcelaComParenteses(valorNumerico, valorFormatado) {
-  if (valorNumerico === null || valorNumerico === undefined) return valorFormatado;
+  if (valorNumerico === null || valorNumerico === undefined)
+    return valorFormatado;
   if (valorNumerico < 0) return `(${valorFormatado})`;
   return valorFormatado;
 }
@@ -25,11 +30,7 @@ function formatarParcelaComParenteses(valorNumerico, valorFormatado) {
  * Formata parcela para divisão/multiplicação (decimal: inteiros sem vírgula quando aplicável).
  */
 function formatarParcelaDivisao(valor, sistema, tipo) {
-  if (
-    tipo === "divisao" &&
-    sistema === "decimal" &&
-    Number.isInteger(valor)
-  ) {
+  if (tipo === "divisao" && sistema === "decimal" && Number.isInteger(valor)) {
     return valor.toString();
   }
   return formatarNumero(valor, sistema);
@@ -40,7 +41,7 @@ function formatarParcelaMultiplicacao(
   sistema,
   tipo,
   numeroParcela,
-  temParcela3
+  temParcela3,
 ) {
   if (tipo === "multiplicacao" && sistema === "decimal") {
     if (temParcela3) {
@@ -57,7 +58,12 @@ function formatarParcelaMultiplicacao(
 /**
  * Monta o texto da pergunta para uma conta (operação).
  */
-function formatarPerguntaOperacao(conta, sistemaTipo, formatoResposta, operacaoTipo) {
+function formatarPerguntaOperacao(
+  conta,
+  sistemaTipo,
+  formatoResposta,
+  operacaoTipo,
+) {
   const sistema = sistemaTipo || "natural";
 
   let parcela1Formatada;
@@ -80,8 +86,7 @@ function formatarPerguntaOperacao(conta, sistemaTipo, formatoResposta, operacaoT
     return `${parcela1Formatada} = ?`;
   }
 
-  const temParcela3 =
-    conta.parcela3 !== null && conta.parcela3 !== undefined;
+  const temParcela3 = conta.parcela3 !== null && conta.parcela3 !== undefined;
   const parcela2Formatada =
     conta.parcela2 !== null && conta.parcela2 !== undefined
       ? formatarParcelaComParenteses(
@@ -91,23 +96,22 @@ function formatarPerguntaOperacao(conta, sistemaTipo, formatoResposta, operacaoT
             sistema,
             conta.tipo,
             2,
-            temParcela3
-          )
+            temParcela3,
+          ),
         )
       : "";
-  const parcela3Formatada =
-    temParcela3
-      ? formatarParcelaComParenteses(
+  const parcela3Formatada = temParcela3
+    ? formatarParcelaComParenteses(
+        conta.parcela3,
+        formatarParcelaMultiplicacao(
           conta.parcela3,
-          formatarParcelaMultiplicacao(
-            conta.parcela3,
-            sistema,
-            conta.tipo,
-            3,
-            true
-          )
-        )
-      : null;
+          sistema,
+          conta.tipo,
+          3,
+          true,
+        ),
+      )
+    : null;
   const simbolo = obterSimboloOperacao(conta.tipo);
 
   let expr = `${parcela1Formatada} ${simbolo} ${parcela2Formatada}`;
@@ -119,7 +123,12 @@ function formatarPerguntaOperacao(conta, sistemaTipo, formatoResposta, operacaoT
  * Monta a resposta correta para uma conta (operação).
  * Resposta no formato que o usuário escolheu: natural ou no sistema.
  */
-function formatarRespostaOperacao(conta, sistemaTipo, formatoResposta, operacaoTipo) {
+function formatarRespostaOperacao(
+  conta,
+  sistemaTipo,
+  formatoResposta,
+  operacaoTipo,
+) {
   const sistema = sistemaTipo || "natural";
   const valor = conta.resultado;
 
@@ -142,7 +151,8 @@ function formatarRespostaOperacao(conta, sistemaTipo, formatoResposta, operacaoT
 function tituloTreino(state) {
   if (!state) return "Gabarito do treino";
   if (state.modoCalendario && state.treinoData) {
-    const tipo = state.tipoTreinoCalendario || state.treinoData.tipo || "calendário";
+    const tipo =
+      state.tipoTreinoCalendario || state.treinoData.tipo || "calendário";
     const limite = state.treinoData.limite?.descricao || "";
     return `Treino de calendário${tipo ? ` (${tipo})` : ""}${limite ? ` – ${limite}` : ""}`;
   }
@@ -165,13 +175,104 @@ function getRotaVoltar(state) {
     const params = new URLSearchParams();
     if (td.tipo) params.set("tipo", td.tipo);
     if (td.limite?.id != null) params.set("limite_id", String(td.limite.id));
-    return params.toString() ? `/calendario?${params.toString()}` : "/calendario";
+    return params.toString()
+      ? `/calendario?${params.toString()}`
+      : "/calendario";
   }
   const params = new URLSearchParams();
-  if (td.operacao?.id != null) params.set("operacao_id", String(td.operacao.id));
+  if (td.operacao?.id != null)
+    params.set("operacao_id", String(td.operacao.id));
   if (td.limite?.id != null) params.set("limite_id", String(td.limite.id));
   if (td.sistema?.id != null) params.set("sistema_id", String(td.sistema.id));
   return params.toString() ? `/rankings?${params.toString()}` : "/novo-treino";
+}
+
+// Helpers de calendário para os treinos especiais (ano, dia, mês, século)
+function normalizarChaveModulo7(valor) {
+  if (typeof valor !== "number" || !Number.isFinite(valor)) {
+    return 0;
+  }
+  const mod = ((valor % 7) + 7) % 7; // 0..6
+  if (mod === 0) return 0;
+  return mod <= 3 ? mod : mod - 7; // 4 -> -3, 5 -> -2, 6 -> -1
+}
+
+function calcularChaveAnoFrontend(anoCompleto) {
+  if (typeof anoCompleto !== "number" || !Number.isFinite(anoCompleto)) {
+    return 0;
+  }
+  const doisUltimos = Math.abs(anoCompleto) % 100;
+  return (doisUltimos + Math.floor(doisUltimos / 4)) % 7;
+}
+
+function calcularChaveMesFrontend(mes, chaveJaneiroBase = CHAVE_JANEIRO_PADRAO) {
+  let delta = 0;
+  switch (mes) {
+    case 1: // janeiro
+    case 10: // outubro
+      delta = 0;
+      break;
+    case 4: // abril
+    case 7: // julho
+      delta = -1;
+      break;
+    case 5: // maio
+      delta = 1;
+      break;
+    case 8: // agosto
+      delta = 2;
+      break;
+    case 2: // fevereiro
+    case 3: // março
+    case 11: // novembro
+      delta = 3;
+      break;
+    case 9: // setembro
+    case 12: // dezembro
+      delta = -2;
+      break;
+    case 6: // junho
+      delta = -3;
+      break;
+    default:
+      delta = 0;
+  }
+  const base = chaveJaneiroBase ?? CHAVE_JANEIRO_PADRAO;
+  const valorBruto = base + delta;
+  return normalizarChaveModulo7(valorBruto);
+}
+
+function calcularChaveSeculoFrontend(ano, chaveSeculo21Base = CHAVE_SECULO_21_PADRAO) {
+  if (typeof ano !== "number" || !Number.isFinite(ano)) {
+    return 0;
+  }
+  const seculo = Math.floor(ano / 100) + 1;
+  let delta;
+  switch (seculo) {
+    case 17:
+    case 21:
+      delta = 0;
+      break;
+    case 16:
+    case 20:
+    case 24:
+      delta = 1;
+      break;
+    case 19:
+    case 23:
+      delta = 3;
+      break;
+    case 18:
+    case 22:
+      delta = -2;
+      break;
+    default:
+      // Para outros séculos, manter base como aproximação
+      delta = 0;
+  }
+  const base = chaveSeculo21Base ?? CHAVE_SECULO_21_PADRAO;
+  const valorBruto = base + delta;
+  return normalizarChaveModulo7(valorBruto);
 }
 
 const GabaritoTreino = () => {
@@ -185,6 +286,10 @@ const GabaritoTreino = () => {
   const treinoData = state?.treinoData;
   const operacaoTipo = treinoData?.operacao?.tipo ?? null;
   const visualizacaoCalendario = state?.visualizacaoCalendario ?? "numeros";
+  const tipoTreinoCalendario =
+    state?.tipoTreinoCalendario || state?.treinoData?.tipo || "data_geral";
+  const chaveSeculo21Base = state?.chaveSeculo21Base;
+  const chaveJaneiroBase = state?.chaveJaneiroBase;
   const rotaVoltar = getRotaVoltar(state);
 
   if (!state || !Array.isArray(itens) || itens.length === 0) {
@@ -221,7 +326,7 @@ const GabaritoTreino = () => {
               <tr>
                 <th className="col-num">#</th>
                 <th className="col-pergunta">Pergunta</th>
-                <th className="col-resposta">Resposta correta</th>
+                <th className="col-resposta">Resposta</th>
               </tr>
             </thead>
             <tbody>
@@ -232,8 +337,33 @@ const GabaritoTreino = () => {
                     visualizacaoCalendario === "texto"
                       ? formatarDataTexto(item.data)
                       : formatarDataNumeros(item.data);
-                  const diaSemana = calcularDiaSemana(ano, mes, dia);
-                  const resposta = diaSemanaParaResposta(diaSemana);
+
+                  let resposta;
+                  if (tipoTreinoCalendario === "dia") {
+                    // Treino de dias: dia da data módulo 7 (0..6)
+                    resposta = ((dia % 7) + 7) % 7;
+                  } else if (tipoTreinoCalendario === "ano") {
+                    // Treino de anos: chave do ano (dois últimos dígitos)
+                    resposta = calcularChaveAnoFrontend(ano);
+                  } else if (tipoTreinoCalendario === "mes") {
+                    // Treino de meses: chave do mês (exibir em 0..6, sem negativos)
+                    const baseNorm = normalizarChaveModulo7(
+                      Number(chaveJaneiroBase ?? CHAVE_JANEIRO_PADRAO),
+                    );
+                    const chaveMes = calcularChaveMesFrontend(mes, baseNorm);
+                    resposta = ((chaveMes % 7) + 7) % 7;
+                  } else if (tipoTreinoCalendario === "seculo") {
+                    // Treino de séculos: chave do século a partir da chave do século XXI
+                    const baseNorm = normalizarChaveModulo7(
+                      Number(chaveSeculo21Base ?? CHAVE_SECULO_21_PADRAO),
+                    );
+                    resposta = calcularChaveSeculoFrontend(ano, baseNorm);
+                  } else {
+                    // Demais treinos de calendário: dia da semana (1..7)
+                    const diaSemana = calcularDiaSemana(ano, mes, dia);
+                    resposta = diaSemanaParaResposta(diaSemana);
+                  }
+
                   return (
                     <tr key={`cal-${index}-${ano}-${mes}-${dia}`}>
                       <td className="col-num">{index + 1}</td>
@@ -248,13 +378,13 @@ const GabaritoTreino = () => {
                     conta,
                     sistemaTipo,
                     formatoResposta,
-                    operacaoTipo
+                    operacaoTipo,
                   );
                   const resposta = formatarRespostaOperacao(
                     conta,
                     sistemaTipo,
                     formatoResposta,
-                    operacaoTipo
+                    operacaoTipo,
                   );
                   return (
                     <tr

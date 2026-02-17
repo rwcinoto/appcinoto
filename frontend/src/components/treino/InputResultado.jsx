@@ -39,7 +39,7 @@ const InputResultado = ({
       setEstadoValidacao(null);
       return false;
     }
-    
+
     // Se resposta digitada está vazia, ainda não validar
     if (!respostaDigitada || respostaDigitada.length === 0) {
       setEstadoValidacao(null);
@@ -54,18 +54,21 @@ const InputResultado = ({
       if (sistema === "natural" || sistema === "inteiro") {
         respostaEsperadaFormatada = String(resultadoEsperado);
       } else if (sistema === "decimal") {
-        respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "decimal");
+        respostaEsperadaFormatada = formatarNumero(
+          resultadoEsperado,
+          "decimal",
+        );
       } else if (sistema === "romano") {
         respostaEsperadaFormatada = formatarNumero(resultadoEsperado, "romano");
       } else if (sistema === "binario") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
-          "binario"
+          "binario",
         );
       } else if (sistema === "hexadecimal") {
         respostaEsperadaFormatada = formatarNumero(
           resultadoEsperado,
-          "hexadecimal"
+          "hexadecimal",
         );
       } else {
         setEstadoValidacao(null);
@@ -80,13 +83,16 @@ const InputResultado = ({
       if (sistema === "natural" || sistema === "inteiro") {
         // Para natural e inteiro: comparar caractere por caractere
         const esperado = String(respostaEsperadaFormatada);
-        
+
         // Verificar se resultado é negativo
         const resultadoNegativo = resultadoEsperado < 0;
-        
+
         // Se resultado é negativo e usuário não digitou "-" ainda, mas já digitou número, erro
         if (resultadoNegativo) {
-          if (!respostaNormalizada.startsWith("-") && respostaNormalizada.length > 0) {
+          if (
+            !respostaNormalizada.startsWith("-") &&
+            respostaNormalizada.length > 0
+          ) {
             return "erro";
           }
         } else {
@@ -95,23 +101,23 @@ const InputResultado = ({
             return "erro";
           }
         }
-        
+
         // Se a resposta está vazia, ainda não validar
         if (respostaNormalizada.length === 0) {
           return false;
         }
-        
+
         // Comparar cada caractere digitado com o caractere correspondente da resposta esperada
         // Exemplo: se resposta esperada é "17" e usuário digitou "2", comparamos "2" com "1" → erro imediato
         // Exemplo: se resposta esperada é "17" e usuário digitou "1", comparamos "1" com "1" → OK, continua
         const tamanhoDigitado = respostaNormalizada.length;
         const tamanhoEsperado = esperado.length;
-        
+
         // Se digitou mais caracteres que o esperado, erro
         if (tamanhoDigitado > tamanhoEsperado) {
           return "erro";
         }
-        
+
         // Comparar caractere por caractere - qualquer diferença é erro imediato
         for (let i = 0; i < tamanhoDigitado; i++) {
           const charDigitado = respostaNormalizada.charAt(i);
@@ -120,24 +126,24 @@ const InputResultado = ({
             return "erro";
           }
         }
-        
+
         // Se chegou aqui, todos os caracteres digitados estão corretos
         // Se o tamanho é igual, está completo e correto
         if (tamanhoDigitado === tamanhoEsperado) {
           return true;
         }
-        
+
         // Ainda está digitando e tudo certo até agora
         return false;
       } else if (sistema === "decimal") {
         // Para decimal: usar vírgula como padrão (padrão brasileiro)
         // respostaEsperadaFormatada já vem com vírgula da função formatarNumero
-        
+
         // Se está vazio, ainda não validar
         if (respostaNormalizada.length === 0) {
           return false;
         }
-        
+
         // Se usuário digitou apenas vírgula
         if (respostaNormalizada === ",") {
           // Se a resposta esperada não começa com vírgula (começa com número), erro imediato
@@ -149,14 +155,17 @@ const InputResultado = ({
             return false;
           }
         }
-        
+
         // Comparar cada caractere digitado com o caractere correspondente
         for (let i = 0; i < respostaNormalizada.length; i++) {
-          if (i >= respostaEsperadaFormatada.length || respostaNormalizada[i] !== respostaEsperadaFormatada[i]) {
+          if (
+            i >= respostaEsperadaFormatada.length ||
+            respostaNormalizada[i] !== respostaEsperadaFormatada[i]
+          ) {
             return "erro";
           }
         }
-        
+
         // Se chegou aqui, todos os caracteres digitados estão corretos
         // Se o tamanho é igual, validar o valor numérico para confirmar
         if (respostaNormalizada.length === respostaEsperadaFormatada.length) {
@@ -170,50 +179,59 @@ const InputResultado = ({
           }
           return "erro";
         }
-        
+
         // Ainda está digitando e tudo certo até agora
         return false;
       } else if (sistema === "romano") {
         // Para romano: comparar caractere por caractere (case insensitive)
         for (let i = 0; i < respostaUpper.length; i++) {
-          if (i >= esperadoUpper.length || respostaUpper[i] !== esperadoUpper[i]) {
+          if (
+            i >= esperadoUpper.length ||
+            respostaUpper[i] !== esperadoUpper[i]
+          ) {
             return "erro";
           }
         }
-        
+
         // Se chegou aqui e o tamanho é igual, está correto
         if (respostaUpper.length === esperadoUpper.length) {
           return true;
         }
-        
+
         return false;
       } else if (sistema === "binario") {
         // Para binário: comparar caractere por caractere
         for (let i = 0; i < respostaNormalizada.length; i++) {
-          if (i >= respostaEsperadaFormatada.length || respostaNormalizada[i] !== respostaEsperadaFormatada[i]) {
+          if (
+            i >= respostaEsperadaFormatada.length ||
+            respostaNormalizada[i] !== respostaEsperadaFormatada[i]
+          ) {
             return "erro";
           }
         }
-        
+
         // Se chegou aqui e o tamanho é igual, está correto
         if (respostaNormalizada.length === respostaEsperadaFormatada.length) {
           return true;
         }
-        
+
         return false;
       } else if (sistema === "hexadecimal") {
         // Para hexadecimal: comparar caractere por caractere (case insensitive)
         for (let i = 0; i < respostaUpper.length; i++) {
-          if (i >= esperadoUpper.length || respostaUpper[i] !== esperadoUpper[i]) {
+          if (
+            i >= esperadoUpper.length ||
+            respostaUpper[i] !== esperadoUpper[i]
+          ) {
             return "erro";
           }
         }
-        
+
         // Se chegou aqui e o tamanho é igual, está correto
         if (respostaUpper.length === esperadoUpper.length) {
           return true;
         }
-        
+
         return false;
       }
     } catch (error) {
@@ -277,17 +295,17 @@ const InputResultado = ({
       // Erro detectado: marcar como erro e limpar campo
       setEstadoValidacao("errado");
       setValor("");
-      
+
       // Garantir que o input está limpo no DOM também
       if (inputRef.current) {
         inputRef.current.value = "";
       }
-      
+
       // Chamar callback de erro se fornecido
       if (onErro) {
         onErro();
       }
-      
+
       // Resetar estado após um breve delay para mostrar feedback visual
       setTimeout(() => {
         setEstadoValidacao(null);
@@ -296,14 +314,14 @@ const InputResultado = ({
           inputRef.current.focus();
         }
       }, 300);
-      
+
       // Prevenir que o valor seja atualizado no input
       return;
     } else if (resultadoValidacao === true) {
       // Resposta correta completa: atualizar valor e marcar como correto
       setValor(valorFiltrado);
       setEstadoValidacao("correto");
-      
+
       // Aguardar um pouco antes de chamar o callback (para mostrar feedback visual)
       setTimeout(() => {
         if (onAcerto) {
@@ -338,8 +356,22 @@ const InputResultado = ({
       <input
         ref={inputRef}
         type="text"
-        inputMode={sistema === "romano" || sistema === "hexadecimal" ? "text" : "numeric"}
-        pattern={sistema === "natural" ? "[0-9]*" : sistema === "inteiro" ? "-?[0-9]*" : sistema === "decimal" ? "[0-9]*[.,]?[0-9]*" : sistema === "binario" ? "[01]*" : sistema === "hexadecimal" ? "[0-9A-Fa-f]*" : undefined}
+        inputMode={
+          sistema === "romano" || sistema === "hexadecimal" ? "text" : "numeric"
+        }
+        pattern={
+          sistema === "natural"
+            ? "[0-9]*"
+            : sistema === "inteiro"
+              ? "-?[0-9]*"
+              : sistema === "decimal"
+                ? "[0-9]*[.,]?[0-9]*"
+                : sistema === "binario"
+                  ? "[01]*"
+                  : sistema === "hexadecimal"
+                    ? "[0-9A-Fa-f]*"
+                    : undefined
+        }
         value={valor}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
