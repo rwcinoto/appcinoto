@@ -133,7 +133,7 @@ const InfoUsuario = ({
                   title="Iniciar treino com estas configurações"
                   aria-label="Iniciar treino com estas configurações"
                 >
-                  {iniciandoTreino ? "..." : "🏃 Iniciar esse treino"}
+                  {iniciandoTreino ? "..." : "🏃 Iniciar este treino"}
                 </button>
               </div>
             )}

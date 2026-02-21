@@ -29,8 +29,10 @@ const Calendario = () => {
   const [totalParticipantes, setTotalParticipantes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [limites, setLimites] = useState([]);
+  const [conjuntos, setConjuntos] = useState([]);
   const [tipoSelecionado, setTipoSelecionado] = useState("data_geral");
   const [limiteSelecionado, setLimiteSelecionado] = useState("");
+  const [conjuntoSelecionado, setConjuntoSelecionado] = useState("");
   const [tempoLimite, setTempoLimite] = useState(null);
   const [erro, setErro] = useState("");
   const tipoInicialAplicadoRef = useRef(false);
@@ -44,13 +46,19 @@ const Calendario = () => {
   const carregarDados = useCallback(async () => {
     setErro("");
     try {
-      const limitesRes = await api.get("/limites");
+      const conjuntosUrl =
+        usuario?.tipo === "admin" ? "/conjuntos?todos=true" : "/conjuntos";
+      const [limitesRes, conjuntosRes] = await Promise.all([
+        api.get("/limites"),
+        api.get(conjuntosUrl).catch(() => ({ data: [] })),
+      ]);
       setLimites(limitesRes.data);
+      setConjuntos(conjuntosRes.data || []);
     } catch (error) {
       logError("Calendario - carregarDados", error);
       setErro(getErrorMessage(error));
     }
-  }, []);
+  }, [usuario?.tipo]);
 
   const carregarRanking = useCallback(async () => {
     if (!tipoSelecionado || !limiteSelecionado) {
@@ -66,6 +74,9 @@ const Calendario = () => {
         tipo: tipoSelecionado,
         limite_id: limiteSelecionado,
       });
+      if (conjuntoSelecionado) {
+        params.append("conjunto_id", conjuntoSelecionado);
+      }
       const url = `/calendario/rankings?${params.toString()}`;
       const response = await api.get(url);
 
@@ -83,7 +94,7 @@ const Calendario = () => {
     } finally {
       setLoading(false);
     }
-  }, [tipoSelecionado, limiteSelecionado]);
+  }, [tipoSelecionado, limiteSelecionado, conjuntoSelecionado]);
 
   useEffect(() => {
     if (usuario) {
@@ -96,6 +107,7 @@ const Calendario = () => {
 
     const tipoParam = searchParams.get("tipo");
     const limiteParam = searchParams.get("limite_id");
+    const conjuntoIdParam = searchParams.get("conjunto_id");
 
     if (tipoParam && tiposPermitidos.some((t) => t.value === tipoParam)) {
       // Aplicar o tipo vindo da URL apenas uma vez (primeira carga)
@@ -139,8 +151,18 @@ const Calendario = () => {
         setLimiteSelecionado(String(limitePadrao.id));
       }
     }
+
+    if (
+      conjuntoIdParam &&
+      conjuntos.find((c) => String(c.id) === conjuntoIdParam)
+    ) {
+      setConjuntoSelecionado(conjuntoIdParam);
+    } else {
+      setConjuntoSelecionado("");
+    }
   }, [
     limites,
+    conjuntos,
     searchParams,
     tiposPermitidos,
     tipoSelecionado,
@@ -152,7 +174,13 @@ const Calendario = () => {
     if (usuario && tipoSelecionado && limiteSelecionado) {
       carregarRanking();
     }
-  }, [usuario, tipoSelecionado, limiteSelecionado, carregarRanking]);
+  }, [
+    usuario,
+    tipoSelecionado,
+    limiteSelecionado,
+    conjuntoSelecionado,
+    carregarRanking,
+  ]);
 
   if (!usuario) {
     return (
@@ -234,6 +262,24 @@ const Calendario = () => {
               <span className="filtro-valor">{limites[0].descricao}</span>
             </div>
           ) : null}
+
+          {conjuntos.length > 0 && (
+            <div className="select-group-filtro">
+              <span className="filtro-label">Conjunto:</span>
+              <select
+                value={conjuntoSelecionado}
+                onChange={(e) => setConjuntoSelecionado(e.target.value)}
+                className="select-conjunto"
+              >
+                <option value="">Global</option>
+                {conjuntos.map((conjunto) => (
+                  <option key={conjunto.id} value={conjunto.id}>
+                    {conjunto.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <button
             type="button"

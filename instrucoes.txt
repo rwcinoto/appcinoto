@@ -1,0 +1,41 @@
+Vamos criar agora as duas páginas de instruções de calendário. Tem uma para a página de rankings/treinos de calendário e outra para o de recordes de calendário. Deixar os placeholders para eu acrescentar as imagens depois.
+
+Página de recordes de calendário:
+- essa é mais simples, basta fazer parecida com a página de instruções de recordes de operações.
+- Mas agora temos a lista dos últimos recordes batidos no Numix e não falamos disso na página de instruções de recordes de operações, temos que falar.
+
+Página de rankings/treinos de calendário:
+- a ideia é fazer algo muito parecido com a página de instruções de treinos de operações, mas agora para os treinos de calendário.
+- primeiro quero falar como funcionam os treinos para quem já sabe calcular o dia da semana de uma data
+- tenho que informar sobre outros tipos de treinos e outros limites para quem está em outros níveis
+- depois quero fazer um mini tutorial para quem não sabe como calcular o dia da semana de uma data
+- nesse tutorial eu vou explicar que para calcular o dia da semana de uma data a pessoa vai somar o valor do dia, um número que é associado ao mês, um número que é associado ao ano, mais um número que é associado ao século da data
+- o número do dia é o mais fácil porque eu simplesmente somar o dia sem mudar nada
+- o mês você precisa decorar qual é o valor de cada mês. Para isso normalmente as pessoas fazem alguma associação do mês com aquele número e vou deixar como exemplo as associações que eu uso
+  - Janeiro = 1 (primeiro mês do ano)
+  - Fevereiro = 4 (carnaval cai em fevereiro e tem 4 dias)
+  - Março = 4 (carnaval cai em março e tem 4 dias)
+  - Abril = 0 (mês da mentira: 0 verdades)
+  - Maio = 2 (mês das noivas: 2 pessoas num casal)
+  - Junho = 5 (junho tem 5 letras)
+  - Julho = 0 (mês de férias, 0 aulas)
+  - Agosto = 3 (agosto tem 3 sílabas)
+  - Setembro = 6 (lembra seistembro)
+  - Outubro = 1 (lembra ou1ubro)
+  - Novembro = 4 (mês da re-pú-bli-ca: 4 sílabas)
+  - Dezembro = 6 (mês das festas: festas tem 6 letras)
+- para o ano você precisa fazer uma conta que é somar o número do ano mais o quociente da divisão daquele número por 4 e ver o resto da divisão desse resultado por 7. Dá para fazer essa conta de cabeça mas fica mais rápido se você decorar esse resultado para todos os anos e colocará uma tabela com esses valores de todos os anos de 0 a 99
+  - temos que colocar uns 3 exemplos de anos para a pessoa entender melhor a conta
+- para o séculos também tem uma regra e vamos colocar a tabela com os números referentes a cada século explicando que o padrão se mantém para outro séculos para frente
+  - século XVI (1582-1599) = 0
+  - século XVII (1600-1699) = -1
+  - século XVIII (1700-1799) = -3
+  - século XIX (1800-1899) = 2
+  - século XX (1900-1999) = 0
+  - século XXI (2000-2099) = -1
+  - século XXII (2100-2199) = -3
+  - século XXIII (2200-2299) = 2
+  - século XXIV (2300-2399) = 0
+- e no final explicar que a pessoa vai somar o número do dia com o número do mês com o número do ano com o número do século e ver o resto da divisão desse resultado por 7 isso dará o dia da semana
+- se for ano bissexto e for janeiro ou fevereiro tem que lembrar de subtrair 1
+- explicar que domingo é um, segundo é dois e essa sucessivamente até sábado que é 7, mas sábado você também pode digitar zero

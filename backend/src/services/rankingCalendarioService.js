@@ -1,16 +1,23 @@
 "use strict";
 
-const { RecordeCalendario, Usuario, Limite } = require("../models");
+const {
+  RecordeCalendario,
+  Usuario,
+  Limite,
+  Conjunto,
+  UsuarioConjunto,
+} = require("../models");
 const { Op, Sequelize } = require("sequelize");
 
 class RankingCalendarioService {
   /**
-   * Obtém ranking de calendário (sempre global, sem conjuntos).
-   * @param {Object} filtros - Filtros: tipo, id_limite
+   * Obtém ranking de calendário (global ou por conjunto).
+   * @param {Object} filtros - Filtros: tipo, id_limite, conjunto_id (opcional)
    * @param {number} usuarioId - ID do usuário logado
+   * @param {string} usuarioTipo - Tipo do usuário logado (admin, comum, profe)
    * @returns {Promise<{ ranking: any[], posicaoUsuario: number|null, totalParticipantes: number }>}
    */
-  async obterRanking(filtros, usuarioId) {
+  async obterRanking(filtros, usuarioId, usuarioTipo) {
     // Validar filtros obrigatórios
     if (!filtros.tipo || !filtros.id_limite) {
       throw new Error("Filtros obrigatórios: tipo, id_limite");
@@ -25,17 +32,66 @@ class RankingCalendarioService {
       throw new Error("Limite não encontrado");
     }
 
+    // Se conjunto_id fornecido, validar que usuário pertence ao conjunto
+    let usuariosConjuntoIds = null;
+    if (filtros.conjunto_id) {
+      const conjunto = await Conjunto.findByPk(filtros.conjunto_id, {
+        attributes: ["id", "ativo"],
+      });
+
+      if (!conjunto) {
+        throw new Error("Conjunto não encontrado");
+      }
+
+      if (!conjunto.ativo) {
+        throw new Error("Conjunto inativo");
+      }
+
+      if (usuarioTipo !== "admin") {
+        const usuarioConjunto = await UsuarioConjunto.findOne({
+          where: {
+            id_conjunto: filtros.conjunto_id,
+            id_usuario: usuarioId,
+            status: "aceito",
+          },
+          attributes: ["id"],
+        });
+
+        if (!usuarioConjunto) {
+          throw new Error(
+            "Usuário não pertence ao conjunto ou convite não foi aceito"
+          );
+        }
+      }
+
+      const usuariosConjunto = await UsuarioConjunto.findAll({
+        where: {
+          id_conjunto: filtros.conjunto_id,
+          status: "aceito",
+        },
+        attributes: ["id_usuario"],
+      });
+
+      usuariosConjuntoIds = usuariosConjunto.map((uc) => uc.id_usuario);
+    }
+
     // where para recordes de calendário
     const whereRecorde = {
       tipo: filtros.tipo,
       id_limite: filtros.id_limite,
     };
 
-    // Apenas usuários ativos e com ranking_global = true aparecem no ranking global
+    if (usuariosConjuntoIds !== null) {
+      whereRecorde.id_usuario = { [Op.in]: usuariosConjuntoIds };
+    }
+
+    // Ranking global: apenas ativos com ranking_global. Ranking por conjunto: apenas ativos.
     const whereUsuario = {
       ativo: true,
-      ranking_global: true,
     };
+    if (usuariosConjuntoIds === null) {
+      whereUsuario.ranking_global = true;
+    }
 
     // Total de participantes (usuários distintos) nesse filtro
     const totalParticipantes = await RecordeCalendario.count({
@@ -107,7 +163,11 @@ class RankingCalendarioService {
       data_recorde: recorde.data_recorde || recorde.atualizado_em,
     }));
 
-    const posicaoUsuario = await this.obterPosicaoUsuario(filtros, usuarioId);
+    const posicaoUsuario = await this.obterPosicaoUsuario(
+      filtros,
+      usuarioId,
+      usuarioTipo
+    );
 
     return {
       ranking,
@@ -118,28 +178,62 @@ class RankingCalendarioService {
 
   /**
    * Calcula posição exata do usuário no ranking de calendário
-   * @param {{ tipo: string, id_limite: number }} filtros
+   * @param {{ tipo: string, id_limite: number, conjunto_id?: number }} filtros
    * @param {number} usuarioId
+   * @param {string} usuarioTipo
    * @returns {Promise<number|null>} Posição (1-based) ou null se não tem recorde
    */
-  async obterPosicaoUsuario(filtros, usuarioId) {
+  async obterPosicaoUsuario(filtros, usuarioId, usuarioTipo) {
     if (!filtros.tipo || !filtros.id_limite) {
       throw new Error("Filtros obrigatórios: tipo, id_limite");
     }
 
-    // where do usuário para verificar se ele pode aparecer no ranking global
+    let usuariosConjuntoIds = null;
+    if (filtros.conjunto_id) {
+      const conjunto = await Conjunto.findByPk(filtros.conjunto_id, {
+        attributes: ["id", "ativo"],
+      });
+      if (!conjunto || !conjunto.ativo) {
+        throw new Error("Conjunto não encontrado ou inativo");
+      }
+      if (usuarioTipo !== "admin") {
+        const usuarioConjunto = await UsuarioConjunto.findOne({
+          where: {
+            id_conjunto: filtros.conjunto_id,
+            id_usuario: usuarioId,
+            status: "aceito",
+          },
+          attributes: ["id"],
+        });
+        if (!usuarioConjunto) {
+          return null;
+        }
+      }
+      const usuariosConjunto = await UsuarioConjunto.findAll({
+        where: {
+          id_conjunto: filtros.conjunto_id,
+          status: "aceito",
+        },
+        attributes: ["id_usuario"],
+      });
+      usuariosConjuntoIds = usuariosConjunto.map((uc) => uc.id_usuario);
+    }
+
     const whereUsuarioRecorde = {
       ativo: true,
-      ranking_global: true,
+    };
+    if (usuariosConjuntoIds === null) {
+      whereUsuarioRecorde.ranking_global = true;
+    }
+
+    const whereRecordeUsuario = {
+      id_usuario: usuarioId,
+      tipo: filtros.tipo,
+      id_limite: filtros.id_limite,
     };
 
-    // Buscar recorde do usuário para esse tipo/limite
     const recordeUsuario = await RecordeCalendario.findOne({
-      where: {
-        id_usuario: usuarioId,
-        tipo: filtros.tipo,
-        id_limite: filtros.id_limite,
-      },
+      where: whereRecordeUsuario,
       attributes: ["total", "erros", "quantidade", "data_recorde", "atualizado_em"],
       include: [
         {
@@ -159,12 +253,16 @@ class RankingCalendarioService {
       tipo: filtros.tipo,
       id_limite: filtros.id_limite,
     };
+    if (usuariosConjuntoIds !== null) {
+      whereRecorde.id_usuario = { [Op.in]: usuariosConjuntoIds };
+    }
 
-    // Para o ranking global, usar mesmos critérios de ordenação do obterRanking
     const whereUsuario = {
       ativo: true,
-      ranking_global: true,
     };
+    if (usuariosConjuntoIds === null) {
+      whereUsuario.ranking_global = true;
+    }
 
     const errosUsuario = recordeUsuario.erros ?? 9999999;
     const dataRecordeUsuario =

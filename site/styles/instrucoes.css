@@ -203,6 +203,83 @@ footer {
     box-shadow: 0 5px 20px rgba(0,0,0,0.4);
 }
 
+/* Estilos para a página de calendário (aviso tutorial, tabelas) */
+.instrucoes-aviso-tutorial {
+    margin: 0 0 30px 0;
+    padding: 20px 24px;
+    background: rgba(33, 150, 243, 0.15);
+    border: 2px solid #2196F3;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #E0E0E0;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+.instrucoes-aviso-link {
+    color: #64B5F6;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.instrucoes-aviso-link:hover {
+    color: #90CAF9;
+}
+
+.tabela-tutorial-wrapper {
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.tabela-tutorial {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+    color: #E0E0E0;
+    background: #252525;
+}
+
+.tabela-tutorial th,
+.tabela-tutorial td {
+    border: 1px solid #404040;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.tabela-tutorial thead th {
+    background: #2A2A2A;
+    font-weight: 600;
+}
+
+.tabela-tutorial tbody th {
+    text-align: left;
+    font-weight: 500;
+    background: #2A2A2A;
+}
+
+.tabela-tutorial.tabela-seculos {
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tabela-tutorial.tabela-seculos th,
+.tabela-tutorial.tabela-seculos td {
+    text-align: center;
+}
+
+.lista-meses-tutorial {
+    list-style: none;
+    padding-left: 0;
+}
+
+.lista-meses-tutorial li {
+    margin-bottom: 6px;
+}
+
 @media (max-width: 768px) {
     .logo-section {
         padding: 30px 20px;

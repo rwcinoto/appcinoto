@@ -147,7 +147,7 @@ const CalendarioRecordes = () => {
     ? `Recordes de calendário de ${usuarioVisualizado.nome}`
     : "Meus recordes de calendário";
 
-  const LIMITE_EXIBICAO = 60;
+  const LIMITE_EXIBICAO = 40;
   const totalRecordes = recordes.length;
   const recordesExibidos = recordes.slice(0, LIMITE_EXIBICAO);
   const temMaisRecordes = totalRecordes > LIMITE_EXIBICAO;
@@ -160,8 +160,8 @@ const CalendarioRecordes = () => {
             <h1>{titulo}</h1>
             <button
               className="btn-ajuda"
-              onClick={() => navigate("/instrucoes/calendario")}
-              title="Ver instruções sobre calendário"
+              onClick={() => navigate("/instrucoes/calendario-recordes")}
+              title="Ver instruções sobre recordes de calendário"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -30,6 +30,9 @@ const Visitantes = lazy(() => import("./pages/Visitantes"));
 const Calendario = lazy(() => import("./pages/Calendario"));
 const CalendarioRecordes = lazy(() => import("./pages/CalendarioRecordes"));
 const InstrucoesCalendario = lazy(() => import("./pages/InstrucoesCalendario"));
+const InstrucoesCalendarioRecordes = lazy(() =>
+  import("./pages/InstrucoesCalendarioRecordes"),
+);
 
 const PrivateRoute = ({ children }) => {
   const { usuario, loading } = useAuth();
@@ -69,6 +72,10 @@ const AppRoutes = () => {
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/calendario/recordes" element={<CalendarioRecordes />} />
           <Route path="/instrucoes/calendario" element={<InstrucoesCalendario />} />
+          <Route
+            path="/instrucoes/calendario-recordes"
+            element={<InstrucoesCalendarioRecordes />}
+          />
           <Route path="/conjuntos" element={<Conjuntos />} />
           <Route path="/instrucoes/conjuntos" element={<InstrucoesConjuntos />} />
           <Route path="/conjuntos/:id" element={<DetalhesConjunto />} />

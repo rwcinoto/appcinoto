@@ -18,7 +18,7 @@ class RankingCalendarioController {
         return res.status(400).json({ errors: erros.array() });
       }
 
-      const { tipo, limite_id } = req.query;
+      const { tipo, limite_id, conjunto_id } = req.query;
 
       if (!tipo || !limite_id) {
         return res.status(400).json({
@@ -34,15 +34,23 @@ class RankingCalendarioController {
       }
 
       const usuario = req.usuario;
+      const conjuntoId = conjunto_id ? parseInt(conjunto_id) : null;
+      if (conjunto_id != null && (Number.isNaN(conjuntoId) || conjuntoId < 1)) {
+        return res.status(400).json({
+          message: "conjunto_id deve ser um número válido",
+        });
+      }
 
       const filtros = {
         tipo: String(tipo),
         id_limite: limiteIdNum,
+        conjunto_id: conjuntoId,
       };
 
       const resultado = await rankingCalendarioService.obterRanking(
         filtros,
-        usuario.id
+        usuario.id,
+        usuario.tipo
       );
 
       // Buscar informações do limite para incluir na resposta
@@ -70,7 +78,10 @@ class RankingCalendarioController {
 
       if (
         error.message === "Filtros obrigatórios: tipo, id_limite" ||
-        error.message === "Limite não encontrado"
+        error.message === "Limite não encontrado" ||
+        error.message === "Conjunto não encontrado" ||
+        error.message === "Conjunto inativo" ||
+        error.message === "Usuário não pertence ao conjunto ou convite não foi aceito"
       ) {
         return res.status(404).json({ message: error.message });
       }
