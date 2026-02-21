@@ -38,7 +38,8 @@ const InstrucoesCalendarioRecordes = () => {
           </p>
           <ul>
             <li>
-              - <strong>Tipo de treino</strong> (Data 1582-2399, Dia, Mês etc.);
+              - <strong>Tipo de treino</strong> (Data 1582-2399, Dia, Mês,
+              etc.);
             </li>
             <li>
               - <strong>Maior pontuação</strong> e tempo médio por resposta;
@@ -106,7 +107,7 @@ const InstrucoesCalendarioRecordes = () => {
           <ul>
             <li>
               - <strong>Tipo:</strong> mostra apenas um tipo de treino (Data
-              1582-2399, Dia, Mês etc.);
+              1582-2399, Dia, Mês, etc.);
             </li>
             <li>
               - <strong>Limite:</strong> filtra pelo limite de tempo.
@@ -161,7 +162,7 @@ const InstrucoesCalendarioRecordes = () => {
           />
           <div className="instrucao-destaque">
             <strong>Dica:</strong> clicando no ícone de treino você inicia um
-            treino igual ao daquele recorde (mesmo tipo e limite).
+            treino igual ao do recorde (mesmo tipo e limite).
           </div>
         </section>
 

@@ -1,27 +1,415 @@
 import React from "react";
-import "./InstrucoesTreino.css";
+import { useNavigate } from "react-router-dom";
+import "./InstrucoesCalendario.css";
+import "./InstrucoesRankings.css";
 
-// Página inicial simples de instruções de calendário.
-// Será detalhada depois, conforme o plano.
+// Valor do ano para o calendário: (ano + floor(ano/4)) % 7 (ano = últimos 2 dígitos 0-99)
+const valorAno = (y) => (y + Math.floor(y / 4)) % 7;
+
 const InstrucoesCalendario = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="instrucoes-container">
-      <div className="instrucoes-card">
-        <h1>Instruções de calendário</h1>
-        <p>
-          Aqui você encontrará explicações sobre como funcionam os treinos de
-          calendário, incluindo como calcular mentalmente o dia da semana de
-          uma data.
+      <div className="instrucoes-header">
+        <button onClick={() => navigate(-1)} className="btn-voltar">
+          ← Voltar
+        </button>
+        <h1>Sobre treinos de calendário no Numix</h1>
+        <p className="instrucoes-aviso-tutorial">
+          Há um{" "}
+          <a href="#tutorial-calendario" className="instrucoes-aviso-link">
+            tutorial
+          </a>{" "}
+          abaixo explicando como calcular o dia da semana de uma data.
         </p>
-        <p>
-          Esta página é apenas um rascunho inicial. O conteúdo será detalhado
-          depois que todas as funcionalidades de calendário estiverem
-          implementadas.
-        </p>
+      </div>
+
+      <div className="instrucoes-content">
+        <section className="instrucao-secao">
+          <h2>Visão geral</h2>
+          <p>
+            Na página de calendário você tem os rankings do Numix para cada tipo
+            de treino. Os treinos são iniciados na mesma página: escolha o tipo
+            e o limite nos filtros e clique no botão "Iniciar este treino".
+            Existem até 7 tipos de treino de calendário (Data 1582-2399, Dia,
+            Mês, Ano, Século, Data esse ano e Data 1900-2099) dependendo do seu
+            nível.
+          </p>
+          <img
+            src="/instrucoes/rankingCalendario.png"
+            alt="Página de calendário com filtros e ranking"
+            className="instrucao-imagem"
+          />
+          <div className="instrucao-destaque">
+            <strong>Dica:</strong> salve seu treino preferido no perfil e, ao
+            entrar na página de calendário, ele será carregado por padrão.
+          </div>
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Sua posição no ranking</h2>
+          <p>
+            No topo da página há um quadro mostrando sua posição atual no
+            ranking filtrado, junto com o total de participantes.
+          </p>
+          <img
+            src="/instrucoes/posicaoCalendario.png"
+            alt="Quadro mostrando a posição do usuário no ranking de calendário"
+            className="instrucao-imagem"
+          />
+          <div className="instrucao-destaque">
+            <strong>Dica:</strong> clique em "Iniciar este treino" para treinar
+            com as mesmas configurações do ranking (mesmo tipo e limite).
+          </div>
+          <div className="instrucao-destaque instrucao-importante">
+            <strong>Importante:</strong> visitantes não aparecem no ranking,
+            pois seus recordes não são salvos no sistema.
+          </div>
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Tipos de treino e limites por nível</h2>
+          <p>
+            Você pode treinar calcular o dia da semana de uma data ou treinar
+            cada parte da data separadamente.
+          </p>
+          <p>
+            Quais tipos de treino e limites aparecem para você depende do seu
+            nível. Conforme você avança, desbloqueia outros tipos e outros
+            limites de tempo até 5 minutos.
+          </p>
+          <img
+            src="/instrucoes/filtrotipoCalendario.png"
+            alt="Filtros de tipo e limite na página de calendário"
+            className="instrucao-imagem"
+          />
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Filtros de ranking</h2>
+          <p>
+            No alto da página você filtra qual ranking quer ver:{" "}
+            <strong>Tipo</strong> (Data 1582-2399, Dia, Mês, etc.) e{" "}
+            <strong>Limite</strong> (até 5 minutos).
+          </p>
+          <p>
+            O botão "Meus recordes" leva você à sua página de recordes de
+            calendário.
+          </p>
+          <div className="instrucao-destaque">
+            <strong>Observação:</strong> nos filtros aparecem apenas as opções
+            disponíveis para o seu nível.
+          </div>
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Critérios de desempate</h2>
+          <p>
+            Quando dois usuários possuem a mesma pontuação, o desempate é feito
+            usando os seguintes critérios, nesta ordem:
+          </p>
+          <div className="instrucao-item">
+            <h3>1. Quantidade de erros</h3>
+            <p>
+              O usuário com <strong>menos erros</strong> realizados fica em
+              posição melhor.
+            </p>
+          </div>
+          <div className="instrucao-item">
+            <h3>2. Quantidade de treinos</h3>
+            <p>
+              O usuário com <strong>menos treinos</strong> realizados fica em
+              posição melhor.
+            </p>
+          </div>
+          <div className="instrucao-item">
+            <h3>3. Data do recorde</h3>
+            <p>
+              Se ainda houver empate, o recorde <strong>mais antigo</strong> é
+              recompensado por ter alcançado a pontuação primeiro.
+            </p>
+          </div>
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Ver recordes de outros usuários no Numix</h2>
+          <p>
+            Ao clicar no <strong>nome de um usuário</strong> no ranking, você
+            será redirecionado para a página de recordes de calendário dele.
+            Isso permite:
+          </p>
+          <ul>
+            <li>- Ver todas as configurações que ele já treinou;</li>
+            <li>- Comparar seus recordes com os dele;</li>
+            <li>- Descobrir novas configurações de treino para tentar;</li>
+            <li>- Aprender com os melhores praticantes.</li>
+          </ul>
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Privacidade no ranking</h2>
+          <p>
+            Você pode configurar seu perfil para{" "}
+            <strong>não mostrar seus recordes no ranking global</strong>. Quando
+            essa opção está ativada:
+          </p>
+          <ul>
+            <li>- Seus recordes não aparecem nos rankings globais;</li>
+            <li>- Você ainda pode ver os rankings de outros usuários;</li>
+            <li>- Seus recordes continuam salvos normalmente;</li>
+            <li>
+              - Você ainda aparece em rankings de conjuntos dos quais participa.
+            </li>
+          </ul>
+          <p>
+            Para ativar essa opção, acesse seu perfil e configure a preferência
+            de privacidade.
+          </p>
+          <img
+            src="/instrucoes/rankingperfil.png"
+            alt="Parte da página de perfil de usuário mostrando a opção de privacidade"
+            className="instrucao-imagem"
+          />
+        </section>
+
+        <section className="instrucao-secao">
+          <h2>Pronto para competir?</h2>
+          <p>
+            Agora que já sabe como funciona, volte para a página de calendário e
+            veja sua posição!
+          </p>
+          <div className="instrucao-acoes">
+            <button
+              onClick={() => navigate("/calendario")}
+              className="btn-comecar-treino"
+            >
+              Ver calendário
+            </button>
+          </div>
+        </section>
+
+        {/* Tutorial: como calcular o dia da semana */}
+        <section
+          id="tutorial-calendario"
+          className="instrucao-secao instrucao-secao-tutorial"
+        >
+          <h2>Tutorial: como calcular o dia da semana de uma data</h2>
+          <p>
+            Se você ainda não sabe calcular mentalmente o dia da semana de uma
+            data, use o método abaixo. A ideia é obter quatro números (dia, mês,
+            ano e século), somá-los e calcular o{" "}
+            <strong>resto da divisão dessa soma por 7</strong>. Esse resto
+            corresponde ao dia da semana (1 = domingo, 2 = segunda, … 0 =
+            sábado).
+          </p>
+
+          <div className="instrucao-item">
+            <h3>1. Número do dia</h3>
+            <p>
+              É o mais fácil: use o próprio dia do mês (1 a 31), sem mudar nada.
+            </p>
+          </div>
+
+          <div className="instrucao-item">
+            <h3>2. Número do mês</h3>
+            <p>
+              Cada mês tem um valor fixo que você precisa decorar. Uma forma de
+              lembrar é criar associações. Abaixo estão as associações que eu
+              uso como exemplo:
+            </p>
+            <ul className="lista-meses-tutorial">
+              <li>Janeiro = 1 (primeiro mês do ano)</li>
+              <li>
+                Fevereiro = 4 (carnaval pode cair em fevereiro e tem 4 dias)
+              </li>
+              <li>Março = 4 (carnaval pode cair em março e tem 4 dias)</li>
+              <li>Abril = 0 (mês da mentira: 0 verdades)</li>
+              <li>Maio = 2 (mês das noivas: 2 pessoas num casal)</li>
+              <li>Junho = 5 (junho tem 5 letras)</li>
+              <li>Julho = 0 (mês de férias, 0 aulas)</li>
+              <li>Agosto = 3 (a-gos-to tem 3 sílabas)</li>
+              <li>Setembro = 6 (lembra 6tembro)</li>
+              <li>Outubro = 1 (lembra ou1ubro)</li>
+              <li>Novembro = 4 (mês da re-pú-bli-ca: 4 sílabas)</li>
+              <li>Dezembro = 6 (mês das festas: festas tem 6 letras)</li>
+            </ul>
+          </div>
+
+          <div className="instrucao-item">
+            <h3>3. Número do ano</h3>
+            <p>
+              Use apenas os <strong>últimos dois dígitos</strong> do ano (por
+              exemplo, 85 para 1985). A conta é: some esse número com o
+              quociente da divisão dele por 4 (ignorando decimais) e calcule o{" "}
+              <strong>resto da divisão desse resultado por 7</strong>. Dá para
+              fazer de cabeça, mas fica mais rápido se você decorar o resultado
+              para cada ano. Abaixo, três exemplos:
+            </p>
+            <ul>
+              <li>
+                <strong>Ano 24:</strong> 24 ÷ 4 = 6; 24 + 6 = 30; 30 ÷ 7 dá
+                resto 2 → valor do ano = 2.
+              </li>
+              <li>
+                <strong>Ano 35:</strong> 35 ÷ 4 = 8 e resto 3; 35 + 8 = 43; 43 ÷
+                7 dá resto 1 → valor do ano = 1.
+              </li>
+              <li>
+                <strong>Ano 85:</strong> 85 ÷ 4 = 21 e resto 1; 85 + 21 = 106;
+                106 ÷ 7 dá resto 1 → valor do ano = 1.
+              </li>
+            </ul>
+            <p>
+              Tabela com o valor do ano para todos os anos de 0 a 99 (últimos
+              dois dígitos):
+            </p>
+            <div className="tabela-tutorial-wrapper">
+              <table className="tabela-tutorial">
+                <thead>
+                  <tr>
+                    <th>Ano</th>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((u) => (
+                      <th key={u}>{u}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((dezena) => (
+                    <tr key={dezena}>
+                      <th>
+                        {dezena}0–{dezena}9
+                      </th>
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((unidade) => {
+                        const y = dezena * 10 + unidade;
+                        return <td key={y}>{valorAno(y)}</td>;
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p></p>
+              <p>
+                Para decorar o valor de cada ano, pode fazer associações com o
+                ano e o valor. Por exemplo, 23 é o número do Michael Jordan, que
+                não errava nada, seu valor é 0. Do 52 ao 55, todos os anos têm o
+                valor igual ao final do ano: 52 é 2, 53 é 3, 54 é 4 e 55 é 5.
+                São muitos anos, mas devagar pode consguir decorar todos.
+              </p>
+            </div>
+          </div>
+
+          <div className="instrucao-item">
+            <h3>4. Número do século</h3>
+            <p>
+              Cada período de 100 anos (século) tem um valor fixo. O padrão se
+              repete a cada 400 anos, então você pode usar a tabela abaixo e
+              estender para outros séculos no futuro:
+            </p>
+            <div className="tabela-tutorial-wrapper">
+              <table className="tabela-tutorial tabela-seculos">
+                <thead>
+                  <tr>
+                    <th>Século (anos)</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XVI (1582–1599)</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>XVII (1600–1699)</td>
+                    <td>-1</td>
+                  </tr>
+                  <tr>
+                    <td>XVIII (1700–1799)</td>
+                    <td>-3</td>
+                  </tr>
+                  <tr>
+                    <td>XIX (1800–1899)</td>
+                    <td>2</td>
+                  </tr>
+                  <tr>
+                    <td>XX (1900–1999)</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>XXI (2000–2099)</td>
+                    <td>-1</td>
+                  </tr>
+                  <tr>
+                    <td>XXII (2100–2199)</td>
+                    <td>-3</td>
+                  </tr>
+                  <tr>
+                    <td>XXIII (2200–2299)</td>
+                    <td>2</td>
+                  </tr>
+                  <tr>
+                    <td>XXIV (2300–2399)</td>
+                    <td>0</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="instrucao-destaque instrucao-importante">
+                <strong>Atenção:</strong> os anos terminados em 00 são
+                considerados como sendo do século seguinte. Por exemplo, 1900 é
+                do século XX, 2000 é do século XXI e 2100 é do século XXII.
+              </div>
+            </div>
+          </div>
+
+          <div className="instrucao-item">
+            <h3>5. Passo final</h3>
+            <p>
+              Some o número do dia + número do mês + número do ano + número do
+              século. Calcule o{" "}
+              <strong>resto da divisão desse total por 7</strong>. O resultado é
+              o dia da semana: 1 = domingo, 2 = segunda, 3 = terça, 4 = quarta,
+              5 = quinta, 6 = sexta, 0 = sábado.
+            </p>
+            <div className="instrucao-destaque instrucao-importante">
+              <strong>Ano bissexto:</strong> se a data for em{" "}
+              <strong>janeiro ou fevereiro</strong> de um ano bissexto, subtraia
+              1 do total antes de calcular o resto por 7.
+            </div>
+            <p>
+              São <strong>bissextos</strong> os anos divisíveis por 4, exceto os
+              anos que terminam em 00 (como 1900, 2100): esses só são bissextos
+              se forem divisíveis por 400. Assim, 2000 foi bissexto, mas 1900
+              não foi e 2100 não será.
+            </p>
+          </div>
+
+          <div className="instrucao-item">
+            <h3>6. Exemplos completos</h3>
+            <p>Abaixo, três exemplos de contas completas:</p>
+
+            <p>
+              <strong>12 de abril de 1976</strong> — Dia: 12. Abril: 0. Ano 76:
+              (76 + 19) mod 7 = 4. Século XX: 0. 1976 é bissexto, mas abril não
+              é janeiro nem fevereiro, sem ajuste. Total: 12 + 0 + 4 + 0 = 16.
+              16 mod 7 = 2 → <strong>segunda-feira</strong>.
+            </p>
+            <p>
+              <strong>21 de fevereiro de 2026</strong> — Dia: 21. Fevereiro: 4.
+              Ano 26: (26 + 6) mod 7 = 4. Século XXI: -1. 2026 não é bissexto,
+              sem ajuste. Total: 21 + 4 + 4 - 1 = 28. 28 mod 7 = 0 →{" "}
+              <strong>sábado</strong>.
+            </p>
+            <p>
+              <strong>8 de janeiro de 1752</strong> — Dia: 8. Janeiro: 1. Ano
+              52: (52 + 13) mod 7 = 2. Século XVIII: -3. 1752 é bissexto e a
+              data é em janeiro: subtrair 1. Total: 8 + 1 + 2 - 3 = 8; 8 - 1 =
+              7. 7 mod 7 = 0 → <strong>sábado</strong>.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
 };
 
 export default InstrucoesCalendario;
-

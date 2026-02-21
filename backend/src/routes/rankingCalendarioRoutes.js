@@ -16,6 +16,10 @@ const validarObterRankingCalendario = [
     .withMessage("limite_id é obrigatório")
     .isInt({ min: 1 })
     .withMessage("limite_id deve ser um número inteiro válido"),
+  query("conjunto_id")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("conjunto_id deve ser um número inteiro válido"),
 ];
 
 router.get(

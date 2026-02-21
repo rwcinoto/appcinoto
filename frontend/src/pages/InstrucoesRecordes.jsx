@@ -160,6 +160,25 @@ const InstrucoesRecordes = () => {
         </section>
 
         <section className="instrucao-secao">
+          <h2>Últimos recordes batidos no Numix</h2>
+          <p>
+            Na parte de baixo da página há uma seção com os 20{" "}
+            <strong>últimos recordes batidos no Numix</strong>. Ao clicar no
+            nome do usuário de um recorde, você é levado à página de recordes
+            daquela pessoa.
+          </p>
+          <img
+            src="/instrucoes/ultimosRecordes.png"
+            alt="Últimos recordes batidos no Numix"
+            className="instrucao-imagem"
+          />
+          <div className="instrucao-destaque">
+            <strong>Dica:</strong> clicando no ícone de treino você inicia um
+            treino igual ao do recorde (mesma operação, limite e sistema).
+          </div>
+        </section>
+
+        <section className="instrucao-secao">
           <h2>Pronto para treinar?</h2>
           <p>
             Agora que já sabe como funciona, volte para a página de recordes e

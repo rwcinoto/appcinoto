@@ -129,7 +129,7 @@ const InfoUsuarioCalendario = ({
                   title="Iniciar treino com estas configurações"
                   aria-label="Iniciar treino com estas configurações"
                 >
-                  🏃 Iniciar esse treino
+                  🏃 Iniciar este treino
                 </button>
               </div>
             )}
