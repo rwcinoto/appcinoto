@@ -182,21 +182,23 @@ class RankingService {
     }));
 
     // Calcular posição do usuário logado (mesmo se não estiver nos 100)
-    const posicaoUsuario = await this.obterPosicaoUsuario(filtros, usuarioId, usuarioTipo);
+    const resultadoPosicao = await this.obterPosicaoUsuario(filtros, usuarioId, usuarioTipo);
+    const posicaoUsuario =
+      resultadoPosicao === null ? null : resultadoPosicao.posicao;
 
     return {
       ranking,
-      posicaoUsuario: posicaoUsuario,
+      posicaoUsuario,
       totalParticipantes,
     };
   }
 
   /**
-   * Calcula posição exata do usuário no ranking filtrado
+   * Calcula posição exata do usuário no ranking filtrado e total de participantes
    * @param {Object} filtros - Filtros: operacao_id, limite_id, sistema_id, conjunto_id (opcional)
    * @param {number} usuarioId - ID do usuário
    * @param {string} usuarioTipo - Tipo do usuário logado (admin, comum, profe)
-   * @returns {Promise<number|null>} Posição (1-based) ou null se não tem recorde
+   * @returns {Promise<{posicao: number, totalParticipantes: number}|null>} Posição (1-based), total de pessoas no ranking, ou null se não tem recorde
    */
   async obterPosicaoUsuario(filtros, usuarioId, usuarioTipo) {
     // Validar filtros obrigatórios
@@ -360,8 +362,20 @@ class RankingService {
       ],
     });
 
+    // Total de pessoas nesse ranking (para exibir "posição X de Y pessoas")
+    const totalParticipantes = await Recorde.count({
+      where: whereRecorde,
+      include: [
+        {
+          association: "usuario",
+          required: true,
+          where: whereUsuario,
+        },
+      ],
+    });
+
     // Posição é base 1 (quantos estão à frente + 1)
-    return posicao + 1;
+    return { posicao: posicao + 1, totalParticipantes };
   }
 }
 

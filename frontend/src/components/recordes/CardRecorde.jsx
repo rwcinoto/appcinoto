@@ -14,6 +14,8 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [totalParticipantesRanking, setTotalParticipantesRanking] =
+    useState(null);
   const [iniciandoTreino, setIniciandoTreino] = useState(false);
   const [mostrarContagem, setMostrarContagem] = useState(false);
   const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
@@ -52,9 +54,11 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
           `/rankings/posicao?${params.toString()}`,
         );
         setPosicaoRanking(response.data.posicao);
+        setTotalParticipantesRanking(response.data.total_participantes ?? null);
       } catch (error) {
         console.error("Erro ao buscar posição no ranking:", error);
         setPosicaoRanking(null);
+        setTotalParticipantesRanking(null);
       }
     };
 
@@ -333,15 +337,17 @@ const CardRecorde = ({ recorde, usuarioIdVisualizado = null }) => {
               <div
                 style={{ display: "flex", alignItems: "center", gap: "8px" }}
               >
-                <span className="card-recorde-posicao-label">
-                  Posição global:
-                </span>
+                <span className="card-recorde-posicao-label">Posição:</span>
                 <Link
                   to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
                   className="card-recorde-posicao-valor card-recorde-posicao-link"
                 >
                   #{posicaoRanking}
                 </Link>
+                <span className="card-recorde-posicao-label">
+                  {totalParticipantesRanking != null &&
+                    ` de ${totalParticipantesRanking}`}
+                </span>
               </div>
             )}
         </div>
