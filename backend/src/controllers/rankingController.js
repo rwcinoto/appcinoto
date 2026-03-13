@@ -207,14 +207,21 @@ class RankingController {
         usuarioIdParaBuscar = usuarioIdQuery;
       }
 
-      // Chamar service para obter posição
-      const posicao = await rankingService.obterPosicaoUsuario(
+      // Chamar service para obter posição e total de participantes
+      const resultado = await rankingService.obterPosicaoUsuario(
         filtros,
         usuarioIdParaBuscar,
         usuario.tipo
       );
 
-      return res.json({ posicao });
+      if (resultado === null) {
+        return res.json({ posicao: null, total_participantes: null });
+      }
+
+      return res.json({
+        posicao: resultado.posicao,
+        total_participantes: resultado.totalParticipantes,
+      });
     } catch (error) {
       console.error("Erro ao obter posição:", error);
 

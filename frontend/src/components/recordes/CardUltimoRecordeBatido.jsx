@@ -66,6 +66,8 @@ const CardUltimoRecordeBatido = ({ recorde }) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [totalParticipantesRanking, setTotalParticipantesRanking] =
+    useState(null);
   const [iniciandoTreino, setIniciandoTreino] = useState(false);
   const [mostrarContagem, setMostrarContagem] = useState(false);
   const [mostrarModalFormato, setMostrarModalFormato] = useState(false);
@@ -94,9 +96,11 @@ const CardUltimoRecordeBatido = ({ recorde }) => {
           `/rankings/posicao?${params.toString()}`,
         );
         setPosicaoRanking(response.data.posicao);
+        setTotalParticipantesRanking(response.data.total_participantes ?? null);
       } catch (error) {
         console.error("Erro ao buscar posição no ranking:", error);
         setPosicaoRanking(null);
+        setTotalParticipantesRanking(null);
       }
     };
 
@@ -246,7 +250,7 @@ const CardUltimoRecordeBatido = ({ recorde }) => {
           recorde.sistema && (
             <div className="card-ultimo-recorde-batido-posicao">
               <span className="card-ultimo-recorde-batido-posicao-label">
-                Posição global:
+                Posição:
               </span>
               <Link
                 to={`/rankings?operacao_id=${recorde.operacao.id}&limite_id=${recorde.limite.id}&sistema_id=${recorde.sistema.id}`}
@@ -254,6 +258,10 @@ const CardUltimoRecordeBatido = ({ recorde }) => {
               >
                 #{posicaoRanking}
               </Link>
+              <span className="card-ultimo-recorde-batido-posicao-label">
+                {totalParticipantesRanking != null &&
+                  ` de ${totalParticipantesRanking}`}
+              </span>
             </div>
           )}
       </div>

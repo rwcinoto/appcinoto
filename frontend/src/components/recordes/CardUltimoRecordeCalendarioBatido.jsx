@@ -37,6 +37,8 @@ const obterCorPorTipoCalendario = (tipo) => {
 const CardUltimoRecordeCalendarioBatido = ({ recorde }) => {
   const navigate = useNavigate();
   const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [totalParticipantesRanking, setTotalParticipantesRanking] =
+    useState(null);
   const [iniciandoTreino, setIniciandoTreino] = useState(false);
   const [mostrarContagem, setMostrarContagem] = useState(false);
   const [dadosTreino, setDadosTreino] = useState(null);
@@ -58,6 +60,8 @@ const CardUltimoRecordeCalendarioBatido = ({ recorde }) => {
   useEffect(() => {
     const buscarPosicaoRanking = async () => {
       if (!recorde?.usuario?.id || !recorde?.tipo || !recorde?.limite?.id) {
+        setPosicaoRanking(null);
+        setTotalParticipantesRanking(null);
         return;
       }
 
@@ -74,12 +78,16 @@ const CardUltimoRecordeCalendarioBatido = ({ recorde }) => {
           (item) => item.id_usuario === recorde.usuario.id,
         );
         setPosicaoRanking(itemUsuario ? itemUsuario.posicao : null);
+        setTotalParticipantesRanking(
+          response.data?.totalParticipantes ?? null,
+        );
       } catch (error) {
         console.error(
           "Erro ao buscar posição no ranking de calendário:",
           error,
         );
         setPosicaoRanking(null);
+        setTotalParticipantesRanking(null);
       }
     };
 
@@ -241,7 +249,7 @@ const CardUltimoRecordeCalendarioBatido = ({ recorde }) => {
         {posicaoRanking !== null && recorde.tipo && recorde.limite && (
           <div className="card-ultimo-recorde-batido-posicao">
             <span className="card-ultimo-recorde-batido-posicao-label">
-              Posição global:
+              Posição:
             </span>
             <Link
               to={linkRanking}
@@ -250,6 +258,10 @@ const CardUltimoRecordeCalendarioBatido = ({ recorde }) => {
             >
               #{posicaoRanking}
             </Link>
+            <span className="card-ultimo-recorde-batido-posicao-label">
+              {totalParticipantesRanking != null &&
+                ` de ${totalParticipantesRanking}`}
+            </span>
           </div>
         )}
       </div>

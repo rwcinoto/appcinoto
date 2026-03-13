@@ -36,6 +36,7 @@ const Calendario = () => {
   const [tempoLimite, setTempoLimite] = useState(null);
   const [erro, setErro] = useState("");
   const tipoInicialAplicadoRef = useRef(false);
+  const limiteInicialAplicadoRef = useRef(false);
 
   const planoId = usuario?.id_plano || 0;
 
@@ -142,13 +143,29 @@ const Calendario = () => {
 
     if (limiteParam && limites.find((l) => String(l.id) === limiteParam)) {
       setLimiteSelecionado(limiteParam);
+      limiteInicialAplicadoRef.current = true;
     } else if (
       !limiteSelecionado ||
       !limites.find((l) => String(l.id) === limiteSelecionado)
     ) {
-      const limitePadrao = limites.find((l) => l.tempo === 60) || limites[0];
-      if (limitePadrao) {
-        setLimiteSelecionado(String(limitePadrao.id));
+      if (!limiteInicialAplicadoRef.current) {
+        const limiteFavoritoId = usuario?.limite_id;
+        const limiteFavorito =
+          limiteFavoritoId != null &&
+          limites.find(
+            (l) => l.id === limiteFavoritoId || String(l.id) === String(limiteFavoritoId)
+          );
+        const limitePadrao =
+          limiteFavorito || limites.find((l) => l.tempo === 60) || limites[0];
+        if (limitePadrao) {
+          setLimiteSelecionado(String(limitePadrao.id));
+        }
+        limiteInicialAplicadoRef.current = true;
+      } else {
+        const limitePadrao = limites.find((l) => l.tempo === 60) || limites[0];
+        if (limitePadrao) {
+          setLimiteSelecionado(String(limitePadrao.id));
+        }
       }
     }
 
@@ -168,6 +185,7 @@ const Calendario = () => {
     tipoSelecionado,
     limiteSelecionado,
     usuario?.calendario_tipo_treino,
+    usuario?.limite_id,
   ]);
 
   useEffect(() => {

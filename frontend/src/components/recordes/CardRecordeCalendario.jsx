@@ -51,6 +51,8 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
   const [mostrarContagem, setMostrarContagem] = useState(false);
   const [dadosTreino, setDadosTreino] = useState(null);
   const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [totalParticipantesRanking, setTotalParticipantesRanking] =
+    useState(null);
   const [mostrarModalOpcoes, setMostrarModalOpcoes] = useState(false);
   const [opcoesParaNavegacao, setOpcoesParaNavegacao] = useState(null);
   const [isMobile, setIsMobile] = useState(
@@ -188,6 +190,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
     const buscarPosicaoRanking = async () => {
       if (!recorde?.tipo || !recorde?.limite?.id || !usuarioRankingId) {
         setPosicaoRanking(null);
+        setTotalParticipantesRanking(null);
         return;
       }
 
@@ -207,12 +210,16 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
         );
 
         setPosicaoRanking(itemUsuario ? itemUsuario.posicao : null);
+        setTotalParticipantesRanking(
+          response.data?.totalParticipantes ?? null,
+        );
       } catch (error) {
         console.error(
           "Erro ao buscar posição no ranking de calendário:",
           error,
         );
         setPosicaoRanking(null);
+        setTotalParticipantesRanking(null);
       }
     };
 
@@ -306,9 +313,7 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
           </span>
           {posicaoRanking !== null && (
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span className="card-recorde-posicao-label">
-                Posição global:
-              </span>
+              <span className="card-recorde-posicao-label">Posição:</span>
               <Link
                 to={linkRanking}
                 className="card-recorde-posicao-valor card-recorde-posicao-link"
@@ -316,6 +321,10 @@ const CardRecordeCalendario = ({ recorde, usuarioIdVisualizado = null }) => {
               >
                 #{posicaoRanking}
               </Link>
+              <span className="card-recorde-posicao-label">
+                {totalParticipantesRanking != null &&
+                  ` de ${totalParticipantesRanking}`}
+              </span>
             </div>
           )}
         </div>
