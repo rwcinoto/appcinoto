@@ -20,6 +20,9 @@ const Perfil = () => {
     sistema_id: "",
     ranking_global: true,
     calendario_tipo_treino: "",
+    senha_digitos: "",
+    senha_tamanho: "",
+    senha_repeticao: "",
   });
   const [operacoes, setOperacoes] = useState([]);
   const [limites, setLimites] = useState([]);
@@ -40,6 +43,9 @@ const Perfil = () => {
         ranking_global:
           usuario.ranking_global !== undefined ? usuario.ranking_global : true,
         calendario_tipo_treino: usuario.calendario_tipo_treino || "",
+        senha_digitos: usuario.senha_digitos != null ? String(usuario.senha_digitos) : "",
+        senha_tamanho: usuario.senha_tamanho != null ? String(usuario.senha_tamanho) : "",
+        senha_repeticao: usuario.senha_repeticao != null ? String(usuario.senha_repeticao) : "",
       });
     }
   }, [usuario]);
@@ -120,6 +126,9 @@ const Perfil = () => {
         sistema_id: formData.sistema_id ? parseInt(formData.sistema_id) : null,
         ranking_global: formData.ranking_global,
         calendario_tipo_treino: formData.calendario_tipo_treino || null,
+        senha_digitos: formData.senha_digitos ? parseInt(formData.senha_digitos) : null,
+        senha_tamanho: formData.senha_tamanho ? parseInt(formData.senha_tamanho) : null,
+        senha_repeticao: formData.senha_repeticao !== "" ? parseInt(formData.senha_repeticao) : null,
       };
 
       // Só enviar senha se foi preenchida
@@ -307,6 +316,75 @@ const Perfil = () => {
               <option value="seculo">Século</option>
               <option value="data_esse_ano">Data esse ano</option>
               <option value="data_2021">Data 1900-2099</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="senha_digitos">Senha - dígitos favorito</label>
+            <select
+              id="senha_digitos"
+              name="senha_digitos"
+              value={formData.senha_digitos}
+              onChange={handleChange}
+              disabled={isVisitante}
+            >
+              <option value="">Nenhum</option>
+              {[6, 7, 8, 9, 10]
+                .filter((d) => {
+                  const planoId = usuario?.id_plano || 2;
+                  const maxDigitos = { 2: 6, 3: 7, 4: 8, 5: 9, 6: 10 };
+                  return d <= (maxDigitos[planoId] || 6);
+                })
+                .map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="senha_tamanho">Senha - tamanho favorito</label>
+            <select
+              id="senha_tamanho"
+              name="senha_tamanho"
+              value={formData.senha_tamanho}
+              onChange={handleChange}
+              disabled={isVisitante}
+            >
+              <option value="">Nenhum</option>
+              {[3, 4, 5]
+                .filter((t) => {
+                  const planoId = usuario?.id_plano || 2;
+                  const maxTamanho = { 2: 4, 3: 4, 4: 5, 5: 5, 6: 5 };
+                  const minTamanho = { 2: 4, 3: 3, 4: 3, 5: 3, 6: 3 };
+                  return (
+                    t >= (minTamanho[planoId] || 4) &&
+                    t <= (maxTamanho[planoId] || 4)
+                  );
+                })
+                .map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="senha_repeticao">Senha - repetição favorita</label>
+            <select
+              id="senha_repeticao"
+              name="senha_repeticao"
+              value={formData.senha_repeticao}
+              onChange={handleChange}
+              disabled={isVisitante}
+            >
+              <option value="">Nenhum</option>
+              <option value="0">Não</option>
+              {(usuario?.id_plano || 2) >= 3 && (
+                <option value="1">Sim</option>
+              )}
             </select>
           </div>
 

@@ -1,0 +1,197 @@
+.gabarito-senha-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.gabarito-senha-vazio {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-secondary);
+}
+
+.gabarito-senha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+}
+
+.gabarito-senha-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--color-text);
+}
+
+.gabarito-senha-config {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.gabarito-senha-secreta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  border: 2px solid var(--color-primary);
+  margin-bottom: 16px;
+}
+
+.gabarito-senha-secreta-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.gabarito-senha-secreta-digitos {
+  display: flex;
+  gap: 8px;
+}
+
+.gabarito-digito-secreto {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.gabarito-senha-resumo {
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.gabarito-acertou {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.gabarito-nao-acertou {
+  color: var(--color-error, #f44336);
+  font-weight: 600;
+}
+
+.gabarito-senha-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.gabarito-tentativa-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  transition: border-color 0.2s;
+}
+
+.gabarito-tentativa-linha.acerto {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.08);
+}
+
+.gabarito-tentativa-numero {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 24px;
+  text-align: right;
+}
+
+.gabarito-tentativa-digitos {
+  display: flex;
+  gap: 6px;
+}
+
+.gabarito-tentativa-digito {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.gabarito-tentativa-digito.correto {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.gabarito-tentativa-feedback {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.gabarito-tentativa-feedback .feedback-correto {
+  font-size: 18px;
+  color: #4caf50;
+}
+
+.gabarito-tentativa-feedback .feedback-parcial {
+  font-size: 18px;
+  color: #ff9800;
+}
+
+.gabarito-senha-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-voltar-ranking {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-voltar-ranking:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .gabarito-senha-container {
+    padding: 16px;
+  }
+
+  .gabarito-senha-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .gabarito-tentativa-digito {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .gabarito-digito-secreto {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}

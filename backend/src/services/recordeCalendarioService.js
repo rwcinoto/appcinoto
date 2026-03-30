@@ -293,7 +293,7 @@ class RecordeCalendarioService {
           attributes: ["id", "descricao", "tempo"],
         },
       ],
-      order: [["atualizado_em", "DESC"]],
+      order: [["data_recorde", "DESC"]],
       limit: Math.min(limite, 100),
     });
 

@@ -1,0 +1,188 @@
+.treino-senha-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.treino-senha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.treino-senha-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.treino-senha-titulo {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.treino-senha-tentativas {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.treino-senha-cronometro {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+
+.treino-senha-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tentativa-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.tentativa-input-linha {
+  border-color: var(--color-primary);
+  border-width: 2px;
+  background: var(--color-background);
+}
+
+.tentativa-numero {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 24px;
+  text-align: right;
+}
+
+.tentativa-digitos {
+  display: flex;
+  gap: 6px;
+}
+
+.tentativa-digito {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.tentativa-feedback {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.feedback-correto {
+  font-size: 18px;
+  color: #4caf50;
+}
+
+.feedback-parcial {
+  font-size: 18px;
+  color: #ff9800;
+}
+
+.treino-senha-celulas {
+  display: flex;
+  gap: 6px;
+  cursor: text;
+}
+
+.treino-senha-celula {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  user-select: none;
+  transition: border-color 0.15s;
+}
+
+.treino-senha-celula.celula-ativa {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
+}
+
+.treino-senha-input-oculto {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+}
+
+.btn-confirmar-tentativa {
+  margin-left: auto;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-confirmar-tentativa:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-confirmar-tentativa:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .treino-senha-container {
+    padding: 16px;
+  }
+
+  .treino-senha-header {
+    margin-bottom: 16px;
+    padding-right: 64px;
+  }
+
+  .treino-senha-cronometro {
+    font-size: 20px;
+  }
+
+  .treino-senha-celula {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .tentativa-digito {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+}
