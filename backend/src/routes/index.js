@@ -38,6 +38,11 @@ router.use("/calendario", require("./calendarioRoutes"));
 router.use("/calendario/rankings", require("./rankingCalendarioRoutes"));
 router.use("/calendario/recordes", require("./recordeCalendarioRoutes"));
 
+// Rotas de senha (treinos, rankings e recordes)
+router.use("/senha", require("./senhaRoutes"));
+router.use("/senha/rankings", require("./rankingSenhaRoutes"));
+router.use("/senha/recordes", require("./recordeSenhaRoutes"));
+
 // Rotas de conjuntos
 router.use("/conjuntos", require("./conjuntoRoutes"));
 

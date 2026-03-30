@@ -132,6 +132,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(20),
         allowNull: true,
       },
+      senha_digitos: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      senha_tamanho: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      senha_repeticao: {
+        type: DataTypes.TINYINT(1),
+        allowNull: true,
+      },
       ranking_global: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

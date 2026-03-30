@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { formatarTempoSenha } from "../../constants/senha";
 import LinhaRanking from "./LinhaRanking";
 import "./TabelaRanking.css";
 
@@ -9,6 +10,7 @@ const TabelaRanking = ({
   posicaoUsuario,
   tempoLimite,
   recordesBasePath = "/recordes",
+  tipo = "operacoes",
 }) => {
   const { usuario } = useAuth();
   if (!ranking || ranking.length === 0) {
@@ -30,8 +32,12 @@ const TabelaRanking = ({
             <tr>
               <th className="coluna-posicao-header">Posição</th>
               <th className="coluna-nome-header">Nome</th>
-              <th className="coluna-pontuacao-header">Pontuação</th>
-              <th className="coluna-precisao-header">Precisão</th>
+              <th className="coluna-pontuacao-header">
+                {tipo === "senha" ? "Tentativas" : "Pontuação"}
+              </th>
+              <th className="coluna-precisao-header">
+                {tipo === "senha" ? "Tempo" : "Precisão"}
+              </th>
               <th className="coluna-data-header">Data</th>
               <th className="coluna-tentativas-header">Treinos</th>
             </tr>
@@ -43,6 +49,7 @@ const TabelaRanking = ({
                 item={item}
                 tempoLimite={tempoLimite}
                 recordesBasePath={recordesBasePath}
+                tipo={tipo}
               />
             ))}
           </tbody>
@@ -54,32 +61,24 @@ const TabelaRanking = ({
         {ranking.map((item) => {
           const eUsuarioLogado = usuario && item.id_usuario === usuario.id;
 
-          // Calcular tempo médio por conta
           const calcularTempoMedioPorConta = () => {
+            if (tipo === "senha") return null;
             const totalAcertos = item.total || 0;
             const tempo = tempoLimite || 0;
-
-            if (totalAcertos === 0 || tempo === 0) {
-              return null;
-            }
-
+            if (totalAcertos === 0 || tempo === 0) return null;
             const tempoMedio = tempo / totalAcertos;
             return tempoMedio.toFixed(1).replace(".", ",");
           };
 
           const tempoMedioFormatado = calcularTempoMedioPorConta();
 
-          // Calcular precisão (mesma lógica do LinhaRanking)
           const calcularPrecisao = () => {
-            if (item.erros === null || item.erros === undefined) {
-              return null;
-            }
+            if (tipo === "senha") return null;
+            if (item.erros === null || item.erros === undefined) return null;
             const totalAcertos = item.total || 0;
             const totalErros = item.erros || 0;
             const totalRespostas = totalAcertos + totalErros;
-            if (totalRespostas === 0) {
-              return null;
-            }
+            if (totalRespostas === 0) return null;
             const precisao = (totalAcertos / totalRespostas) * 100;
             return precisao.toFixed(1).replace(".", ",") + "%";
           };
@@ -98,11 +97,24 @@ const TabelaRanking = ({
                   <span className="numero-posicao-mobile">#{item.posicao}</span>
                 </div>
                 <div className="card-ranking-pontuacao-mobile">
-                  {item.total}
-                  {tempoMedioFormatado && (
-                    <span className="card-ranking-tempo-medio-mobile">
-                      {" "}({tempoMedioFormatado} seg/conta)
-                    </span>
+                  {tipo === "senha" ? (
+                    <>
+                      {item.total} {item.total === 1 ? "tentativa" : "tentativas"}
+                      {item.tempo != null && (
+                        <span className="card-ranking-tempo-medio-mobile">
+                          {" "}({formatarTempoSenha(item.tempo)})
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {item.total}
+                      {tempoMedioFormatado && (
+                        <span className="card-ranking-tempo-medio-mobile">
+                          {" "}({tempoMedioFormatado} seg/conta)
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

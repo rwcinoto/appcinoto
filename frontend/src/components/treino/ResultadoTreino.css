@@ -201,6 +201,60 @@
   box-shadow: var(--shadow-md);
 }
 
+.resultado-tempo-detalhe {
+  font-size: 18px;
+  color: #888;
+  margin-top: 8px;
+  font-family: "Courier New", monospace;
+}
+
+.resultado-senha-nao-acertou {
+  text-align: center;
+}
+
+.resultado-senha-revelada {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--color-background-light);
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.resultado-senha-revelada-label {
+  display: block;
+  font-size: 14px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.resultado-senha-revelada-digitos {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.resultado-senha-revelada-digito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 52px;
+  background: #2196f3;
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  border-radius: 8px;
+  font-family: "Courier New", monospace;
+}
+
+.recorde-anterior-tempo {
+  font-size: 20px;
+  color: #888;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .resultado-treino-container {

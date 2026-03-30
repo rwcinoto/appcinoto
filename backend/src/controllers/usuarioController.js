@@ -301,6 +301,9 @@ class UsuarioController {
         "sistema_id",
         "ranking_global",
         "calendario_tipo_treino",
+        "senha_digitos",
+        "senha_tamanho",
+        "senha_repeticao",
       ];
 
       const camposPermitidos = isAdmin

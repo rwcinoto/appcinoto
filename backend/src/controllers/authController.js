@@ -67,6 +67,9 @@ class AuthController {
         ranking_global: usuario.ranking_global,
         data_ultimo_treino: usuario.data_ultimo_treino,
         calendario_tipo_treino: usuario.calendario_tipo_treino,
+        senha_digitos: usuario.senha_digitos,
+        senha_tamanho: usuario.senha_tamanho,
+        senha_repeticao: usuario.senha_repeticao,
         isVisitante: false,
       });
     } catch (error) {

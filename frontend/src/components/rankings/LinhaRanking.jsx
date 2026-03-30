@@ -2,9 +2,10 @@ import { format } from "date-fns";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { formatarTempoSenha } from "../../constants/senha";
 import "./LinhaRanking.css";
 
-const LinhaRanking = ({ item, tempoLimite, recordesBasePath = "/recordes" }) => {
+const LinhaRanking = ({ item, tempoLimite, recordesBasePath = "/recordes", tipo = "operacoes" }) => {
   const { usuario } = useAuth();
 
   if (!item) {
@@ -139,7 +140,7 @@ const LinhaRanking = ({ item, tempoLimite, recordesBasePath = "/recordes" }) => 
           style={estaNoTop3 ? { color: corPosicao } : {}}
         >
           {total}
-          {tempoMedioFormatado && (
+          {tipo !== "senha" && tempoMedioFormatado && (
             <span className="pontuacao-tempo-medio">
               {" "}({tempoMedioFormatado} seg/conta)
             </span>
@@ -151,7 +152,7 @@ const LinhaRanking = ({ item, tempoLimite, recordesBasePath = "/recordes" }) => 
           className="precisao-valor"
           style={eUsuarioLogado ? { fontWeight: 'bold' } : {}}
         >
-          {precisaoFormatada || "-"}
+          {tipo === "senha" ? formatarTempoSenha(item.tempo) : (precisaoFormatada || "-")}
         </span>
       </td>
       <td className="coluna-data">
