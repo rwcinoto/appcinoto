@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const { Usuario } = require("../models");
 const treinoSenhaService = require("../services/treinoSenhaService");
 const recordeSenhaService = require("../services/recordeSenhaService");
+const recordeService = require("../services/recordeService");
 
 const treinosSenhaAtivos = new Map();
 let proximoIdTreinoSenha = 1;
@@ -127,7 +128,9 @@ class SenhaController {
       treino.inicio = Date.now();
 
       try {
-        if (!usuario.isVisitante) {
+        if (usuario.isVisitante) {
+          await recordeService.incrementarQuantidadeTreinoSenhaVisitante();
+        } else {
           await recordeSenhaService.incrementarQuantidadeTreinoSenha(
             usuario.id,
             treino.digitos,
