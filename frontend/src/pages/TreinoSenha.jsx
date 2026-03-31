@@ -32,14 +32,13 @@ const TreinoSenha = () => {
   const [tentativas, setTentativas] = useState([]);
   const [inputAtual, setInputAtual] = useState([]);
   const [focusIndex, setFocusIndex] = useState(0);
-  const [inputFocado, setInputFocado] = useState(false);
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [inicioTreino, setInicioTreino] = useState(null);
   const [tempoDecorrido, setTempoDecorrido] = useState(0);
   const [resultado, setResultado] = useState(null);
 
-  const hiddenInputRef = useRef(null);
+  const containerRef = useRef(null);
   const inicializadoRef = useRef(false);
   const intervalRef = useRef(null);
   const tentativasEndRef = useRef(null);
@@ -98,7 +97,7 @@ const TreinoSenha = () => {
       });
       setInicioTreino(Date.now());
       setFase("jogando");
-      setTimeout(() => hiddenInputRef.current?.focus(), 100);
+      setTimeout(() => containerRef.current?.focus(), 100);
     } catch (error) {
       logError("TreinoSenha - confirmarInicio", error);
       setErro(getErrorMessage(error));
@@ -148,48 +147,57 @@ const TreinoSenha = () => {
     return n >= 1 && n <= digitos;
   };
 
-  const handleTecla = (e) => {
-    if (e.key === "Enter") {
-      handleEnviarTentativa();
-      return;
-    }
-
-    if (e.key === "Backspace") {
-      e.preventDefault();
+  const processarTecla = useCallback((key) => {
+    if (key === "Backspace") {
       setInputAtual((prev) => {
         const novo = [...prev];
         if (novo[focusIndex] !== "") {
           novo[focusIndex] = "";
         } else if (focusIndex > 0) {
           novo[focusIndex - 1] = "";
-          setFocusIndex((f) => f - 1);
         }
         return novo;
       });
+      if (inputAtual[focusIndex] === "" && focusIndex > 0) {
+        setFocusIndex((f) => f - 1);
+      }
       return;
     }
 
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
+    if (key === "ArrowLeft") {
       setFocusIndex((f) => Math.max(0, f - 1));
       return;
     }
 
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
+    if (key === "ArrowRight") {
       setFocusIndex((f) => Math.min(tamanho - 1, f + 1));
       return;
     }
 
-    if (digitoValido(e.key)) {
-      e.preventDefault();
+    if (digitoValido(key)) {
       setInputAtual((prev) => {
         const novo = [...prev];
-        novo[focusIndex] = e.key;
+        novo[focusIndex] = key;
         return novo;
       });
       setFocusIndex((f) => Math.min(f + 1, tamanho - 1));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tamanho, digitos, focusIndex, inputAtual]);
+
+  const handleKeyDown = (e) => {
+    if (fase !== "jogando") return;
+    e.preventDefault();
+    if (e.key === "Enter") {
+      handleEnviarTentativa();
+      return;
+    }
+    processarTecla(e.key);
+  };
+
+  const handleTeclaVirtual = (valor) => {
+    processarTecla(valor);
+    containerRef.current?.focus();
   };
 
   const todosPreenchidos = inputAtual.every((v) => v !== "");
@@ -223,7 +231,7 @@ const TreinoSenha = () => {
         await finalizarTreino(novasTentativas);
       } else {
         setFocusIndex(0);
-        setTimeout(() => hiddenInputRef.current?.focus(), 50);
+        setTimeout(() => containerRef.current?.focus(), 50);
       }
     } catch (error) {
       logError("TreinoSenha - tentativa", error);
@@ -352,8 +360,26 @@ const TreinoSenha = () => {
     );
   }
 
+  const teclasVirtuais = (() => {
+    const teclas = [];
+    const inicio = digitos === 10 ? 0 : 1;
+    const fim = digitos === 10 ? 9 : digitos;
+    for (let i = inicio; i <= fim; i++) teclas.push(String(i));
+    return teclas;
+  })();
+
+  const teclasLinhas = [];
+  for (let i = 0; i < teclasVirtuais.length; i += 3) {
+    teclasLinhas.push(teclasVirtuais.slice(i, i + 3));
+  }
+
   return (
-    <div className="treino-senha-container">
+    <div
+      className="treino-senha-container"
+      ref={containerRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <div className="treino-senha-header">
         <div className="treino-senha-info">
           <span className="treino-senha-titulo">
@@ -406,35 +432,19 @@ const TreinoSenha = () => {
           </div>
         ))}
 
-        <div
-          key="input-row"
-          className="tentativa-linha tentativa-input-linha"
-          onClick={() => hiddenInputRef.current?.focus()}
-        >
+        <div key="input-row" className="tentativa-linha tentativa-input-linha">
           <span className="tentativa-numero">{tentativas.length + 1}.</span>
           <div className="treino-senha-celulas">
             {inputAtual.map((valor, index) => (
               <div
                 key={`cel-${index}`}
-                className={`treino-senha-celula${index === focusIndex && inputFocado ? " celula-ativa" : ""}`}
-                onClick={(e) => { e.stopPropagation(); setFocusIndex(index); hiddenInputRef.current?.focus(); }}
+                className={`treino-senha-celula${index === focusIndex ? " celula-ativa" : ""}`}
+                onClick={() => setFocusIndex(index)}
               >
                 {valor}
               </div>
             ))}
           </div>
-          <input
-            ref={hiddenInputRef}
-            type="text"
-            className="treino-senha-input-oculto"
-            value=""
-            onChange={() => {}}
-            onKeyDown={handleTecla}
-            onFocus={() => setInputFocado(true)}
-            onBlur={() => setInputFocado(false)}
-            readOnly={false}
-            aria-hidden="true"
-          />
           <button
             className="btn-confirmar-tentativa"
             onClick={handleEnviarTentativa}
@@ -444,6 +454,58 @@ const TreinoSenha = () => {
           </button>
         </div>
         <div key="scroll-end" ref={tentativasEndRef} />
+      </div>
+
+      <div className="teclado-senha-container">
+        <div className="teclado-senha">
+          {teclasLinhas.map((linha, li) => (
+            <div key={li} className="teclado-senha-linha">
+              {linha.map((tecla) => (
+                <button
+                  key={tecla}
+                  className="tecla-senha"
+                  onClick={() => handleTeclaVirtual(tecla)}
+                  disabled={enviando}
+                  type="button"
+                >
+                  {tecla}
+                </button>
+              ))}
+              {li === teclasLinhas.length - 1 && linha.length < 3 && (
+                <button
+                  className="tecla-senha tecla-senha-backspace"
+                  onClick={() => handleTeclaVirtual("Backspace")}
+                  disabled={enviando}
+                  type="button"
+                  aria-label="Apagar"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                    <line x1="18" y1="9" x2="12" y2="15" />
+                    <line x1="12" y1="9" x2="18" y2="15" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ))}
+          {teclasLinhas[teclasLinhas.length - 1]?.length === 3 && (
+            <div className="teclado-senha-linha teclado-senha-linha-backspace">
+              <button
+                className="tecla-senha tecla-senha-backspace"
+                onClick={() => handleTeclaVirtual("Backspace")}
+                disabled={enviando}
+                type="button"
+                aria-label="Apagar"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                  <line x1="18" y1="9" x2="12" y2="15" />
+                  <line x1="12" y1="9" x2="18" y2="15" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

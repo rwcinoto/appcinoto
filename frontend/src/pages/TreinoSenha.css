@@ -128,12 +128,8 @@
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
 }
 
-.treino-senha-input-oculto {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 1px;
-  height: 1px;
+.treino-senha-container:focus {
+  outline: none;
 }
 
 .btn-confirmar-tentativa {
@@ -160,6 +156,116 @@
   opacity: 0.9;
 }
 
+/* Teclado virtual */
+.teclado-senha-container {
+  display: none;
+  width: 100%;
+  padding: 16px 12px;
+  margin-top: 20px;
+  background: var(--color-background-dark);
+  border-radius: 8px;
+}
+
+.teclado-senha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.teclado-senha-linha {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.teclado-senha-linha-backspace {
+  grid-template-columns: 1fr;
+  max-width: 90px;
+  margin: 0 auto;
+}
+
+.tecla-senha {
+  min-height: 50px;
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.tecla-senha:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.tecla-senha:active:not(:disabled) {
+  transform: scale(0.95);
+  background: var(--color-primary-dark);
+  color: #fff;
+}
+
+.tecla-senha:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tecla-senha-backspace {
+  background: var(--color-background-dark);
+  border-color: var(--color-border-dark);
+}
+
+.tecla-senha-backspace:hover:not(:disabled) {
+  background: #f44336;
+  border-color: #f44336;
+  color: #fff;
+}
+
+.tecla-senha-backspace svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Tema escuro */
+.dark .teclado-senha-container {
+  background: rgba(30, 30, 30, 0.8);
+}
+
+.dark .tecla-senha {
+  background: rgba(50, 50, 50, 0.8);
+  border-color: rgba(100, 100, 100, 0.3);
+  color: var(--color-text-dark);
+}
+
+.dark .tecla-senha-backspace {
+  background: rgba(40, 40, 40, 0.8);
+  border-color: rgba(80, 80, 80, 0.3);
+}
+
+.dark .tecla-senha:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.dark .tecla-senha-backspace:hover:not(:disabled) {
+  background: #f44336;
+  border-color: #f44336;
+  color: #fff;
+}
+
 @media (max-width: 768px) {
   .treino-senha-container {
     padding: 16px;
@@ -184,5 +290,21 @@
     width: 30px;
     height: 30px;
     font-size: 15px;
+  }
+
+  .teclado-senha-container {
+    display: block;
+    padding: 12px 8px;
+    margin-top: 16px;
+  }
+
+  .tecla-senha {
+    min-height: 45px;
+    font-size: 22px;
+  }
+
+  .tecla-senha-backspace svg {
+    width: 18px;
+    height: 18px;
   }
 }
