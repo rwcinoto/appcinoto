@@ -165,11 +165,28 @@ class RecordeService {
    */
   async incrementarQuantidadeTreinoCalendarioVisitante(limiteId) {
     const ID_OPERACAO_CALENDARIO = 99;
-    const ID_SISTEMA_QUALQUER = 1; // Qualquer id válido; calendário se identifica por id_operacao
+    const ID_SISTEMA_QUALQUER = 1;
     await this.incrementarQuantidadeTreinoVisitante(
       ID_OPERACAO_CALENDARIO,
       limiteId,
-      ID_SISTEMA_QUALQUER
+      ID_SISTEMA_QUALQUER,
+    );
+  }
+
+  /**
+   * Incrementa a quantidade de treinos de senha realizados por visitantes.
+   * Usa id_operacao=98 como sentinela (senha não tem operação real no modelo padrão).
+   * id_limite e id_sistema usam 1 como valor fixo, pois identificamos senha por id_operacao.
+   * @returns {Promise<void>}
+   */
+  async incrementarQuantidadeTreinoSenhaVisitante() {
+    const ID_OPERACAO_SENHA = 98;
+    const ID_LIMITE_QUALQUER = 1;
+    const ID_SISTEMA_QUALQUER = 1;
+    await this.incrementarQuantidadeTreinoVisitante(
+      ID_OPERACAO_SENHA,
+      ID_LIMITE_QUALQUER,
+      ID_SISTEMA_QUALQUER,
     );
   }
 
@@ -434,7 +451,14 @@ class RecordeService {
    */
   async listarRecordesVisitantes() {
     const recordes = await RecordeVisitante.findAll({
-      attributes: ["id", "id_operacao", "id_limite", "id_sistema", "quantidade", "atualizado_em"],
+      attributes: [
+        "id",
+        "id_operacao",
+        "id_limite",
+        "id_sistema",
+        "quantidade",
+        "atualizado_em",
+      ],
       include: [
         { association: "operacao", attributes: ["id", "nome"] },
         { association: "limite", attributes: ["id", "tempo", "descricao"] },
@@ -449,9 +473,20 @@ class RecordeService {
 
     return recordes.map((rv) => ({
       id: rv.id,
-      operacao_nome: rv.operacao?.nome ?? "—",
-      limite_minutos: rv.limite ? Math.round(rv.limite.tempo / 60) : null,
-      sistema_descricao: rv.id_operacao === 99 ? "Calendário" : (rv.sistema?.descricao ?? rv.sistema?.tipo ?? "—"),
+      operacao_nome:
+        rv.id_operacao === 99
+          ? "Calendário"
+          : rv.id_operacao === 98
+            ? "Senha"
+            : (rv.operacao?.nome ?? "—"),
+      limite_minutos:
+        rv.id_operacao === 99 || rv.id_operacao === 98
+          ? null
+          : rv.limite ? Math.round(rv.limite.tempo / 60) : null,
+      sistema_descricao:
+        rv.id_operacao === 99 || rv.id_operacao === 98
+          ? "—"
+          : (rv.sistema?.descricao ?? rv.sistema?.tipo ?? "—"),
       quantidade: rv.quantidade,
       atualizado_em: rv.atualizado_em,
     }));
