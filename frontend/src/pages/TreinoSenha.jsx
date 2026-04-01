@@ -314,7 +314,11 @@ const TreinoSenha = () => {
 
   const handleVoltar = () => {
     sessionStorage.removeItem(STORAGE_KEY);
-    navigate("/senha");
+    const params = new URLSearchParams();
+    if (config?.digitos != null) params.set("digitos", String(config.digitos));
+    if (config?.tamanho != null) params.set("tamanho", String(config.tamanho));
+    if (config?.repeticao != null) params.set("repeticao", String(config.repeticao));
+    navigate(params.toString() ? `/senha?${params.toString()}` : "/senha");
   };
 
   if (!config) {

@@ -2,6 +2,7 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 24px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .treino-senha-header {
@@ -130,6 +131,7 @@
 
 .treino-senha-container:focus {
   outline: none;
+  box-shadow: none;
 }
 
 .btn-confirmar-tentativa {
@@ -202,6 +204,12 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+.treino-senha-celula,
+.tentativa-input-linha,
+.btn-confirmar-tentativa {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tecla-senha:hover:not(:disabled) {
