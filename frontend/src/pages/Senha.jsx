@@ -28,6 +28,7 @@ const Senha = () => {
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState(4);
   const [repeticaoSelecionado, setRepeticaoSelecionado] = useState(0);
   const [conjuntoSelecionado, setConjuntoSelecionado] = useState("");
+  const [filtrosInicializados, setFiltrosInicializados] = useState(false);
   const [erro, setErro] = useState("");
   const inicialAplicadoRef = useRef(false);
 
@@ -138,6 +139,8 @@ const Senha = () => {
     if (conjuntoIdParam) {
       setConjuntoSelecionado(conjuntoIdParam);
     }
+
+    setFiltrosInicializados(true);
   }, [
     searchParams,
     digitosPermitidos,
@@ -149,10 +152,18 @@ const Senha = () => {
   ]);
 
   useEffect(() => {
-    if (usuario) {
+    if (usuario && filtrosInicializados) {
       carregarRanking();
     }
-  }, [usuario, digitosSelecionado, tamanhoSelecionado, repeticaoSelecionado, conjuntoSelecionado, carregarRanking]);
+  }, [
+    usuario,
+    filtrosInicializados,
+    digitosSelecionado,
+    tamanhoSelecionado,
+    repeticaoSelecionado,
+    conjuntoSelecionado,
+    carregarRanking,
+  ]);
 
   useEffect(() => {
     if (!digitosPermitidos.includes(digitosSelecionado)) {
