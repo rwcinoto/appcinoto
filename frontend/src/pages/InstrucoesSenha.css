@@ -1,0 +1,12 @@
+/* Mesmas cores que .feedback-correto e .feedback-parcial em TreinoSenha.css */
+.instrucoes-senha-feedback-correto {
+  color: #4caf50;
+  font-size: 18px;
+  vertical-align: baseline;
+}
+
+.instrucoes-senha-feedback-parcial {
+  color: #ff9800;
+  font-size: 18px;
+  vertical-align: baseline;
+}
