@@ -135,6 +135,12 @@
   color: #4caf50;
 }
 
+.gabarito-tentativa-digito.parcial {
+  background: rgba(255, 152, 0, 0.12);
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
 .gabarito-tentativa-feedback {
   display: flex;
   gap: 4px;
