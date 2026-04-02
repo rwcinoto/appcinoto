@@ -37,6 +37,10 @@ const Senha = lazy(() => import("./pages/Senha"));
 const SenhaRecordes = lazy(() => import("./pages/SenhaRecordes"));
 const TreinoSenha = lazy(() => import("./pages/TreinoSenha"));
 const GabaritoSenha = lazy(() => import("./pages/GabaritoSenha"));
+const InstrucoesSenha = lazy(() => import("./pages/InstrucoesSenha"));
+const InstrucoesSenhaRecordes = lazy(() =>
+  import("./pages/InstrucoesSenhaRecordes"),
+);
 
 const PrivateRoute = ({ children }) => {
   const { usuario, loading } = useAuth();
@@ -82,6 +86,11 @@ const AppRoutes = () => {
           />
           <Route path="/senha" element={<Senha />} />
           <Route path="/senha/recordes" element={<SenhaRecordes />} />
+          <Route path="/instrucoes/senha" element={<InstrucoesSenha />} />
+          <Route
+            path="/instrucoes/senha-recordes"
+            element={<InstrucoesSenhaRecordes />}
+          />
           <Route path="/treino-senha" element={<TreinoSenha />} />
           <Route path="/senha/gabarito" element={<GabaritoSenha />} />
           <Route path="/conjuntos" element={<Conjuntos />} />

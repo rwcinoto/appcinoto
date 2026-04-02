@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ErrorMessage from "../components/common/ErrorMessage";
 import Loading from "../components/common/Loading";
 import ListaRecordesSenha from "../components/recordes/ListaRecordesSenha";
@@ -16,6 +16,7 @@ import "./Recordes.css";
 
 const SenhaRecordes = () => {
   const { usuario } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const usuarioIdParam = searchParams.get("usuario_id");
 
@@ -119,6 +120,29 @@ const SenhaRecordes = () => {
         <div className="recordes-titulo-container">
           <div className="titulo-com-ajuda">
             <h1>{titulo}</h1>
+            <button
+              type="button"
+              className="btn-ajuda"
+              onClick={() => navigate("/instrucoes/senha-recordes")}
+              title="Ver instruções sobre recordes de senha"
+              aria-label="Ver instruções sobre recordes de senha"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
           </div>
         </div>
 

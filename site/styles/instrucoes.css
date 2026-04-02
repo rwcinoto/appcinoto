@@ -280,6 +280,19 @@ footer {
     margin-bottom: 6px;
 }
 
+/* Bolinhas de feedback (mesmas cores do treino de senha no app) */
+.instrucoes-senha-feedback-correto {
+    color: #4caf50;
+    font-size: 18px;
+    vertical-align: baseline;
+}
+
+.instrucoes-senha-feedback-parcial {
+    color: #ff9800;
+    font-size: 18px;
+    vertical-align: baseline;
+}
+
 @media (max-width: 768px) {
     .logo-section {
         padding: 30px 20px;
