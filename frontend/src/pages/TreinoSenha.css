@@ -69,6 +69,7 @@
 .tentativa-digitos {
   display: flex;
   gap: 6px;
+  direction: ltr;
 }
 
 .tentativa-digito {
@@ -106,6 +107,7 @@
   display: flex;
   gap: 6px;
   cursor: text;
+  direction: ltr;
 }
 
 .treino-senha-celula {

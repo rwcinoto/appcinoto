@@ -77,6 +77,7 @@ const TreinoSenha = () => {
         });
         setTreinoId(res.data.treino_id);
         setInputAtual(Array(config.tamanho).fill(""));
+        setFocusIndex(0);
         setFase("contagem");
         salvarSessao({ treinoId: res.data.treino_id });
       } catch (error) {
@@ -95,6 +96,7 @@ const TreinoSenha = () => {
       await api.post("/senha/treinos/confirmar-inicio", {
         treino_id: treinoId,
       });
+      setFocusIndex(0);
       setInicioTreino(Date.now());
       setFase("jogando");
       setTimeout(() => containerRef.current?.focus(), 100);
@@ -272,6 +274,7 @@ const TreinoSenha = () => {
     setTreinoId(null);
     setTentativas([]);
     setInputAtual(Array(tamanho).fill(""));
+    setFocusIndex(0);
     setErro("");
     setInicioTreino(null);
     setTempoDecorrido(0);
@@ -287,6 +290,7 @@ const TreinoSenha = () => {
         });
         setTreinoId(res.data.treino_id);
         setInputAtual(Array(config.tamanho).fill(""));
+        setFocusIndex(0);
         setFase("contagem");
         salvarSessao({ treinoId: res.data.treino_id });
       } catch (error) {
