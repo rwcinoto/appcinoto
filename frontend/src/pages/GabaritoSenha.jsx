@@ -2,6 +2,42 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./GabaritoSenha.css";
 
+/**
+ * Mesma regra do treino (Mastermind): verdes primeiro, depois parciais sem duplicar.
+ * @returns {("correto"|"parcial"|"neutro")[]}
+ */
+function estadosDigitosTentativa(senhaSecreta, tentativa) {
+  const tamanho = senhaSecreta.length;
+  const estados = Array(tamanho).fill("neutro");
+
+  const senhaRestante = [];
+  const indicesNaoCorretos = [];
+
+  for (let i = 0; i < tamanho; i++) {
+    if (tentativa[i] === senhaSecreta[i]) {
+      estados[i] = "correto";
+    } else {
+      senhaRestante.push(senhaSecreta[i]);
+      indicesNaoCorretos.push(i);
+    }
+  }
+
+  const senhaContagem = {};
+  for (const d of senhaRestante) {
+    senhaContagem[d] = (senhaContagem[d] || 0) + 1;
+  }
+
+  for (const i of indicesNaoCorretos) {
+    const d = tentativa[i];
+    if (senhaContagem[d] > 0) {
+      estados[i] = "parcial";
+      senhaContagem[d]--;
+    }
+  }
+
+  return estados;
+}
+
 const GabaritoSenha = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,6 +105,7 @@ const GabaritoSenha = () => {
       <div className="gabarito-senha-lista">
         {tentativas.map((t, index) => {
           const isAcerto = acertou && index === tentativas.length - 1;
+          const estados = estadosDigitosTentativa(senhaSecreta, t.tentativa);
           return (
             <div
               key={index}
@@ -76,14 +113,21 @@ const GabaritoSenha = () => {
             >
               <span className="gabarito-tentativa-numero">{index + 1}.</span>
               <div className="gabarito-tentativa-digitos">
-                {t.tentativa.map((d, i) => (
-                  <span
-                    key={i}
-                    className={`gabarito-tentativa-digito ${d === senhaSecreta[i] ? "correto" : ""}`}
-                  >
-                    {d}
-                  </span>
-                ))}
+                {t.tentativa.map((d, i) => {
+                  const estado = estados[i];
+                  return (
+                    <span
+                      key={i}
+                      className={
+                        estado === "neutro"
+                          ? "gabarito-tentativa-digito"
+                          : `gabarito-tentativa-digito ${estado}`
+                      }
+                    >
+                      {d}
+                    </span>
+                  );
+                })}
               </div>
               <div className="gabarito-tentativa-feedback">
                 {Array(t.corretos)
