@@ -8,7 +8,7 @@ Esta pasta contém os arquivos da página de divulgação do sistema Numix.
 
 ## Como usar
 
-1. Faça upload do arquivo `index.html` para a pasta `cinoto.com.br/numix` no seu servidor via FTP
+1. Faça upload do arquivo `index.html` para a pasta `cinoto.com.br/numix/ajuda` no seu servidor via FTP
 2. Adicione as imagens dos prints do sistema nos lugares indicados na página
 
 ## Adicionando imagens
@@ -22,7 +22,7 @@ Exemplo de como adicionar uma imagem:
 
 ```html
 <div class="image-placeholder">
-    <img src="imagens/novo-treino.png" alt="Tela de novo treino do Numix">
+  <img src="imagens/novo-treino.png" alt="Tela de novo treino do Numix" />
 </div>
 ```
 
@@ -38,4 +38,3 @@ cinoto.com.br/
 ```
 
 Se você adicionar as imagens em uma subpasta `imagens`, lembre-se de atualizar os caminhos no HTML.
-
