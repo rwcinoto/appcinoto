@@ -53,11 +53,11 @@ const InstrucoesTreino = () => {
           <div className="instrucao-destaque">
             <strong>Dica:</strong> acesse{" "}
             <a
-              href="https://cinoto.com.br/numix/ajuda"
+              href="https://cinoto.com.br/numix"
               target="_blank"
               rel="noopener noreferrer"
             >
-              cinoto.com.br/numix/ajuda
+              cinoto.com.br/numix
             </a>{" "}
             para mais detalhes sobre os níveis e as opções disponíveis.
           </div>
